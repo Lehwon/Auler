@@ -39,3 +39,8 @@ jobs:
       - uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check licenses bans sources
+      - name: Third-party list is up to date
+        shell: pwsh
+        run: |
+          ./tools/update-third-party.ps1
+          git diff --exit-code -- THIRD-PARTY.md

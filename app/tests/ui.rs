@@ -61,13 +61,13 @@ fn by_role(ui: &AppWindow, role: AccessibleRole) -> Vec<ElementHandle> {
 }
 
 fn by_role_and_label(ui: &AppWindow, role: AccessibleRole, label: &str) -> ElementHandle {
-    let label = label.to_string();
+    let wanted = label.to_string();
     ElementQuery::from_root(ui)
         .match_descendants()
         .match_accessible_role(role)
-        .match_predicate(move |e| e.accessible_label().is_some_and(|l| l == label.as_str()))
+        .match_predicate(move |e| e.accessible_label().is_some_and(|l| l == wanted.as_str()))
         .find_first()
-        .unwrap_or_else(|| panic!("{role:?} 요소를 찾지 못함"))
+        .unwrap_or_else(|| panic!("{role:?} 요소 '{label}'를 찾지 못함"))
 }
 
 fn has_text(ui: &AppWindow, text: &str) -> bool {
@@ -87,7 +87,7 @@ fn layout_fits_minimum_window_on_every_page() {
         let ui = setup(KO, size);
         for language in [KO, EN] {
             set_language(&ui, language);
-            for page in 0..=6 {
+            for page in 0..=auler::LAST_PAGE {
                 ui.set_page(page);
                 let (w, h) = (ui.get_layout_min_width(), ui.get_layout_min_height());
                 eprintln!(
@@ -183,7 +183,7 @@ fn placement_text_and_selection_bounds() {
 fn nav_items_are_selectable_tabs() {
     let ui = setup(KO, wide());
     let tabs = by_role(&ui, AccessibleRole::Tab);
-    assert_eq!(tabs.len(), 7);
+    assert_eq!(tabs.len(), 8);
     let data = by_role_and_label(&ui, AccessibleRole::Tab, "기준자료");
     assert_eq!(data.accessible_item_selected(), Some(false));
     data.invoke_accessible_default_action();
@@ -343,6 +343,14 @@ fn write_snapshots() {
             3,
         ),
         ("en-1024x640-data", EN, LogicalSize::new(1024.0, 640.0), 1),
+        ("ko-1366x768-about", KO, wide(), 7),
+        (
+            "ko-1366x1300-about-full",
+            KO,
+            LogicalSize::new(1366.0, 1300.0),
+            7,
+        ),
+        ("en-1024x640-about", EN, LogicalSize::new(1024.0, 640.0), 7),
     ] {
         let ui = setup(language, size);
         ui.set_page(page);
@@ -357,4 +365,65 @@ fn write_snapshots() {
             .write_image_data(shot.as_bytes())
             .unwrap();
     }
+}
+
+/// 정보 화면: 제작자·저장소·라이선스 링크, 기술 스택, 사용한 오픈소스, AboutSlint(Slint 라이선스 조건)
+#[test]
+fn about_page_lists_author_repository_license_and_components() {
+    // 테스트 API의 요소 검색은 스크롤 영역 밖으로 잘린 요소를 건너뛴다(화면 읽기용 트리는 포함).
+    // 모든 항목이 보이도록 창을 길게 잡는다.
+    let ui = setup(KO, LogicalSize::new(1366.0, 1600.0));
+    // 테스트에서는 브라우저를 열지 않고 요청된 주소만 모은다.
+    let opened = std::rc::Rc::new(std::cell::RefCell::new(Vec::<String>::new()));
+    let sink = opened.clone();
+    ui.on_open_url(move |url| sink.borrow_mut().push(url.to_string()));
+
+    by_role_and_label(&ui, AccessibleRole::Tab, "정보").invoke_accessible_default_action();
+    assert_eq!(ui.get_page(), auler::LAST_PAGE);
+
+    let links = [
+        ("Lehwon", "https://github.com/Lehwon"),
+        ("github.com/Lehwon/Auler", "https://github.com/Lehwon/Auler"),
+        ("MIT", "https://github.com/Lehwon/Auler/blob/main/LICENSE"),
+        ("Slint", "https://github.com/slint-ui/slint"),
+        ("sys-locale", "https://github.com/1Password/sys-locale"),
+        ("windows-sys", "https://github.com/microsoft/windows-rs"),
+        ("Rust std", "https://github.com/rust-lang/rust"),
+        (
+            "전체 오픈소스 구성 요소와 라이선스",
+            "https://github.com/Lehwon/Auler/blob/main/THIRD-PARTY.md",
+        ),
+    ];
+    for (label, url) in links {
+        let link = by_role_and_label(&ui, AccessibleRole::Button, label);
+        assert_eq!(
+            link.accessible_description().as_deref(),
+            Some(url),
+            "{label}"
+        );
+        assert!(
+            auler::is_allowed_url(url),
+            "{url}는 허용 목록에 있어야 한다"
+        );
+        link.invoke_accessible_default_action();
+    }
+    let expected: Vec<String> = links.iter().map(|(_, url)| url.to_string()).collect();
+    assert_eq!(*opened.borrow(), expected);
+
+    for text in [
+        "제작자",
+        "저장소",
+        "라이선스",
+        "기술 스택",
+        "사용한 오픈소스",
+        "Slint Royalty-free License 2.0",
+    ] {
+        assert!(has_text(&ui, text), "{text}");
+    }
+    assert!(
+        ElementHandle::find_by_element_type_name(&ui, "AboutSlint")
+            .next()
+            .is_some(),
+        "Slint Royalty-free 라이선스 조건: 정보 화면에 AboutSlint를 표시한다"
+    );
 }

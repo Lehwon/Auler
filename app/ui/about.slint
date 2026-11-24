@@ -1,0 +1,197 @@
+import { AboutSlint, ScrollView } from "std-widgets.slint";
+import { Theme, Panel, Icon, Icons, FocusRing } from "theme.slint";
+
+// 웹 링크. 누르면 기본 브라우저로 연다(Rust가 정해 둔 주소만 연다).
+// 화면 읽기 프로그램에는 버튼으로, 설명에 주소를 알린다.
+component LinkButton inherits FocusScope {
+    in property <string> text;
+    in property <string> url;
+    callback open(string);
+    property <bool> keyboard-focus;
+
+    accessible-role: AccessibleRole.button;
+    accessible-label: root.text;
+    accessible-description: root.url;
+    accessible-action-default => {
+        root.open(root.url);
+    }
+    key-pressed(event) => {
+        if (event.text == Key.Return || event.text == Key.Space) {
+            root.open(root.url);
+            return accept;
+        }
+        return reject;
+    }
+    focus-gained(reason) => {
+        root.keyboard-focus = reason == FocusReason.tab-navigation;
+    }
+    focus-lost(reason) => {
+        root.keyboard-focus = false;
+    }
+
+    HorizontalLayout {
+        spacing: 4px;
+        alignment: start;
+        Text {
+            text: root.text;
+            color: touch.has-hover ? #1B4280 : Theme.action;
+            vertical-alignment: center;
+            accessible-role: AccessibleRole.none;
+        }
+        Icon {
+            text: Icons.external;
+            font-size: 11px;
+            color: Theme.action;
+        }
+    }
+    touch := TouchArea {
+        mouse-cursor: pointer;
+        clicked => {
+            root.open(root.url);
+        }
+    }
+    if root.keyboard-focus: FocusRing {
+        x: -3px;
+        y: -3px;
+        width: root.width + 6px;
+        height: root.height + 6px;
+    }
+}
+
+component SectionTitle inherits Text {
+    font-size: 15px;
+    font-weight: 700;
+    color: Theme.text;
+}
+
+// 왼쪽 이름, 오른쪽 내용
+component InfoRow inherits HorizontalLayout {
+    in property <string> key;
+    in property <length> key-width: 140px;
+    spacing: 12px;
+    min-height: 28px;
+    Text {
+        text: root.key;
+        width: root.key-width;
+        color: Theme.text-muted;
+        vertical-alignment: center;
+        wrap: word-wrap;
+    }
+    @children
+}
+
+// 정보 화면: 제작자, 저장소, 라이선스, 기술 스택, 사용한 오픈소스.
+// Slint Royalty-free 라이선스 조건에 따라 AboutSlint를 표시한다.
+export component AboutPage inherits VerticalLayout {
+    in property <string> version;
+    callback open-url(string);
+
+    padding: 20px;
+    spacing: 14px;
+
+    VerticalLayout {
+        spacing: 4px;
+        Text { text: @tr("About Auler"); font-size: Theme.font-title; font-weight: 700; color: Theme.text; }
+        Text { text: @tr("Version {0}", root.version); font-size: Theme.font-small; color: Theme.text-muted; }
+    }
+
+    sv := ScrollView {
+        vertical-stretch: 1;
+        content-width: sv.visible-width;
+        content-height: body.preferred-height;
+
+        body := VerticalLayout {
+            width: sv.visible-width;
+            spacing: 14px;
+            padding-right: 12px;
+            padding-bottom: 8px;
+
+            Panel {
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 6px;
+                    Text { text: "Auler"; font-size: 18px; font-weight: 700; color: Theme.text; }
+                    Text {
+                        text: @tr("Lightweight local timetabling tool for university department offices");
+                        color: Theme.text-muted;
+                        wrap: word-wrap;
+                    }
+                    Rectangle { height: 6px; }
+                    InfoRow {
+                        key: @tr("Author");
+                        LinkButton { text: "Lehwon"; url: "https://github.com/Lehwon"; open(u) => { root.open-url(u); } }
+                    }
+                    InfoRow {
+                        key: @tr("Repository");
+                        LinkButton { text: "github.com/Lehwon/Auler"; url: "https://github.com/Lehwon/Auler"; open(u) => { root.open-url(u); } }
+                    }
+                    InfoRow {
+                        key: @tr("License");
+                        LinkButton { text: "MIT"; url: "https://github.com/Lehwon/Auler/blob/main/LICENSE"; open(u) => { root.open-url(u); } }
+                    }
+                    InfoRow {
+                        key: @tr("Version");
+                        Text { text: root.version; color: Theme.text; vertical-alignment: center; }
+                    }
+                }
+            }
+
+            Panel {
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 8px;
+                    SectionTitle { text: @tr("Tech stack"); }
+                    for item in [
+                        { name: "Rust", note: @tr("Language for the core logic and the app") },
+                        { name: "Slint", note: @tr("Native user interface, software renderer, no browser engine") },
+                        { name: "Win32 API (windows-sys)", note: @tr("Window placement and opening links") },
+                        { name: "Segoe UI, Malgun Gothic, Segoe Fluent Icons", note: @tr("Windows system fonts, not bundled") },
+                    ]: InfoRow {
+                        key: item.name;
+                        key-width: 300px;
+                        Text { text: item.note; color: Theme.text; wrap: word-wrap; vertical-alignment: center; horizontal-stretch: 1; }
+                    }
+                }
+            }
+
+            Panel {
+                VerticalLayout {
+                    padding: 16px;
+                    spacing: 8px;
+                    SectionTitle { text: @tr("Open-source components"); }
+                    Text {
+                        text: @tr("Components used directly. Each project keeps its own license.");
+                        color: Theme.text-muted;
+                        wrap: word-wrap;
+                    }
+                    for c in [
+                        { name: "Slint", purpose: @tr("User interface toolkit"), license: "Slint Royalty-free License 2.0", url: "https://github.com/slint-ui/slint" },
+                        { name: "sys-locale", purpose: @tr("System language detection"), license: "MIT OR Apache-2.0", url: "https://github.com/1Password/sys-locale" },
+                        { name: "windows-sys", purpose: @tr("Windows API bindings"), license: "MIT OR Apache-2.0", url: "https://github.com/microsoft/windows-rs" },
+                        { name: "Rust std", purpose: @tr("Rust standard library"), license: "MIT OR Apache-2.0", url: "https://github.com/rust-lang/rust" },
+                    ]: HorizontalLayout {
+                        spacing: 12px;
+                        min-height: 28px;
+                        LinkButton { width: 140px; text: c.name; url: c.url; open(u) => { root.open-url(u); } }
+                        Text { text: c.purpose; color: Theme.text; vertical-alignment: center; horizontal-stretch: 1; overflow: elide; }
+                        Text { text: c.license; color: Theme.text-muted; vertical-alignment: center; }
+                    }
+                    Rectangle { height: 4px; }
+                    LinkButton {
+                        text: @tr("All third-party components and licenses");
+                        url: "https://github.com/Lehwon/Auler/blob/main/THIRD-PARTY.md";
+                        open(u) => { root.open-url(u); }
+                    }
+                }
+            }
+
+            Panel {
+                HorizontalLayout {
+                    padding: 16px;
+                    alignment: start;
+                    AboutSlint { }
+                }
+            }
+        }
+    }
+}

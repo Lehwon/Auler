@@ -3,6 +3,7 @@ import { Theme, Badge, Tone, Panel, Icons, IconButton, LockSwitch } from "theme.
 import { Labels } from "labels.slint";
 import { TopBar, NavItem, StatusBar } from "shell.slint";
 import { CardData, PeriodRow, UnassignedData, AltData, TimetableGrid, UnassignedCard, AlternativeRow } from "timetable.slint";
+import { AboutPage } from "about.slint";
 
 export { CardData, PeriodRow, UnassignedData, AltData, Labels }
 
@@ -323,10 +324,12 @@ export component AppWindow inherits Window {
     in property <int> conflict-count;
     in property <bool> can-undo;
     in property <bool> can-redo;
+    in property <string> app-version;
     in-out property <int> page: 3;
     in-out property <int> language-index: 0;
     in-out property <int> selected: 3;
     callback language-selected(int);
+    callback open-url(string);
     callback lock-toggled(int);
     callback move-card(int, int, int) -> bool;
     pure callback can-move(int, int, int) -> bool;
@@ -371,6 +374,7 @@ export component AppWindow inherits Window {
                     NavItem { icon: Icons.export; label: @tr("Export & Handover"); compact: root.page == 3; active: root.page == 5; clicked => { root.page = 5; } }
                     Rectangle { vertical-stretch: 1; }
                     NavItem { icon: Icons.settings; label: @tr("Settings"); compact: root.page == 3; active: root.page == 6; clicked => { root.page = 6; } }
+                    NavItem { icon: Icons.info; label: @tr("About"); compact: root.page == 3; active: root.page == 7; clicked => { root.page = 7; } }
                 }
                 Rectangle {
                     x: parent.width - 1px;
@@ -403,7 +407,12 @@ export component AppWindow inherits Window {
                 horizontal-stretch: 1;
                 rows: root.rows;
             }
-            if root.page != 1 && root.page != 3: PlaceholderPage {
+            if root.page == 7: AboutPage {
+                horizontal-stretch: 1;
+                version: root.app-version;
+                open-url(url) => { root.open-url(url); }
+            }
+            if root.page != 1 && root.page != 3 && root.page != 7: PlaceholderPage {
                 horizontal-stretch: 1;
                 title: root.page == 0 ? @tr("Home") : root.page == 2 ? @tr("Constraints") : root.page == 4 ? @tr("Review") : root.page == 5 ? @tr("Export & Handover") : @tr("Settings");
             }
@@ -411,7 +420,7 @@ export component AppWindow inherits Window {
 
         StatusBar {
             left-text: @tr("Local workspace");
-            right-text: "Auler 0.1 · " + @tr("Sample department data");
+            right-text: "Auler " + root.app-version + " · " + @tr("Sample department data");
         }
     }
 }

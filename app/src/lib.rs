@@ -28,6 +28,12 @@ pub const INITIAL_SIZE: LogicalSize = LogicalSize {
 /// 화면 검증용 분반 표의 행 수
 const SAMPLE_ROWS: usize = 500;
 
+/// 내비 화면 번호의 마지막 값 (0=홈 … 6=설정, 7=정보)
+pub const LAST_PAGE: i32 = 7;
+
+/// 정보 화면에서 열 수 있는 주소. 이 밖의 주소는 열지 않는다.
+const ALLOWED_URL_PREFIXES: [&str; 1] = ["https://github.com/"];
+
 struct State {
     cards: Rc<VecModel<CardData>>,
     grid: GridSize,
@@ -74,6 +80,10 @@ pub fn init(ui: &AppWindow, language: usize) {
         history: RefCell::new(History::default()),
     });
 
+    ui.set_app_version(env!("CARGO_PKG_VERSION").into());
+    ui.on_open_url(|url| {
+        open_url(&url);
+    });
     ui.set_department(sample::DEPARTMENT.into());
     ui.set_year(sample::YEAR);
     ui.set_term(sample::TERM);
@@ -198,4 +208,62 @@ pub fn startup_language() -> usize {
 
 fn system_language_is_korean() -> bool {
     sys_locale::get_locale().is_some_and(|l| l.to_ascii_lowercase().starts_with("ko"))
+}
+
+/// 정해 둔 https 주소인지 검사한다. 공백·따옴표·제어 문자가 섞인 주소는 거절한다.
+pub fn is_allowed_url(url: &str) -> bool {
+    ALLOWED_URL_PREFIXES.iter().any(|p| url.starts_with(p))
+        && !url
+            .chars()
+            .any(|c| c.is_whitespace() || c.is_control() || c == '"' || c == '<' || c == '>')
+}
+
+/// 정보 화면의 링크를 기본 브라우저로 연다. 허용한 주소가 아니면 아무것도 하지 않는다.
+pub fn open_url(url: &str) -> bool {
+    is_allowed_url(url) && shell_open(url)
+}
+
+#[cfg(windows)]
+fn shell_open(url: &str) -> bool {
+    use windows_sys::Win32::UI::Shell::ShellExecuteW;
+    use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+
+    let wide = |s: &str| s.encode_utf16().chain(Some(0)).collect::<Vec<u16>>();
+    let (verb, file) = (wide("open"), wide(url));
+    // SAFETY: 두 문자열은 NUL로 끝나고 호출 동안 살아 있다. 나머지 포인터는 null이 허용된다.
+    let result = unsafe {
+        ShellExecuteW(
+            std::ptr::null_mut(),
+            verb.as_ptr(),
+            file.as_ptr(),
+            std::ptr::null(),
+            std::ptr::null(),
+            SW_SHOWNORMAL,
+        )
+    };
+    // 32보다 크면 성공 (ShellExecute 규약)
+    result as isize > 32
+}
+
+#[cfg(not(windows))]
+fn shell_open(_url: &str) -> bool {
+    false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_allowed_url;
+
+    #[test]
+    fn only_listed_https_urls_can_be_opened() {
+        assert!(is_allowed_url("https://github.com/Lehwon/Auler"));
+        assert!(is_allowed_url(
+            "https://github.com/Lehwon/Auler/blob/main/THIRD-PARTY.md"
+        ));
+        assert!(!is_allowed_url("http://github.com/Lehwon"), "http는 막는다");
+        assert!(!is_allowed_url("https://example.com/"));
+        assert!(!is_allowed_url("file:///C:/Windows/System32/cmd.exe"));
+        assert!(!is_allowed_url("https://github.com/a b"));
+        assert!(!is_allowed_url("https://github.com/\"x"));
+    }
 }

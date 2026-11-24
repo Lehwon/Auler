@@ -27,7 +27,7 @@ cargo test --workspace             # 단위·UI·번역 테스트 (UI 스냅숏:
 ./tools/measure-interaction.ps1    # 스크롤·끌기 중 CPU·FPS·메모리 (릴리스 빌드 필요)
 ```
 
-개발용 환경 변수: `AULER_LANG`(ko|en), `AULER_PAGE`(0~6) 시작 언어·화면 고정, `AULER_BENCH`(idle|scroll|drag) 벤치마크 실행 후 종료.
+개발용 환경 변수: `AULER_LANG`(ko|en), `AULER_PAGE`(0~7) 시작 언어·화면 고정, `AULER_BENCH`(idle|scroll|drag) 벤치마크 실행 후 종료.
 
 ## English
 
@@ -35,6 +35,11 @@ Auler is a lightweight, local-first Windows 11 app that helps university departm
 
 This project is in early development and not usable yet.
 
-## License
+## 만든 사람·라이선스 / Author and license
 
-[MIT](LICENSE)
+- 제작자 / Author: [Lehwon](https://github.com/Lehwon)
+- 기술 스택 / Tech stack: Rust, [Slint](https://slint.dev) (소프트웨어 렌더러), Win32 API ([windows-sys](https://github.com/microsoft/windows-rs))
+- 라이선스 / License: [MIT](LICENSE)
+- 사용한 오픈소스와 라이선스 / Third-party components: [THIRD-PARTY.md](THIRD-PARTY.md). Slint는 Royalty-free License 2.0으로 사용하며 앱의 정보 화면에 표시한다.
+
+앱의 **정보** 화면에서도 같은 내용을 볼 수 있다. / The same information is shown on the app's **About** page.

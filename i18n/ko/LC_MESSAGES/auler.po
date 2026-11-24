@@ -270,3 +270,68 @@ msgstr "붙여넣기"
 
 msgid "Select All"
 msgstr "모두 선택"
+
+# 정보 화면
+msgid "About"
+msgstr "정보"
+
+msgid "About Auler"
+msgstr "Auler 정보"
+
+msgid "Version {0}"
+msgstr "버전 {0}"
+
+msgid "Lightweight local timetabling tool for university department offices"
+msgstr "학과 사무실용 경량 로컬 시간표 제작 도구"
+
+msgid "Author"
+msgstr "제작자"
+
+msgid "Repository"
+msgstr "저장소"
+
+msgid "License"
+msgstr "라이선스"
+
+msgid "Version"
+msgstr "버전"
+
+msgid "Tech stack"
+msgstr "기술 스택"
+
+msgid "Language for the core logic and the app"
+msgstr "핵심 로직과 앱을 작성한 언어"
+
+msgid "Native user interface, software renderer, no browser engine"
+msgstr "네이티브 화면, 소프트웨어 렌더러, 브라우저 엔진 없음"
+
+msgid "Window placement and opening links"
+msgstr "창 배치와 링크 열기"
+
+msgid "Windows system fonts, not bundled"
+msgstr "Windows 시스템 글꼴, 동봉하지 않음"
+
+msgid "Open-source components"
+msgstr "사용한 오픈소스"
+
+msgid "Components used directly. Each project keeps its own license."
+msgstr "직접 사용하는 구성 요소입니다. 각 프로젝트의 라이선스를 따릅니다."
+
+msgid "User interface toolkit"
+msgstr "화면(UI) 툴킷"
+
+msgid "System language detection"
+msgstr "시스템 언어 감지"
+
+msgid "Windows API bindings"
+msgstr "Windows API 바인딩"
+
+msgid "Rust standard library"
+msgstr "Rust 표준 라이브러리"
+
+msgid "All third-party components and licenses"
+msgstr "전체 오픈소스 구성 요소와 라이선스"
+
+# Slint 표준 위젯(AboutSlint)
+msgid "Version {}"
+msgstr "버전 {}"

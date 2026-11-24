@@ -7,8 +7,16 @@
 use std::collections::BTreeSet;
 use std::path::Path;
 
-/// 화면에 나타나는 Slint 표준 위젯의 번역 문구 (LineEdit·TextEdit 우클릭 메뉴)
-const STD_WIDGET_MSGIDS: [&str; 6] = ["Undo", "Redo", "Cut", "Copy", "Paste", "Select All"];
+/// 화면에 나타나는 Slint 표준 위젯의 번역 문구 (LineEdit·TextEdit 우클릭 메뉴, AboutSlint)
+const STD_WIDGET_MSGIDS: [&str; 7] = [
+    "Undo",
+    "Redo",
+    "Cut",
+    "Copy",
+    "Paste",
+    "Select All",
+    "Version {}",
+];
 
 /// .slint에 직접 써도 되는 한글: 언어 선택 목록의 자기 언어 이름
 const ALLOWED_HANGUL_LITERALS: [&str; 1] = ["한국어"];
