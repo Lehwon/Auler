@@ -2,7 +2,7 @@ import { ComboBox, LineEdit } from "std-widgets.slint";
 import { Theme, Badge, Tone, Icon, Dot, FocusRing } from "theme.slint";
 import { Labels } from "labels.slint";
 
-// 상단바: 학과/학기, 버전, 저장 상태, 검색, 언어 (명세서 3.2, 그림 2)
+// 상단바: 학과/학기, 버전, 저장 상태, 검색, 언어
 // 학과명은 원본 자료, 학기 표기는 앱이 만드는 문구다.
 export component TopBar inherits Rectangle {
     in property <string> department;
@@ -189,7 +189,7 @@ export component NavItem inherits FocusScope {
     }
 }
 
-// 하단 상태바 (명세서 3.2)
+// 하단 상태바
 export component StatusBar inherits Rectangle {
     in property <string> left-text;
     in property <string> right-text;

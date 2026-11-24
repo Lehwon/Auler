@@ -29,7 +29,7 @@ component KeyValue inherits HorizontalLayout {
     Text { text: root.value; color: Theme.text; font-weight: 600; vertical-alignment: center; }
 }
 
-// 선택한 배치의 상세 정보와 대안 (그림 6 오른쪽). 넓은 화면에서는 고정 패널, 좁은 화면에서는 오버레이.
+// 선택한 배치의 상세 정보와 대안. 넓은 화면에서는 고정 패널, 좁은 화면에서는 오버레이.
 // 내용이 길면 패널 안에서 스크롤한다.
 component DetailPanel inherits Panel {
     in property <bool> has-selection;
@@ -100,7 +100,7 @@ component DetailPanel inherits Panel {
     }
 }
 
-// S06 시간표 편성 워크벤치 축소판 (그림 6)
+// 시간표 편성 워크벤치 (축소판)
 component TimetablePage inherits Rectangle {
     in property <[CardData]> cards;
     in property <[int]> days;
@@ -119,7 +119,7 @@ component TimetablePage inherits Rectangle {
     callback undo();
     callback redo();
 
-    // 명세서 3.2: 좁은 화면(125~150% 배율 등)에서는 상세 패널을 오버레이로 바꾼다.
+    // 좁은 화면(125~150% 배율 등)에서는 상세 패널을 오버레이로 바꾼다.
     // 페이지 폭은 레이아웃이 정하므로 여기서 재면 순환이 생긴다. 창 폭으로 정해서 받는다.
     in property <bool> compact;
     in-out property <bool> detail-open;
@@ -253,7 +253,7 @@ component TimetablePage inherits Rectangle {
     }
 }
 
-// S03 기준자료 축소판: 큰 표(보이는 행만 생성) 확인용 (그림 3)
+// 기준자료 (축소판): 큰 표(보이는 행만 생성) 확인용
 component DataPage inherits VerticalLayout {
     in property <[[StandardListViewItem]]> rows;
     padding: 20px;

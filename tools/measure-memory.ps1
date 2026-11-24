@@ -3,7 +3,7 @@
     Auler 프로세스와 모든 하위 프로세스의 메모리 합계를 기록한다.
 
 .DESCRIPTION
-    기획서의 측정 지표(앱과 자식 프로세스의 Private Bytes 합계)를 시점별로 잰다.
+    측정 지표(앱과 자식 프로세스의 Private Bytes 합계)를 시점별로 잰다.
     -Exe로 앱을 실행해 측정하거나, -ProcessId로 이미 실행 중인 앱에 붙는다.
     결과는 화면에 표로 보여주고 tools/out/memory.csv에 한 줄씩 쌓는다.
     -Exe로 실행한 앱은 측정이 끝나거나 오류·중단(Ctrl+C)이 나도 종료한다(-KeepRunning 제외).

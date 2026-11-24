@@ -29,7 +29,7 @@ pub struct GridSize {
 pub enum MoveError {
     /// 없는 배치이거나 격자 밖
     OutOfRange,
-    /// 잠긴 배치는 옮기지 않는다 (UI-STATE-04)
+    /// 잠긴 배치는 옮기지 않는다
     Locked,
     /// 다른 배치와 겹친다
     Overlaps(usize),

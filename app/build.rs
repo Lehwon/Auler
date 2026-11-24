@@ -6,7 +6,7 @@ fn main() {
     let debug_build = std::env::var("PROFILE").is_ok_and(|p| p == "debug");
 
     let config = slint_build::CompilerConfiguration::new()
-        // 시스템 다크 모드와 관계없이 명세서의 밝은 테마로 시작한다.
+        // 시스템 다크 모드와 관계없이 밝은 테마로 시작한다.
         .with_style("fluent-light".into())
         // 번역 파일: i18n/<언어>/LC_MESSAGES/auler.po. 원문(msgid)은 영어다.
         .with_bundled_translations("../i18n")

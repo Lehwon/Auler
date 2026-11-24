@@ -1,5 +1,4 @@
 # Auler 한국어 번역
-# 용어는 UI·UX 설계 명세서 7.3의 용어 사전을 따른다.
 # 원문(msgid)은 영어다. app/tests/i18n.rs가 화면의 모든 @tr 문구에 번역이 있는지 검사한다.
 msgid ""
 msgstr ""

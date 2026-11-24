@@ -39,7 +39,7 @@ export struct AltData {
     shortage: int,
 }
 
-// 잠금 표시: 자물쇠 아이콘과 '잠김' 텍스트를 함께 쓴다 (UI-STATE-04)
+// 잠금 표시: 자물쇠 아이콘과 '잠김' 텍스트를 함께 쓴다
 component LockLabel inherits HorizontalLayout {
     spacing: 2px;
     horizontal-stretch: 0;
@@ -58,9 +58,9 @@ component LockLabel inherits HorizontalLayout {
     }
 }
 
-// 시간표 격자의 강의 카드 (그림 6).
+// 시간표 격자의 강의 카드.
 // 마우스: 클릭으로 선택, 끌어서 이동. 키보드: Tab 포커스, Enter·Space 선택, Ctrl+화살표 이동, 끄는 중 Escape 취소.
-// 끌기와 키보드 이동은 같은 move-card 검사를 거친다 (명세서 7.2, AC-05).
+// 끌기와 키보드 이동은 같은 move-card 검사를 거친다.
 component CourseCard inherits FocusScope {
     in property <CardData> data;
     in property <string> day-label;
@@ -212,7 +212,7 @@ component CourseCard inherits FocusScope {
 }
 
 // 주간 격자: 열은 학기 설정의 요일, 행은 실제 교시와 시작 시각.
-// 교시가 많거나 창이 좁으면 바깥의 ScrollView가 스크롤한다 (명세서 3.2: 가로 스크롤은 격자·표에 한정).
+// 교시가 많거나 창이 좁으면 바깥의 ScrollView가 스크롤한다 (가로 스크롤은 격자와 표에만 둔다).
 export component TimetableGrid inherits Panel {
     in property <[CardData]> cards;
     in property <[int]> days;        // 요일 번호 (0=월 … 6=일)
@@ -359,7 +359,7 @@ export component TimetableGrid inherits Panel {
     }
 }
 
-// 미배정 분반 카드 (그림 6 왼쪽)
+// 미배정 분반 카드
 export component UnassignedCard inherits Panel {
     in property <UnassignedData> data;
     accessible-role: AccessibleRole.list-item;
@@ -379,7 +379,7 @@ export component UnassignedCard inherits Panel {
     }
 }
 
-// 대안 배치 한 줄 (그림 6 오른쪽)
+// 대안 배치 한 줄
 export component AlternativeRow inherits Panel {
     in property <AltData> data;
     in property <string> day-label;

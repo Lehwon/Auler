@@ -19,7 +19,7 @@ slint::include_modules!();
 /// 화면 언어. 인덱스는 상단바 언어 선택의 순서와 같다.
 pub const LANGUAGES: [&str; 2] = ["ko", "en"];
 
-/// 첫 창의 내용 크기. 명세서 3.2의 우선 검증 해상도(1366×768)에 맞춘다.
+/// 첫 창의 내용 크기. 우선 지원하는 해상도(1366×768)에 맞춘다.
 pub const INITIAL_SIZE: LogicalSize = LogicalSize {
     width: 1366.0,
     height: 768.0,

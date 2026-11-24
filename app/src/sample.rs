@@ -1,7 +1,7 @@
 //! 화면 검증용 가상 데이터. 실제 학과 자료가 아니다.
 //!
 //! 과목명, 교원명, 학과명, 강의실, 조건 이름은 원본 자료로 보고 번역하지 않는다
-//! (명세서 7.3). 상태, 단위, 사유처럼 앱이 만드는 문구는 Slint의 `Labels`에서
+//! 상태, 단위, 사유처럼 앱이 만드는 문구는 Slint의 `Labels`에서
 //! 번역한다.
 
 use slint::{ModelRc, SharedString, StandardListViewItem, VecModel};
@@ -17,7 +17,7 @@ pub fn weekdays() -> Vec<i32> {
     (0..5).collect()
 }
 
-/// 기본 교시표 예시: 09:00부터 1시간 간격 8교시 (그림 6). 실제로는 학기 설정에서 온다.
+/// 기본 교시표 예시: 09:00부터 1시간 간격 8교시. 실제로는 학기 설정에서 온다.
 pub fn periods() -> Vec<PeriodRow> {
     (0..8)
         .map(|i| PeriodRow {
@@ -40,7 +40,7 @@ type CardRow = (
     i32,
 );
 
-/// 그림 6의 배치를 바탕으로 한 카드 12개. (요일 열, 시작 교시, 교시 수)는 0부터 센다.
+/// 시간표 화면 확인용 카드 12개. (요일 열, 시작 교시, 교시 수)는 0부터 센다.
 pub fn cards() -> Vec<CardData> {
     #[rustfmt::skip]
     let raw: [CardRow; 12] = [
@@ -94,7 +94,7 @@ pub fn unassigned() -> Vec<UnassignedData> {
     ]
 }
 
-/// 대안 배치 예시 (그림 6). verdict: 0 = 가능, 1 = 선호 경고, 2 = 불가.
+/// 대안 배치 예시. verdict: 0 = 가능, 1 = 선호 경고, 2 = 불가.
 /// 실제 후보는 M1 편성 엔진이 계산한다.
 pub fn alternatives() -> Vec<AltData> {
     vec![

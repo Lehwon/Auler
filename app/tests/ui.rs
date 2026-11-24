@@ -80,7 +80,7 @@ fn card(ui: &AppWindow, index: usize) -> auler::CardData {
     ui.get_cards().row_data(index).expect("카드")
 }
 
-/// 리뷰 1: 어떤 화면·언어·폭에서도 레이아웃 최소 크기가 창 최소 크기(1024×640)를 넘지 않아야 잘리지 않는다.
+/// 어떤 화면·언어·폭에서도 레이아웃 최소 크기가 창 최소 크기(1024×640)를 넘지 않아야 잘리지 않는다.
 #[test]
 fn layout_fits_minimum_window_on_every_page() {
     for size in [wide(), LogicalSize::new(1024.0, 640.0)] {
@@ -105,7 +105,7 @@ fn layout_fits_minimum_window_on_every_page() {
     }
 }
 
-/// 좁은 창에서는 상세 패널이 오버레이로 바뀐다 (명세서 3.2).
+/// 좁은 창에서는 상세 패널이 오버레이로 바뀐다.
 #[test]
 fn narrow_window_switches_detail_panel_to_overlay() {
     let ui = setup(KO, wide());
@@ -141,7 +141,7 @@ fn narrow_window_switches_detail_panel_to_overlay() {
     assert!(by_role(&ui, AccessibleRole::Complementary).is_empty());
 }
 
-/// 리뷰 5: 잠금 스위치를 누른 뒤에도 다른 카드를 고르면 그 카드의 잠금 상태를 보여야 한다.
+/// 잠금 스위치를 누른 뒤에도 다른 카드를 고르면 그 카드의 잠금 상태를 보여야 한다.
 #[test]
 fn lock_switch_follows_the_selected_card() {
     let ui = setup(KO, wide());
@@ -160,7 +160,7 @@ fn lock_switch_follows_the_selected_card() {
     assert_eq!(ui.get_locked_count(), 4);
 }
 
-/// 리뷰 5: 1교시 배치는 "월 1교시", 연강은 "목 3~4교시". 범위 밖 선택은 안내 문구.
+/// 1교시 배치는 "월 1교시", 연강은 "목 3~4교시". 범위 밖 선택은 안내 문구.
 #[test]
 fn placement_text_and_selection_bounds() {
     let ui = setup(KO, wide());
@@ -178,7 +178,7 @@ fn placement_text_and_selection_bounds() {
     assert!(has_text(&ui, "Select a card to see its details."));
 }
 
-/// 리뷰 4: 내비 항목은 탭 역할, 현재 화면은 선택 상태, 기본 동작으로 화면을 바꾼다.
+/// 내비 항목은 탭 역할, 현재 화면은 선택 상태, 기본 동작으로 화면을 바꾼다.
 #[test]
 fn nav_items_are_selectable_tabs() {
     let ui = setup(KO, wide());
@@ -193,7 +193,7 @@ fn nav_items_are_selectable_tabs() {
     assert_eq!(review.accessible_description().as_deref(), Some("대기 3건"));
 }
 
-/// 리뷰 4: 비활성 아이콘 버튼은 접근성 기본 동작으로도 눌리지 않는다.
+/// 비활성 아이콘 버튼은 접근성 기본 동작으로도 눌리지 않는다.
 #[test]
 fn disabled_icon_button_ignores_default_action() {
     let ui = setup(KO, wide());
@@ -228,7 +228,7 @@ fn move_undo_redo_and_rejections() {
     assert_eq!(ui.get_conflict_count(), 0);
 }
 
-/// AC-05: 끌어서 놓기와 키보드(Ctrl+←)가 같은 결과를 낸다.
+/// 끌어서 놓기와 키보드(Ctrl+←)가 같은 결과를 낸다.
 #[test]
 fn drag_and_keyboard_move_give_the_same_result() {
     const LABEL: &str = "자료구조 01, 김교원 · 공학관 302, 목 3~4교시";
@@ -268,7 +268,7 @@ fn drag_and_keyboard_move_give_the_same_result() {
     assert_eq!(by_drag, by_key);
 }
 
-/// 리뷰 6: 영어 화면에서는 앱이 만드는 문구가 모두 영어다. 원본 자료(과목명 등)는 그대로다.
+/// 영어 화면에서는 앱이 만드는 문구가 모두 영어다. 원본 자료(과목명 등)는 그대로다.
 #[test]
 fn english_mode_translates_generated_text_only() {
     let ui = setup(EN, wide());
@@ -311,7 +311,7 @@ fn english_mode_translates_generated_text_only() {
     assert_eq!(status(&ui), "배정 완료");
 }
 
-/// 리뷰 4: 입력란과 선택 상자에 이름이 있고, 장식 문자가 이름에 섞이지 않는다.
+/// 입력란과 선택 상자에 이름이 있고, 장식 문자가 이름에 섞이지 않는다.
 #[test]
 fn inputs_have_labels_and_no_decorative_glyphs() {
     let ui = setup(KO, wide());
