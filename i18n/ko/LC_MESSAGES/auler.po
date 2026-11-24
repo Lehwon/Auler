@@ -1,0 +1,187 @@
+# Auler 한국어 번역
+# 용어는 UI·UX 설계 명세서 7.3의 용어 사전을 따른다.
+msgid ""
+msgstr ""
+"Project-Id-Version: auler\n"
+"Language: ko\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# 셸
+msgid "Home"
+msgstr "홈"
+
+msgid "Data"
+msgstr "기준자료"
+
+msgid "Constraints"
+msgstr "편성 조건"
+
+msgid "Timetable"
+msgstr "시간표"
+
+msgid "Review"
+msgstr "검토함"
+
+msgid "Export & Handover"
+msgstr "출력·인계"
+
+msgid "Settings"
+msgstr "설정"
+
+msgid "Saved"
+msgstr "저장 완료"
+
+msgid "Search"
+msgstr "검색"
+
+msgid "Draft"
+msgstr "초안"
+
+msgid "Local workspace"
+msgstr "로컬 작업공간"
+
+msgid "Sample department data"
+msgstr "가상 학과 데이터"
+
+msgid "Not implemented yet"
+msgstr "아직 구현되지 않았습니다"
+
+# 시간표 워크벤치
+msgid "Weekly workbench"
+msgstr "주간 편성 워크벤치"
+
+msgid "Weekly timetable"
+msgstr "주간 시간표"
+
+msgid "Period"
+msgstr "교시"
+
+msgid "Undo"
+msgstr "실행 취소"
+
+msgid "Redo"
+msgstr "다시 실행"
+
+msgid "Reschedule"
+msgstr "재편성"
+
+msgid "Auto schedule"
+msgstr "자동 편성"
+
+msgid "Validate & finalize"
+msgstr "검증·확정"
+
+msgid "By year"
+msgstr "학년별"
+
+msgid "By instructor"
+msgstr "교원별"
+
+msgid "By room"
+msgstr "강의실별"
+
+msgid "All"
+msgstr "전체"
+
+msgid "Year 2"
+msgstr "2학년"
+
+msgid "Search courses"
+msgstr "강좌 검색"
+
+msgid "Lock"
+msgstr "잠금"
+
+msgid "Locked"
+msgstr "잠김"
+
+msgid "Unassigned"
+msgstr "미배정"
+
+msgid "Hard conflicts"
+msgstr "필수 충돌"
+
+msgid "Search sections"
+msgstr "분반 검색"
+
+msgid "1 period left"
+msgstr "남은 1교시"
+
+msgid "2 periods left"
+msgstr "남은 2교시"
+
+msgid "No room with equipment"
+msgstr "장비 후보 부족"
+
+msgid "Instructor time conflict"
+msgstr "교원 시간 충돌"
+
+msgid "Details"
+msgstr "상세 정보"
+
+msgid "Placement"
+msgstr "배정"
+
+msgid "PCs available"
+msgstr "PC 가용"
+
+msgid "Hard constraints"
+msgstr "필수 조건"
+
+msgid "Passed"
+msgstr "통과"
+
+msgid "Alternatives"
+msgstr "대안 배치"
+
+msgid "Available"
+msgstr "가능"
+
+msgid "Soft warning"
+msgstr "선호 경고"
+
+msgid "Not allowed"
+msgstr "불가"
+
+# 기준자료
+msgid "Sections, instructors and rooms for the term"
+msgstr "학기별 분반·교원·강의실 및 편성에 필요한 정보"
+
+msgid "Import"
+msgstr "가져오기"
+
+msgid "Add section"
+msgstr "분반 추가"
+
+msgid "Search by course name or code"
+msgstr "과목명, 학수번호 검색"
+
+msgid "Total"
+msgstr "총"
+
+msgid "Code"
+msgstr "학수번호"
+
+msgid "Section"
+msgstr "분반"
+
+msgid "Course"
+msgstr "과목명"
+
+msgid "Instructor"
+msgstr "교원"
+
+msgid "Year"
+msgstr "학년"
+
+msgid "Students"
+msgstr "인원"
+
+msgid "Hours"
+msgstr "시수"
+
+msgid "Status"
+msgstr "상태"

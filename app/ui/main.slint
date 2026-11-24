@@ -1,0 +1,289 @@
+import { Button, ComboBox, LineEdit, StandardTableView, Switch } from "std-widgets.slint";
+import { Theme, Badge, Tone, Panel, Icons, IconButton } from "theme.slint";
+import { TopBar, NavItem, StatusBar } from "shell.slint";
+import { CardData, PeriodRow, TimetableGrid, UnassignedCard } from "timetable.slint";
+
+export { CardData, PeriodRow }
+
+// 페이지 머리말: 제목, 부제, 오른쪽 행동 (주 행동은 한 개)
+component PageHeader inherits HorizontalLayout {
+    in property <string> title;
+    in property <string> subtitle;
+    spacing: 8px;
+    VerticalLayout {
+        spacing: 4px;
+        horizontal-stretch: 1;
+        Text { text: root.title; font-size: Theme.font-title; font-weight: 700; color: Theme.text; }
+        Text { text: root.subtitle; font-size: Theme.font-small; color: Theme.text-muted; }
+    }
+    @children
+}
+
+component KeyValue inherits HorizontalLayout {
+    in property <string> key;
+    in property <string> value;
+    height: 32px;
+    Text { text: root.key; color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; }
+    Text { text: root.value; color: Theme.text; font-weight: 600; vertical-alignment: center; }
+}
+
+component AlternativeRow inherits Panel {
+    in property <string> slot;
+    in property <string> note;
+    in property <string> verdict;
+    in property <Tone> tone;
+    accessible-role: AccessibleRole.list-item;
+    accessible-label: root.slot + ", " + root.verdict + ", " + root.note;
+    HorizontalLayout {
+        padding: 10px;
+        VerticalLayout {
+            spacing: 2px;
+            horizontal-stretch: 1;
+            Text { text: root.slot; font-weight: 600; color: Theme.text; }
+            Text { text: root.note; font-size: Theme.font-small; color: Theme.text-muted; }
+        }
+        VerticalLayout {
+            alignment: start;
+            Badge { text: root.verdict; tone: root.tone; }
+        }
+    }
+}
+
+// S06 시간표 편성 워크벤치 축소판 (그림 6)
+component TimetablePage inherits VerticalLayout {
+    in property <[CardData]> cards;
+    in property <[string]> days;
+    in property <[PeriodRow]> periods;
+    in-out property <int> selected: 3;
+
+    padding: 20px;
+    spacing: 14px;
+
+    PageHeader {
+        title: @tr("Timetable");
+        subtitle: @tr("Weekly workbench") + " · " + @tr("Draft") + " v3";
+        VerticalLayout { alignment: center; IconButton { icon: Icons.undo; label: @tr("Undo"); } }
+        VerticalLayout { alignment: center; IconButton { icon: Icons.redo; label: @tr("Redo"); } }
+        Button { text: @tr("Reschedule"); }
+        Button { text: @tr("Auto schedule"); primary: true; }
+        Button { text: @tr("Validate & finalize"); }
+    }
+
+    HorizontalLayout {
+        spacing: 8px;
+        ComboBox {
+            width: 140px;
+            model: [@tr("By year"), @tr("By instructor"), @tr("By room"), @tr("All")];
+        }
+        ComboBox { width: 110px; model: [@tr("Year 2")]; }
+        LineEdit { width: 200px; placeholder-text: @tr("Search courses"); }
+        Rectangle { horizontal-stretch: 1; }
+        VerticalLayout { alignment: center; Badge { text: @tr("Lock") + " 12"; } }
+        VerticalLayout { alignment: center; Badge { text: @tr("Unassigned") + " 2"; tone: Tone.warning; } }
+        VerticalLayout { alignment: center; Badge { text: @tr("Hard conflicts") + " 0"; tone: Tone.success; } }
+    }
+
+    HorizontalLayout {
+        spacing: 14px;
+        vertical-stretch: 1;
+
+        // 미배정 패널
+        Panel {
+            width: 220px;
+            VerticalLayout {
+                padding: 12px;
+                spacing: 10px;
+                HorizontalLayout {
+                    Text { text: @tr("Unassigned"); font-weight: 700; color: Theme.text; horizontal-stretch: 1; }
+                    Badge { text: "2"; tone: Tone.warning; }
+                }
+                LineEdit { placeholder-text: @tr("Search sections"); }
+                UnassignedCard {
+                    title: "자료구조 02";
+                    detail: "CS201 · 30명";
+                    remaining: @tr("1 period left");
+                    reason: @tr("No room with equipment");
+                }
+                UnassignedCard {
+                    title: "운영체제 01";
+                    detail: "CS301 · 26명";
+                    remaining: @tr("2 periods left");
+                    reason: @tr("Instructor time conflict");
+                }
+                Rectangle { vertical-stretch: 1; }
+            }
+        }
+
+        // 주간 격자
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: start;
+            TimetableGrid {
+                cards: root.cards;
+                days: root.days;
+                periods: root.periods;
+                selected <=> root.selected;
+            }
+        }
+
+        // 상세 패널
+        Panel {
+            width: 300px;
+            VerticalLayout {
+                padding: 14px;
+                spacing: 4px;
+                Text { text: @tr("Details"); font-weight: 700; color: Theme.text; }
+                Rectangle { height: 8px; }
+                Text {
+                    text: root.selected >= 0 ? root.cards[root.selected].title : "";
+                    font-size: 18px;
+                    font-weight: 700;
+                    color: Theme.text;
+                }
+                Text {
+                    text: root.selected >= 0 ? root.cards[root.selected].detail : "";
+                    color: Theme.text-muted;
+                }
+                Rectangle { height: 8px; }
+                KeyValue {
+                    key: @tr("Placement");
+                    value: root.selected < 0 ? "" : root.days[root.cards[root.selected].day] + " "
+                        + (root.cards[root.selected].start + 1) + "–" + (root.cards[root.selected].start + root.cards[root.selected].span);
+                }
+                KeyValue { key: @tr("PCs available"); value: "30 / 28"; }
+                HorizontalLayout {
+                    height: 32px;
+                    Text { text: @tr("Hard constraints"); color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; }
+                    VerticalLayout { alignment: center; Badge { text: @tr("Passed"); tone: Tone.success; } }
+                }
+                HorizontalLayout {
+                    height: 32px;
+                    Text { text: @tr("Lock"); color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; }
+                    Switch {
+                        checked: root.selected >= 0 && root.cards[root.selected].locked;
+                        accessible-label: @tr("Lock");
+                    }
+                }
+                Rectangle { height: 8px; }
+                Text { text: @tr("Alternatives"); font-weight: 700; color: Theme.text; }
+                AlternativeRow { slot: "화 1~2교시"; note: "공학관 302 · 영향 0건"; verdict: @tr("Available"); tone: Tone.success; }
+                AlternativeRow { slot: "수 5~6교시"; note: "수요일 오후 회피 조건"; verdict: @tr("Soft warning"); tone: Tone.warning; }
+                AlternativeRow { slot: "목 5~6교시"; note: "PC 2대 부족"; verdict: @tr("Not allowed"); tone: Tone.danger; }
+                Rectangle { vertical-stretch: 1; }
+            }
+        }
+    }
+}
+
+// S03 기준자료 축소판: 큰 표(보이는 행만 생성) 확인용 (그림 3)
+component DataPage inherits VerticalLayout {
+    in property <[[StandardListViewItem]]> rows;
+    padding: 20px;
+    spacing: 14px;
+
+    PageHeader {
+        title: @tr("Data");
+        subtitle: @tr("Sections, instructors and rooms for the term");
+        Button { text: @tr("Import"); }
+        Button { text: @tr("Add section"); primary: true; }
+    }
+    HorizontalLayout {
+        spacing: 8px;
+        LineEdit { width: 260px; placeholder-text: @tr("Search by course name or code"); }
+        Rectangle { horizontal-stretch: 1; }
+        Text { text: @tr("Total") + " " + root.rows.length; color: Theme.text-muted; vertical-alignment: center; }
+    }
+    StandardTableView {
+        vertical-stretch: 1;
+        columns: [
+            { title: @tr("Code") },
+            { title: @tr("Section") },
+            { title: @tr("Course") },
+            { title: @tr("Instructor") },
+            { title: @tr("Year") },
+            { title: @tr("Students") },
+            { title: @tr("Hours") },
+            { title: @tr("Status") },
+        ];
+        rows: root.rows;
+    }
+}
+
+component PlaceholderPage inherits VerticalLayout {
+    in property <string> title;
+    padding: 20px;
+    PageHeader { title: root.title; subtitle: @tr("Not implemented yet"); }
+    Rectangle { vertical-stretch: 1; }
+}
+
+export component AppWindow inherits Window {
+    title: "Auler";
+    min-width: 1024px;
+    min-height: 640px;
+    background: Theme.bg;
+    default-font-family: Theme.font-family;
+    default-font-size: Theme.font-body;
+
+    in property <[CardData]> cards;
+    in property <[string]> days;
+    in property <[PeriodRow]> periods;
+    in property <[[StandardListViewItem]]> rows;
+    in-out property <int> page: 3;
+    in-out property <int> language-index: 0;
+    callback language-selected(int);
+
+    VerticalLayout {
+        TopBar {
+            department: "컴퓨터공학과";
+            term: "2027학년도 1학기";
+            version: @tr("Draft") + " v3";
+            language-index: root.language-index;
+            language-selected(index) => { root.language-selected(index); }
+        }
+
+        HorizontalLayout {
+            vertical-stretch: 1;
+
+            Rectangle {
+                width: root.page == 3 ? 56px : 208px;
+                VerticalLayout {
+                    padding: 8px;
+                    spacing: 4px;
+                    NavItem { icon: Icons.home; label: @tr("Home"); compact: root.page == 3; active: root.page == 0; clicked => { root.page = 0; } }
+                    NavItem { icon: Icons.data; label: @tr("Data"); compact: root.page == 3; active: root.page == 1; clicked => { root.page = 1; } }
+                    NavItem { icon: Icons.constraints; label: @tr("Constraints"); compact: root.page == 3; active: root.page == 2; clicked => { root.page = 2; } }
+                    NavItem { icon: Icons.timetable; label: @tr("Timetable"); compact: root.page == 3; active: root.page == 3; clicked => { root.page = 3; } }
+                    NavItem { icon: Icons.review; label: @tr("Review"); compact: root.page == 3; active: root.page == 4; count: 3; clicked => { root.page = 4; } }
+                    NavItem { icon: Icons.export; label: @tr("Export & Handover"); compact: root.page == 3; active: root.page == 5; clicked => { root.page = 5; } }
+                    Rectangle { vertical-stretch: 1; }
+                    NavItem { icon: Icons.settings; label: @tr("Settings"); compact: root.page == 3; active: root.page == 6; clicked => { root.page = 6; } }
+                }
+                Rectangle {
+                    x: parent.width - 1px;
+                    width: 1px;
+                    background: Theme.border;
+                }
+            }
+
+            if root.page == 3: TimetablePage {
+                horizontal-stretch: 1;
+                cards: root.cards;
+                days: root.days;
+                periods: root.periods;
+            }
+            if root.page == 1: DataPage {
+                horizontal-stretch: 1;
+                rows: root.rows;
+            }
+            if root.page != 1 && root.page != 3: PlaceholderPage {
+                horizontal-stretch: 1;
+                title: root.page == 0 ? @tr("Home") : root.page == 2 ? @tr("Constraints") : root.page == 4 ? @tr("Review") : root.page == 5 ? @tr("Export & Handover") : @tr("Settings");
+            }
+        }
+
+        StatusBar {
+            left-text: @tr("Local workspace");
+            right-text: "Auler 0.1 · " + @tr("Sample department data");
+        }
+    }
+}

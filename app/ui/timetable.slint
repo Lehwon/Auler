@@ -1,0 +1,198 @@
+import { Theme, Badge, Tone, Panel, Icon, Icons } from "theme.slint";
+
+export struct CardData {
+    title: string,
+    detail: string,
+    day: int,
+    start: int,
+    span: int,
+    hue: int,
+    locked: bool,
+}
+
+export struct PeriodRow {
+    label: string,
+    time: string,
+}
+
+// 시간표 격자의 강의 카드 (그림 6)
+component CourseCard inherits Rectangle {
+    in property <CardData> data;
+    in property <bool> selected;
+    callback clicked;
+
+    property <color> accent: data.hue == 0 ? #3B6FD1 : data.hue == 1 ? #3E8E5A : data.hue == 2 ? #8A63C7 : #D08A2E;
+    property <color> fill: data.hue == 0 ? #E3ECFA : data.hue == 1 ? #E3F1E7 : data.hue == 2 ? #EEE6F8 : #FCEFD9;
+
+    background: fill;
+    border-radius: 4px;
+    border-width: selected ? 2px : 0px;
+    border-color: Theme.action;
+    clip: true;
+    accessible-role: AccessibleRole.button;
+    accessible-label: data.title + ", " + data.detail + (data.locked ? ", " + @tr("Locked") : "");
+
+    Rectangle {
+        x: 0;
+        width: 3px;
+        background: root.accent;
+    }
+
+    VerticalLayout {
+        alignment: start;
+        padding-left: 10px;
+        padding-right: 6px;
+        padding-top: 4px;
+        spacing: 0px;
+        Text {
+            text: data.title;
+            font-weight: 600;
+            color: Theme.text;
+            overflow: elide;
+        }
+        Text {
+            text: data.detail;
+            font-size: Theme.font-small;
+            color: Theme.text-muted;
+            overflow: elide;
+        }
+        // 잠금은 자물쇠 아이콘과 '잠김' 텍스트를 함께 표시한다 (UI-STATE-04)
+        if data.locked: HorizontalLayout {
+            alignment: start;
+            spacing: 3px;
+            Icon {
+                text: Icons.lock;
+                font-size: 11px;
+                color: Theme.text-muted;
+            }
+            Text {
+                text: @tr("Locked");
+                font-size: Theme.font-small;
+                color: Theme.text-muted;
+            }
+        }
+    }
+
+    TouchArea {
+        clicked => { root.clicked(); }
+    }
+}
+
+// 주간 격자: 열은 학기 설정의 요일, 행은 실제 교시와 시작 시각
+export component TimetableGrid inherits Panel {
+    in property <[CardData]> cards;
+    in property <[string]> days;
+    in property <[PeriodRow]> periods;
+    in-out property <int> selected: -1;
+
+    property <length> header-h: 36px;
+    property <length> period-w: 64px;
+    property <length> row-h: 60px;
+    property <length> col-w: (root.width - root.period-w) / max(1, root.days.length);
+
+    min-width: 520px;
+    height: root.header-h + root.periods.length * root.row-h;
+    clip: true;
+    accessible-role: AccessibleRole.table;
+    accessible-label: @tr("Weekly timetable");
+
+    // 머리글 배경
+    Rectangle {
+        y: 0;
+        height: root.header-h;
+        background: #F3F5F8;
+        border-radius: Theme.radius;
+    }
+
+    // 가로 줄
+    for p[i] in root.periods: Rectangle {
+        x: 0;
+        y: root.header-h + i * root.row-h;
+        width: root.width;
+        height: 1px;
+        background: Theme.border;
+    }
+    // 세로 줄
+    for d[i] in root.days: Rectangle {
+        x: root.period-w + i * root.col-w;
+        y: 0;
+        width: 1px;
+        height: root.height;
+        background: Theme.border;
+    }
+
+    Text {
+        x: 0;
+        y: 0;
+        width: root.period-w;
+        height: root.header-h;
+        text: @tr("Period");
+        font-weight: 600;
+        color: Theme.text-muted;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    for d[i] in root.days: Text {
+        x: root.period-w + i * root.col-w;
+        y: 0;
+        width: root.col-w;
+        height: root.header-h;
+        text: d;
+        font-weight: 600;
+        color: Theme.text;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    for p[i] in root.periods: VerticalLayout {
+        x: 0;
+        y: root.header-h + i * root.row-h;
+        width: root.period-w;
+        height: root.row-h;
+        alignment: center;
+        Text {
+            text: p.label;
+            font-weight: 600;
+            color: Theme.text;
+            horizontal-alignment: center;
+        }
+        Text {
+            text: p.time;
+            font-size: Theme.font-small;
+            color: Theme.text-subtle;
+            horizontal-alignment: center;
+        }
+    }
+
+    for c[i] in root.cards: CourseCard {
+        x: root.period-w + c.day * root.col-w + 3px;
+        y: root.header-h + c.start * root.row-h + 3px;
+        width: root.col-w - 6px;
+        height: c.span * root.row-h - 6px;
+        data: c;
+        selected: i == root.selected;
+        clicked => { root.selected = i; }
+    }
+}
+
+// 미배정 분반 카드 (그림 6 왼쪽)
+export component UnassignedCard inherits Panel {
+    in property <string> title;
+    in property <string> detail;
+    in property <string> remaining;
+    in property <string> reason;
+    accessible-role: AccessibleRole.list-item;
+    accessible-label: root.title + ", " + root.reason;
+
+    VerticalLayout {
+        padding: 12px;
+        spacing: 6px;
+        Text { text: root.title; font-size: 15px; font-weight: 700; color: Theme.text; }
+        Text { text: root.detail; font-size: Theme.font-small; color: Theme.text-muted; }
+        Rectangle { height: 1px; background: Theme.border; }
+        Text { text: root.remaining; font-size: Theme.font-small; color: Theme.text-muted; }
+        HorizontalLayout {
+            alignment: start;
+            Badge { text: root.reason; tone: Tone.warning; }
+        }
+    }
+}

@@ -1,0 +1,22 @@
+# Rust
+/target/
+**/*.rs.bk
+
+# 메모리 측정 원본 로그 (요약은 docs/perf/에 남긴다)
+/tools/out/
+
+# 편집기·OS
+.vs/
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# 로컬 작업공간·백업 (개인 자료가 들어갈 수 있음)
+*.auler
+*.auler-wal
+*.auler-shm
+*.auler-backup

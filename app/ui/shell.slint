@@ -1,0 +1,166 @@
+import { ComboBox, LineEdit } from "std-widgets.slint";
+import { Theme, Badge, Tone, Icon } from "theme.slint";
+
+// 상단바: 학과/학기, 버전, 저장 상태, 검색, 언어 (명세서 3.2, 그림 2)
+export component TopBar inherits Rectangle {
+    in property <string> department;
+    in property <string> term;
+    in property <string> version;
+    in property <int> language-index;
+    callback language-selected(int);
+
+    height: 52px;
+    background: Theme.surface;
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        spacing: 12px;
+
+        HorizontalLayout {
+            spacing: 8px;
+            horizontal-stretch: 0;
+            VerticalLayout {
+                alignment: center;
+                Rectangle {
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 5px;
+                    background: Theme.action;
+                    Text {
+                        text: "A";
+                        color: white;
+                        font-size: 15px;
+                        font-weight: 700;
+                        horizontal-alignment: center;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+            Text {
+                text: "Auler";
+                font-size: 18px;
+                font-weight: 700;
+                color: Theme.text;
+                vertical-alignment: center;
+            }
+        }
+
+        Rectangle { width: 16px; }
+
+        Text {
+            text: root.department + "  /  " + root.term;
+            color: Theme.text;
+            font-weight: 600;
+            vertical-alignment: center;
+        }
+        VerticalLayout {
+            alignment: center;
+            Badge { text: root.version; tone: Tone.info; }
+        }
+
+        Rectangle { horizontal-stretch: 1; }
+
+        Text {
+            text: "● " + @tr("Saved");
+            color: Theme.success;
+            font-size: Theme.font-small;
+            vertical-alignment: center;
+        }
+        VerticalLayout {
+            alignment: center;
+            LineEdit {
+                width: 200px;
+                placeholder-text: @tr("Search");
+                accessible-label: @tr("Search");
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            ComboBox {
+                width: 110px;
+                model: ["한국어", "English"];
+                current-index: root.language-index;
+                selected(value) => {
+                    root.language-selected(self.current-index);
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        y: parent.height - 1px;
+        height: 1px;
+        background: Theme.border;
+    }
+}
+
+// 왼쪽 내비게이션 항목. compact이면 아이콘 레일로 접힌다.
+export component NavItem inherits Rectangle {
+    in property <string> icon;
+    in property <string> label;
+    in property <bool> active;
+    in property <bool> compact;
+    in property <int> count: 0;
+    callback clicked;
+
+    height: 40px;
+    border-radius: Theme.radius;
+    background: active ? Theme.action-soft : touch.has-hover ? Theme.neutral-soft : transparent;
+    accessible-role: AccessibleRole.button;
+    accessible-label: root.label;
+
+    HorizontalLayout {
+        padding-left: compact ? 0px : 12px;
+        padding-right: compact ? 0px : 12px;
+        spacing: 12px;
+        alignment: compact ? center : start;
+        Icon {
+            text: root.icon;
+            color: active ? Theme.action : Theme.text-muted;
+            width: 20px;
+        }
+        if !compact: Text {
+            text: root.label;
+            color: active ? Theme.action : Theme.text;
+            font-weight: active ? 700 : 400;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+        if !compact && count > 0: VerticalLayout {
+            alignment: center;
+            Badge { text: count; tone: Tone.info; }
+        }
+    }
+
+    touch := TouchArea {
+        clicked => { root.clicked(); }
+    }
+}
+
+// 하단 상태바 (명세서 3.2)
+export component StatusBar inherits Rectangle {
+    in property <string> left-text;
+    in property <string> right-text;
+
+    height: 28px;
+    background: #EEF1F5;
+
+    HorizontalLayout {
+        padding-left: 16px;
+        padding-right: 16px;
+        Text {
+            text: "● " + root.left-text;
+            color: Theme.text-muted;
+            font-size: Theme.font-small;
+            vertical-alignment: center;
+        }
+        Rectangle { horizontal-stretch: 1; }
+        Text {
+            text: root.right-text;
+            color: Theme.text-muted;
+            font-size: Theme.font-small;
+            vertical-alignment: center;
+        }
+    }
+}

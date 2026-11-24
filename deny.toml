@@ -1,0 +1,36 @@
+# cargo-deny: 의존성 라이선스와 출처 검사 (CI의 licenses 작업)
+
+[graph]
+# 배포 대상은 Windows뿐이다. CI는 Linux에서 돌지만 Windows 의존성 그래프를 검사한다.
+targets = ["x86_64-pc-windows-msvc"]
+
+[licenses]
+confidence-threshold = 0.93
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "CC0-1.0",
+    "ISC",
+    "Unicode-3.0",
+    "Unlicense",
+    "Zlib",
+    "0BSD",
+    # Slint은 GPL-3.0, Royalty-free 2.0, Software 3.0 중 하나로 쓸 수 있다.
+    # Auler는 Royalty-free 2.0을 따른다: 앱 정보 화면의 AboutSlint 위젯 또는
+    # 배포 페이지의 "Made with Slint" 배지로 출처를 표시한다.
+    "LicenseRef-Slint-Royalty-free-2.0",
+]
+
+[licenses.private]
+ignore = true
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
