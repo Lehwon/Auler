@@ -30,6 +30,8 @@ ignore = true
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"
+# 작업공간 안의 경로 의존성(publish = false)은 버전 없이 쓴다
+allow-wildcard-paths = true
 
 [sources]
 unknown-registry = "deny"
