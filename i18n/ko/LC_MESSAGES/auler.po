@@ -1,5 +1,6 @@
 # Auler 한국어 번역
 # 용어는 UI·UX 설계 명세서 7.3의 용어 사전을 따른다.
+# 원문(msgid)은 영어다. app/tests/i18n.rs가 화면의 모든 @tr 문구에 번역이 있는지 검사한다.
 msgid ""
 msgstr ""
 "Project-Id-Version: auler\n"
@@ -9,7 +10,10 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-# 셸
+# 셸과 메뉴
+msgid "Main menu"
+msgstr "주 메뉴"
+
 msgid "Home"
 msgstr "홈"
 
@@ -37,8 +41,14 @@ msgstr "저장 완료"
 msgid "Search"
 msgstr "검색"
 
-msgid "Draft"
-msgstr "초안"
+msgid "Language"
+msgstr "언어"
+
+msgid "Draft v{0}"
+msgstr "초안 v{0}"
+
+msgid "{0}, term {1}"
+msgstr "{0}학년도 {1}학기"
 
 msgid "Local workspace"
 msgstr "로컬 작업공간"
@@ -49,6 +59,32 @@ msgstr "가상 학과 데이터"
 msgid "Not implemented yet"
 msgstr "아직 구현되지 않았습니다"
 
+msgid "{n} pending"
+msgid_plural "{n} pending"
+msgstr[0] "대기 {n}건"
+
+# 요일
+msgid "Mon"
+msgstr "월"
+
+msgid "Tue"
+msgstr "화"
+
+msgid "Wed"
+msgstr "수"
+
+msgid "Thu"
+msgstr "목"
+
+msgid "Fri"
+msgstr "금"
+
+msgid "Sat"
+msgstr "토"
+
+msgid "Sun"
+msgstr "일"
+
 # 시간표 워크벤치
 msgid "Weekly workbench"
 msgstr "주간 편성 워크벤치"
@@ -58,6 +94,12 @@ msgstr "주간 시간표"
 
 msgid "Period"
 msgstr "교시"
+
+msgid "{0}, period {1}"
+msgstr "{0} {1}교시"
+
+msgid "{0}, periods {1}–{2}"
+msgstr "{0} {1}~{2}교시"
 
 msgid "Undo"
 msgstr "실행 취소"
@@ -73,6 +115,9 @@ msgstr "자동 편성"
 
 msgid "Validate & finalize"
 msgstr "검증·확정"
+
+msgid "View"
+msgstr "보기"
 
 msgid "By year"
 msgstr "학년별"
@@ -107,11 +152,13 @@ msgstr "필수 충돌"
 msgid "Search sections"
 msgstr "분반 검색"
 
-msgid "1 period left"
-msgstr "남은 1교시"
+msgid "{n} student"
+msgid_plural "{n} students"
+msgstr[0] "{n}명"
 
-msgid "2 periods left"
-msgstr "남은 2교시"
+msgid "{n} period left"
+msgid_plural "{n} periods left"
+msgstr[0] "남은 {n}교시"
 
 msgid "No room with equipment"
 msgstr "장비 후보 부족"
@@ -122,11 +169,17 @@ msgstr "교원 시간 충돌"
 msgid "Details"
 msgstr "상세 정보"
 
+msgid "Close"
+msgstr "닫기"
+
+msgid "Select a card to see its details."
+msgstr "강의 카드를 선택하면 상세 정보가 나타납니다."
+
 msgid "Placement"
 msgstr "배정"
 
-msgid "PCs available"
-msgstr "PC 가용"
+msgid "Students / seats"
+msgstr "인원 / 좌석"
 
 msgid "Hard constraints"
 msgstr "필수 조건"
@@ -146,6 +199,17 @@ msgstr "선호 경고"
 msgid "Not allowed"
 msgstr "불가"
 
+msgid "{n} section affected"
+msgid_plural "{n} sections affected"
+msgstr[0] "영향 {n}건"
+
+msgid "{n} PC short"
+msgid_plural "{n} PCs short"
+msgstr[0] "PC {n}대 부족"
+
+msgid "Soft constraint: {0}"
+msgstr "{0} 조건"
+
 # 기준자료
 msgid "Sections, instructors and rooms for the term"
 msgstr "학기별 분반·교원·강의실 및 편성에 필요한 정보"
@@ -161,6 +225,9 @@ msgstr "과목명, 학수번호 검색"
 
 msgid "Total"
 msgstr "총"
+
+msgid "Sections"
+msgstr "분반 목록"
 
 msgid "Code"
 msgstr "학수번호"
@@ -185,3 +252,22 @@ msgstr "시수"
 
 msgid "Status"
 msgstr "상태"
+
+msgid "Assigned"
+msgstr "배정 완료"
+
+msgid "Needs review"
+msgstr "확인 필요"
+
+# Slint 표준 위젯(LineEdit·TextEdit 우클릭 메뉴). Undo, Redo는 위에 있다.
+msgid "Cut"
+msgstr "잘라내기"
+
+msgid "Copy"
+msgstr "복사"
+
+msgid "Paste"
+msgstr "붙여넣기"
+
+msgid "Select All"
+msgstr "모두 선택"

@@ -22,8 +22,12 @@
 ```powershell
 cargo run -p auler                 # 디버그 실행
 cargo build --release -p auler     # 릴리스 빌드
-./tools/measure-memory.ps1 -Exe target/release/auler.exe -Label idle   # 메모리 측정
+cargo test --workspace             # 단위·UI·번역 테스트 (UI 스냅숏: target/tmp/ui-snapshots)
+./tools/measure-memory.ps1 -Exe target/release/auler.exe -Label idle   # 유휴 메모리
+./tools/measure-interaction.ps1    # 스크롤·끌기 중 CPU·FPS·메모리 (릴리스 빌드 필요)
 ```
+
+개발용 환경 변수: `AULER_LANG`(ko|en), `AULER_PAGE`(0~6) 시작 언어·화면 고정, `AULER_BENCH`(idle|scroll|drag) 벤치마크 실행 후 종료.
 
 ## English
 

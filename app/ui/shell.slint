@@ -1,16 +1,19 @@
 import { ComboBox, LineEdit } from "std-widgets.slint";
-import { Theme, Badge, Tone, Icon } from "theme.slint";
+import { Theme, Badge, Tone, Icon, Dot, FocusRing } from "theme.slint";
+import { Labels } from "labels.slint";
 
 // 상단바: 학과/학기, 버전, 저장 상태, 검색, 언어 (명세서 3.2, 그림 2)
+// 학과명은 원본 자료, 학기 표기는 앱이 만드는 문구다.
 export component TopBar inherits Rectangle {
     in property <string> department;
-    in property <string> term;
+    in property <string> term-label;
     in property <string> version;
     in property <int> language-index;
     callback language-selected(int);
 
     height: 52px;
     background: Theme.surface;
+    accessible-role: AccessibleRole.banner;
 
     HorizontalLayout {
         padding-left: 16px;
@@ -34,6 +37,7 @@ export component TopBar inherits Rectangle {
                         font-weight: 700;
                         horizontal-alignment: center;
                         vertical-alignment: center;
+                        accessible-role: AccessibleRole.none;
                     }
                 }
             }
@@ -49,10 +53,12 @@ export component TopBar inherits Rectangle {
         Rectangle { width: 16px; }
 
         Text {
-            text: root.department + "  /  " + root.term;
+            text: root.department + "  /  " + root.term-label;
             color: Theme.text;
             font-weight: 600;
             vertical-alignment: center;
+            overflow: elide;
+            min-width: 120px;
         }
         VerticalLayout {
             alignment: center;
@@ -61,26 +67,38 @@ export component TopBar inherits Rectangle {
 
         Rectangle { horizontal-stretch: 1; }
 
-        Text {
-            text: "● " + @tr("Saved");
-            color: Theme.success;
-            font-size: Theme.font-small;
-            vertical-alignment: center;
+        HorizontalLayout {
+            spacing: 6px;
+            horizontal-stretch: 0;
+            VerticalLayout {
+                alignment: center;
+                Dot { background: Theme.success; }
+            }
+            Text {
+                text: @tr("Saved");
+                color: Theme.success;
+                font-size: Theme.font-small;
+                vertical-alignment: center;
+            }
         }
         VerticalLayout {
             alignment: center;
             LineEdit {
-                width: 200px;
+                min-width: 120px;
+                preferred-width: 200px;
+                horizontal-stretch: 0;
                 placeholder-text: @tr("Search");
                 accessible-label: @tr("Search");
             }
         }
         VerticalLayout {
             alignment: center;
+            // 언어 이름은 각 언어로 표기한다 (번역하지 않음)
             ComboBox {
                 width: 110px;
                 model: ["한국어", "English"];
                 current-index: root.language-index;
+                accessible-label: @tr("Language");
                 selected(value) => {
                     root.language-selected(self.current-index);
                 }
@@ -95,46 +113,79 @@ export component TopBar inherits Rectangle {
     }
 }
 
-// 왼쪽 내비게이션 항목. compact이면 아이콘 레일로 접힌다.
-export component NavItem inherits Rectangle {
+// 왼쪽 내비게이션 항목. compact이면 아이콘 레일로 접히고, 이름은 화면 읽기 프로그램에만 남는다.
+// Tab으로 포커스, Enter·Space로 이동한다. 현재 화면은 선택된 탭으로 알린다.
+export component NavItem inherits FocusScope {
     in property <string> icon;
     in property <string> label;
     in property <bool> active;
     in property <bool> compact;
     in property <int> count: 0;
     callback clicked;
+    property <bool> keyboard-focus;
 
     height: 40px;
-    border-radius: Theme.radius;
-    background: active ? Theme.action-soft : touch.has-hover ? Theme.neutral-soft : transparent;
-    accessible-role: AccessibleRole.button;
+    accessible-role: AccessibleRole.tab;
     accessible-label: root.label;
+    accessible-description: root.count > 0 ? Labels.pending(root.count) : "";
+    accessible-item-selectable: true;
+    accessible-item-selected: root.active;
+    accessible-action-default => {
+        root.clicked();
+    }
+    key-pressed(event) => {
+        if (event.text == Key.Return || event.text == Key.Space) {
+            root.clicked();
+            return accept;
+        }
+        return reject;
+    }
+    focus-gained(reason) => {
+        root.keyboard-focus = reason == FocusReason.tab-navigation;
+    }
+    focus-lost(reason) => {
+        root.keyboard-focus = false;
+    }
 
-    HorizontalLayout {
-        padding-left: compact ? 0px : 12px;
-        padding-right: compact ? 0px : 12px;
-        spacing: 12px;
-        alignment: compact ? center : start;
-        Icon {
-            text: root.icon;
-            color: active ? Theme.action : Theme.text-muted;
-            width: 20px;
-        }
-        if !compact: Text {
-            text: root.label;
-            color: active ? Theme.action : Theme.text;
-            font-weight: active ? 700 : 400;
-            vertical-alignment: center;
-            horizontal-stretch: 1;
-        }
-        if !compact && count > 0: VerticalLayout {
-            alignment: center;
-            Badge { text: count; tone: Tone.info; }
+    Rectangle {
+        border-radius: Theme.radius;
+        background: root.active ? Theme.action-soft : touch.has-hover ? Theme.neutral-soft : transparent;
+
+        HorizontalLayout {
+            padding-left: root.compact ? 0px : 12px;
+            padding-right: root.compact ? 0px : 12px;
+            spacing: 12px;
+            alignment: root.compact ? center : start;
+            Icon {
+                text: root.icon;
+                color: root.active ? Theme.action : Theme.text-muted;
+                width: 20px;
+            }
+            if !root.compact: Text {
+                text: root.label;
+                color: root.active ? Theme.action : Theme.text;
+                font-weight: root.active ? 700 : 400;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+                accessible-role: AccessibleRole.none;
+            }
+            if !root.compact && root.count > 0: VerticalLayout {
+                alignment: center;
+                Badge { text: root.count; tone: Tone.info; accessible-role: AccessibleRole.none; }
+            }
         }
     }
 
     touch := TouchArea {
-        clicked => { root.clicked(); }
+        clicked => {
+            root.clicked();
+        }
+    }
+    if root.keyboard-focus: FocusRing {
+        x: -2px;
+        y: -2px;
+        width: root.width + 4px;
+        height: root.height + 4px;
     }
 }
 
@@ -145,15 +196,22 @@ export component StatusBar inherits Rectangle {
 
     height: 28px;
     background: #EEF1F5;
+    accessible-role: AccessibleRole.content-info;
 
     HorizontalLayout {
         padding-left: 16px;
         padding-right: 16px;
+        spacing: 6px;
+        VerticalLayout {
+            alignment: center;
+            Dot { background: Theme.success; }
+        }
         Text {
-            text: "● " + root.left-text;
+            text: root.left-text;
             color: Theme.text-muted;
             font-size: Theme.font-small;
             vertical-alignment: center;
+            overflow: elide;
         }
         Rectangle { horizontal-stretch: 1; }
         Text {
@@ -161,6 +219,7 @@ export component StatusBar inherits Rectangle {
             color: Theme.text-muted;
             font-size: Theme.font-small;
             vertical-alignment: center;
+            overflow: elide;
         }
     }
 }

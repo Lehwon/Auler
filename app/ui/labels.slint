@@ -1,0 +1,60 @@
+// 앱이 만드는 문구(요일, 상태, 단위, 사유). 원문은 영어이고 번역은 i18n/*/LC_MESSAGES/auler.po에 있다.
+// 과목명·교원명·강의실 같은 원본 자료는 여기서 다루지 않는다 (명세서 7.3).
+// Rust 쪽 문구(표의 상태 열)도 이 전역에서 읽어 같은 번역을 쓴다.
+export global Labels {
+    // 0=월 … 6=일
+    out property <[string]> weekdays: [@tr("Mon"), @tr("Tue"), @tr("Wed"), @tr("Thu"), @tr("Fri"), @tr("Sat"), @tr("Sun")];
+    out property <string> status-assigned: @tr("Assigned");
+    out property <string> status-unassigned: @tr("Unassigned");
+    out property <string> status-needs-review: @tr("Needs review");
+
+    public pure function weekday(index: int) -> string {
+        return index >= 0 && index < root.weekdays.length ? root.weekdays[index] : "";
+    }
+
+    // 배치 위치: "월 1교시", "목 3~4교시"
+    public pure function slot(day: string, start: int, span: int) -> string {
+        if (span <= 1) {
+            return @tr("{0}, period {1}", day, start + 1);
+        }
+        return @tr("{0}, periods {1}–{2}", day, start + 1, start + span);
+    }
+
+    public pure function term-label(year: int, term: int) -> string {
+        return @tr("{0}, term {1}", year, term);
+    }
+
+    public pure function draft(version: int) -> string {
+        return @tr("Draft v{0}", version);
+    }
+
+    public pure function students(n: int) -> string {
+        return @tr("{n} student" | "{n} students" % n);
+    }
+
+    public pure function periods-left(n: int) -> string {
+        return @tr("{n} period left" | "{n} periods left" % n);
+    }
+
+    public pure function affected(n: int) -> string {
+        return @tr("{n} section affected" | "{n} sections affected" % n);
+    }
+
+    public pure function pcs-short(n: int) -> string {
+        return @tr("{n} PC short" | "{n} PCs short" % n);
+    }
+
+    public pure function pending(n: int) -> string {
+        return @tr("{n} pending" | "{n} pending" % n);
+    }
+
+    // 조건 이름은 조교가 입력한 원본 자료라 번역하지 않는다.
+    public pure function soft-constraint(name: string) -> string {
+        return @tr("Soft constraint: {0}", name);
+    }
+
+    // 0 = 장비 조건을 만족하는 강의실 없음, 1 = 교원 시간 충돌
+    public pure function unassigned-reason(reason: int) -> string {
+        return reason == 0 ? @tr("No room with equipment") : @tr("Instructor time conflict");
+    }
+}

@@ -1,9 +1,10 @@
-import { Button, ComboBox, LineEdit, StandardTableView, Switch } from "std-widgets.slint";
-import { Theme, Badge, Tone, Panel, Icons, IconButton } from "theme.slint";
+import { Button, ComboBox, LineEdit, ScrollView, StandardTableView } from "std-widgets.slint";
+import { Theme, Badge, Tone, Panel, Icons, IconButton, LockSwitch } from "theme.slint";
+import { Labels } from "labels.slint";
 import { TopBar, NavItem, StatusBar } from "shell.slint";
-import { CardData, PeriodRow, TimetableGrid, UnassignedCard } from "timetable.slint";
+import { CardData, PeriodRow, UnassignedData, AltData, TimetableGrid, UnassignedCard, AlternativeRow } from "timetable.slint";
 
-export { CardData, PeriodRow }
+export { CardData, PeriodRow, UnassignedData, AltData, Labels }
 
 // 페이지 머리말: 제목, 부제, 오른쪽 행동 (주 행동은 한 개)
 component PageHeader inherits HorizontalLayout {
@@ -13,8 +14,8 @@ component PageHeader inherits HorizontalLayout {
     VerticalLayout {
         spacing: 4px;
         horizontal-stretch: 1;
-        Text { text: root.title; font-size: Theme.font-title; font-weight: 700; color: Theme.text; }
-        Text { text: root.subtitle; font-size: Theme.font-small; color: Theme.text-muted; }
+        Text { text: root.title; font-size: Theme.font-title; font-weight: 700; color: Theme.text; overflow: elide; }
+        Text { text: root.subtitle; font-size: Theme.font-small; color: Theme.text-muted; overflow: elide; }
     }
     @children
 }
@@ -23,134 +24,54 @@ component KeyValue inherits HorizontalLayout {
     in property <string> key;
     in property <string> value;
     height: 32px;
+    spacing: 8px;
     Text { text: root.key; color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; }
     Text { text: root.value; color: Theme.text; font-weight: 600; vertical-alignment: center; }
 }
 
-component AlternativeRow inherits Panel {
-    in property <string> slot;
-    in property <string> note;
-    in property <string> verdict;
-    in property <Tone> tone;
-    accessible-role: AccessibleRole.list-item;
-    accessible-label: root.slot + ", " + root.verdict + ", " + root.note;
-    HorizontalLayout {
-        padding: 10px;
-        VerticalLayout {
-            spacing: 2px;
-            horizontal-stretch: 1;
-            Text { text: root.slot; font-weight: 600; color: Theme.text; }
-            Text { text: root.note; font-size: Theme.font-small; color: Theme.text-muted; }
-        }
-        VerticalLayout {
-            alignment: start;
-            Badge { text: root.verdict; tone: root.tone; }
-        }
-    }
-}
+// 선택한 배치의 상세 정보와 대안 (그림 6 오른쪽). 넓은 화면에서는 고정 패널, 좁은 화면에서는 오버레이.
+// 내용이 길면 패널 안에서 스크롤한다.
+component DetailPanel inherits Panel {
+    in property <bool> has-selection;
+    in property <CardData> card;
+    in property <string> day-label;
+    in property <[int]> days;
+    in property <[AltData]> alternatives;
+    in property <bool> closable;
+    callback lock-toggled();
+    callback close();
 
-// S06 시간표 편성 워크벤치 축소판 (그림 6)
-component TimetablePage inherits VerticalLayout {
-    in property <[CardData]> cards;
-    in property <[string]> days;
-    in property <[PeriodRow]> periods;
-    in-out property <int> selected: 3;
+    accessible-role: AccessibleRole.complementary;
+    accessible-label: @tr("Details");
 
-    padding: 20px;
-    spacing: 14px;
-
-    PageHeader {
-        title: @tr("Timetable");
-        subtitle: @tr("Weekly workbench") + " · " + @tr("Draft") + " v3";
-        VerticalLayout { alignment: center; IconButton { icon: Icons.undo; label: @tr("Undo"); } }
-        VerticalLayout { alignment: center; IconButton { icon: Icons.redo; label: @tr("Redo"); } }
-        Button { text: @tr("Reschedule"); }
-        Button { text: @tr("Auto schedule"); primary: true; }
-        Button { text: @tr("Validate & finalize"); }
-    }
-
-    HorizontalLayout {
-        spacing: 8px;
-        ComboBox {
-            width: 140px;
-            model: [@tr("By year"), @tr("By instructor"), @tr("By room"), @tr("All")];
-        }
-        ComboBox { width: 110px; model: [@tr("Year 2")]; }
-        LineEdit { width: 200px; placeholder-text: @tr("Search courses"); }
-        Rectangle { horizontal-stretch: 1; }
-        VerticalLayout { alignment: center; Badge { text: @tr("Lock") + " 12"; } }
-        VerticalLayout { alignment: center; Badge { text: @tr("Unassigned") + " 2"; tone: Tone.warning; } }
-        VerticalLayout { alignment: center; Badge { text: @tr("Hard conflicts") + " 0"; tone: Tone.success; } }
-    }
-
-    HorizontalLayout {
-        spacing: 14px;
-        vertical-stretch: 1;
-
-        // 미배정 패널
-        Panel {
-            width: 220px;
-            VerticalLayout {
-                padding: 12px;
-                spacing: 10px;
-                HorizontalLayout {
-                    Text { text: @tr("Unassigned"); font-weight: 700; color: Theme.text; horizontal-stretch: 1; }
-                    Badge { text: "2"; tone: Tone.warning; }
+    ds := ScrollView {
+        content-width: ds.visible-width;
+        content-height: dl.preferred-height;
+        dl := VerticalLayout {
+            width: ds.visible-width;
+            padding: 14px;
+            spacing: 4px;
+            HorizontalLayout {
+                Text { text: @tr("Details"); font-weight: 700; color: Theme.text; vertical-alignment: center; horizontal-stretch: 1; }
+                if root.closable: IconButton {
+                    icon: Icons.close;
+                    label: @tr("Close");
+                    clicked => { root.close(); }
                 }
-                LineEdit { placeholder-text: @tr("Search sections"); }
-                UnassignedCard {
-                    title: "자료구조 02";
-                    detail: "CS201 · 30명";
-                    remaining: @tr("1 period left");
-                    reason: @tr("No room with equipment");
-                }
-                UnassignedCard {
-                    title: "운영체제 01";
-                    detail: "CS301 · 26명";
-                    remaining: @tr("2 periods left");
-                    reason: @tr("Instructor time conflict");
-                }
-                Rectangle { vertical-stretch: 1; }
             }
-        }
-
-        // 주간 격자
-        VerticalLayout {
-            horizontal-stretch: 1;
-            alignment: start;
-            TimetableGrid {
-                cards: root.cards;
-                days: root.days;
-                periods: root.periods;
-                selected <=> root.selected;
+            Rectangle { height: 8px; }
+            if !root.has-selection: Text {
+                text: @tr("Select a card to see its details.");
+                color: Theme.text-muted;
+                wrap: word-wrap;
             }
-        }
-
-        // 상세 패널
-        Panel {
-            width: 300px;
-            VerticalLayout {
-                padding: 14px;
+            if root.has-selection: VerticalLayout {
                 spacing: 4px;
-                Text { text: @tr("Details"); font-weight: 700; color: Theme.text; }
+                Text { text: root.card.title; font-size: 18px; font-weight: 700; color: Theme.text; overflow: elide; }
+                Text { text: root.card.detail; color: Theme.text-muted; overflow: elide; }
                 Rectangle { height: 8px; }
-                Text {
-                    text: root.selected >= 0 ? root.cards[root.selected].title : "";
-                    font-size: 18px;
-                    font-weight: 700;
-                    color: Theme.text;
-                }
-                Text {
-                    text: root.selected >= 0 ? root.cards[root.selected].detail : "";
-                    color: Theme.text-muted;
-                }
-                Rectangle { height: 8px; }
-                KeyValue {
-                    key: @tr("Placement");
-                    value: root.selected < 0 ? "" : root.days[root.cards[root.selected].day] + " "
-                        + (root.cards[root.selected].start + 1) + "–" + (root.cards[root.selected].start + root.cards[root.selected].span);
-                }
-                KeyValue { key: @tr("PCs available"); value: "30 / 28"; }
+                KeyValue { key: @tr("Placement"); value: Labels.slot(root.day-label, root.card.start, root.card.span); }
+                KeyValue { key: @tr("Students / seats"); value: root.card.students + " / " + root.card.capacity; }
                 HorizontalLayout {
                     height: 32px;
                     Text { text: @tr("Hard constraints"); color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; }
@@ -158,20 +79,177 @@ component TimetablePage inherits VerticalLayout {
                 }
                 HorizontalLayout {
                     height: 32px;
-                    Text { text: @tr("Lock"); color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; }
-                    Switch {
-                        checked: root.selected >= 0 && root.cards[root.selected].locked;
-                        accessible-label: @tr("Lock");
+                    Text { text: @tr("Lock"); color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; accessible-role: AccessibleRole.none; }
+                    VerticalLayout {
+                        alignment: center;
+                        LockSwitch {
+                            checked: root.card.locked;
+                            label: @tr("Lock");
+                            toggled => { root.lock-toggled(); }
+                        }
                     }
                 }
                 Rectangle { height: 8px; }
                 Text { text: @tr("Alternatives"); font-weight: 700; color: Theme.text; }
-                AlternativeRow { slot: "화 1~2교시"; note: "공학관 302 · 영향 0건"; verdict: @tr("Available"); tone: Tone.success; }
-                AlternativeRow { slot: "수 5~6교시"; note: "수요일 오후 회피 조건"; verdict: @tr("Soft warning"); tone: Tone.warning; }
-                AlternativeRow { slot: "목 5~6교시"; note: "PC 2대 부족"; verdict: @tr("Not allowed"); tone: Tone.danger; }
-                Rectangle { vertical-stretch: 1; }
+                for alt in root.alternatives: AlternativeRow {
+                    data: alt;
+                    day-label: Labels.weekday(root.days[alt.day]);
+                }
             }
         }
+    }
+}
+
+// S06 시간표 편성 워크벤치 축소판 (그림 6)
+component TimetablePage inherits Rectangle {
+    in property <[CardData]> cards;
+    in property <[int]> days;
+    in property <[PeriodRow]> periods;
+    in property <[UnassignedData]> unassigned;
+    in property <[AltData]> alternatives;
+    in property <int> locked-count;
+    in property <int> unassigned-count;
+    in property <int> conflict-count;
+    in property <bool> can-undo;
+    in property <bool> can-redo;
+    in-out property <int> selected: -1;
+    callback lock-toggled(int);
+    callback move-card(int, int, int) -> bool;
+    pure callback can-move(int, int, int) -> bool;
+    callback undo();
+    callback redo();
+
+    // 명세서 3.2: 좁은 화면(125~150% 배율 등)에서는 상세 패널을 오버레이로 바꾼다.
+    // 페이지 폭은 레이아웃이 정하므로 여기서 재면 순환이 생긴다. 창 폭으로 정해서 받는다.
+    in property <bool> compact;
+    in-out property <bool> detail-open;
+    property <bool> has-selection: root.selected >= 0 && root.selected < root.cards.length;
+    property <string> selected-day: root.has-selection ? Labels.weekday(root.days[root.cards[root.selected].day]) : "";
+
+    VerticalLayout {
+        padding: 20px;
+        spacing: 14px;
+
+        PageHeader {
+            title: @tr("Timetable");
+            subtitle: @tr("Weekly workbench") + " · " + Labels.draft(3);
+            VerticalLayout { alignment: center; IconButton { icon: Icons.undo; label: @tr("Undo"); enabled: root.can-undo; clicked => { root.undo(); } } }
+            VerticalLayout { alignment: center; IconButton { icon: Icons.redo; label: @tr("Redo"); enabled: root.can-redo; clicked => { root.redo(); } } }
+            Button { text: @tr("Reschedule"); }
+            Button { text: @tr("Auto schedule"); primary: true; }
+            Button { text: @tr("Validate & finalize"); }
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            ComboBox {
+                width: 140px;
+                model: [@tr("By year"), @tr("By instructor"), @tr("By room"), @tr("All")];
+                accessible-label: @tr("View");
+            }
+            ComboBox {
+                width: 110px;
+                model: [@tr("Year 2")];
+                accessible-label: @tr("Year");
+            }
+            LineEdit {
+                min-width: 120px;
+                preferred-width: 200px;
+                horizontal-stretch: 0;
+                placeholder-text: @tr("Search courses");
+                accessible-label: @tr("Search courses");
+            }
+            Rectangle { horizontal-stretch: 1; }
+            VerticalLayout { alignment: center; Badge { text: @tr("Lock") + " " + root.locked-count; } }
+            VerticalLayout { alignment: center; Badge { text: @tr("Unassigned") + " " + root.unassigned-count; tone: Tone.warning; } }
+            VerticalLayout {
+                alignment: center;
+                Badge { text: @tr("Hard conflicts") + " " + root.conflict-count; tone: root.conflict-count == 0 ? Tone.success : Tone.danger; }
+            }
+            if root.compact: Button {
+                text: @tr("Details");
+                checkable: true;
+                checked: root.detail-open;
+                clicked => { root.detail-open = !root.detail-open; }
+            }
+        }
+
+        content := HorizontalLayout {
+            spacing: 14px;
+            vertical-stretch: 1;
+
+            // 미배정 패널
+            Panel {
+                width: root.compact ? 196px : 220px;
+                VerticalLayout {
+                    padding: 12px;
+                    spacing: 10px;
+                    HorizontalLayout {
+                        Text { text: @tr("Unassigned"); font-weight: 700; color: Theme.text; horizontal-stretch: 1; vertical-alignment: center; }
+                        Badge { text: root.unassigned-count; tone: Tone.warning; }
+                    }
+                    LineEdit { placeholder-text: @tr("Search sections"); accessible-label: @tr("Search sections"); }
+                    us := ScrollView {
+                        vertical-stretch: 1;
+                        content-width: us.visible-width;
+                        content-height: ul.preferred-height;
+                        ul := VerticalLayout {
+                            width: us.visible-width;
+                            spacing: 10px;
+                            for u in root.unassigned: UnassignedCard { data: u; }
+                        }
+                    }
+                }
+            }
+
+            // 주간 격자: 좁거나 낮은 창에서는 이 영역만 스크롤한다
+            gs := ScrollView {
+                horizontal-stretch: 1;
+                content-width: grid.width;
+                content-height: grid.height;
+                grid := TimetableGrid {
+                    width: max(grid.min-grid-width, gs.visible-width);
+                    cards: root.cards;
+                    days: root.days;
+                    periods: root.periods;
+                    selected <=> root.selected;
+                    activated(i) => {
+                        if (root.compact) {
+                            root.detail-open = true;
+                        }
+                    }
+                    move-card(i, d, s) => { return root.move-card(i, d, s); }
+                    can-move(i, d, s) => { return root.can-move(i, d, s); }
+                }
+            }
+
+            if !root.compact: DetailPanel {
+                width: 300px;
+                has-selection: root.has-selection;
+                card: root.has-selection ? root.cards[root.selected] : root.cards[0];
+                day-label: root.selected-day;
+                days: root.days;
+                alternatives: root.alternatives;
+                lock-toggled => { root.lock-toggled(root.selected); }
+            }
+        }
+    }
+
+    if root.compact && root.detail-open: DetailPanel {
+        x: root.width - self.width - 20px;
+        y: content.y;
+        width: 320px;
+        height: content.height;
+        drop-shadow-blur: 16px;
+        drop-shadow-color: #0000002e;
+        closable: true;
+        has-selection: root.has-selection;
+        card: root.has-selection ? root.cards[root.selected] : root.cards[0];
+        day-label: root.selected-day;
+        days: root.days;
+        alternatives: root.alternatives;
+        lock-toggled => { root.lock-toggled(root.selected); }
+        close => { root.detail-open = false; }
     }
 }
 
@@ -189,12 +267,19 @@ component DataPage inherits VerticalLayout {
     }
     HorizontalLayout {
         spacing: 8px;
-        LineEdit { width: 260px; placeholder-text: @tr("Search by course name or code"); }
+        LineEdit {
+            min-width: 160px;
+            preferred-width: 260px;
+            horizontal-stretch: 0;
+            placeholder-text: @tr("Search by course name or code");
+            accessible-label: @tr("Search by course name or code");
+        }
         Rectangle { horizontal-stretch: 1; }
         Text { text: @tr("Total") + " " + root.rows.length; color: Theme.text-muted; vertical-alignment: center; }
     }
     StandardTableView {
         vertical-stretch: 1;
+        accessible-label: @tr("Sections");
         columns: [
             { title: @tr("Code") },
             { title: @tr("Section") },
@@ -224,19 +309,46 @@ export component AppWindow inherits Window {
     default-font-family: Theme.font-family;
     default-font-size: Theme.font-body;
 
+    in property <string> department;
+    in property <int> year;
+    in property <int> term;
     in property <[CardData]> cards;
-    in property <[string]> days;
+    in property <[int]> days;
     in property <[PeriodRow]> periods;
     in property <[[StandardListViewItem]]> rows;
+    in property <[UnassignedData]> unassigned;
+    in property <[AltData]> alternatives;
+    in property <int> locked-count;
+    in property <int> unassigned-count;
+    in property <int> conflict-count;
+    in property <bool> can-undo;
+    in property <bool> can-redo;
     in-out property <int> page: 3;
     in-out property <int> language-index: 0;
+    in-out property <int> selected: 3;
     callback language-selected(int);
+    callback lock-toggled(int);
+    callback move-card(int, int, int) -> bool;
+    pure callback can-move(int, int, int) -> bool;
+    callback undo();
+    callback redo();
 
-    VerticalLayout {
+    // 창 폭이 이보다 좁으면 시간표 상세 패널을 오버레이로 바꾼다 (내비 레일 56 + 페이지 1180).
+    // 레이아웃이 창 크기 제약에 쓰이므로 바인딩이 아니라 폭이 바뀔 때 값을 정한다(순환 방지).
+    out property <bool> compact-timetable;
+    changed width => {
+        root.compact-timetable = root.width < 1236px;
+    }
+
+    // 테스트용: 현재 화면 레이아웃의 최소 크기. 창 최소 크기(1024×640) 이하여야 잘리지 않는다.
+    out property <length> layout-min-width: root-layout.min-width;
+    out property <length> layout-min-height: root-layout.min-height;
+
+    root-layout := VerticalLayout {
         TopBar {
-            department: "컴퓨터공학과";
-            term: "2027학년도 1학기";
-            version: @tr("Draft") + " v3";
+            department: root.department;
+            term-label: Labels.term-label(root.year, root.term);
+            version: Labels.draft(3);
             language-index: root.language-index;
             language-selected(index) => { root.language-selected(index); }
         }
@@ -246,6 +358,8 @@ export component AppWindow inherits Window {
 
             Rectangle {
                 width: root.page == 3 ? 56px : 208px;
+                accessible-role: AccessibleRole.tab-list;
+                accessible-label: @tr("Main menu");
                 VerticalLayout {
                     padding: 8px;
                     spacing: 4px;
@@ -270,6 +384,20 @@ export component AppWindow inherits Window {
                 cards: root.cards;
                 days: root.days;
                 periods: root.periods;
+                unassigned: root.unassigned;
+                alternatives: root.alternatives;
+                locked-count: root.locked-count;
+                unassigned-count: root.unassigned-count;
+                conflict-count: root.conflict-count;
+                can-undo: root.can-undo;
+                can-redo: root.can-redo;
+                compact: root.compact-timetable;
+                selected <=> root.selected;
+                lock-toggled(i) => { root.lock-toggled(i); }
+                move-card(i, d, s) => { return root.move-card(i, d, s); }
+                can-move(i, d, s) => { return root.can-move(i, d, s); }
+                undo => { root.undo(); }
+                redo => { root.redo(); }
             }
             if root.page == 1: DataPage {
                 horizontal-stretch: 1;

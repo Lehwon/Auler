@@ -434,6 +434,8 @@ dependencies = [
 name = "auler"
 version = "0.1.0"
 dependencies = [
+ "i-slint-backend-testing",
+ "png",
  "slint",
  "slint-build",
  "sys-locale",

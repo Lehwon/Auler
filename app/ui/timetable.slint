@@ -1,13 +1,17 @@
-import { Theme, Badge, Tone, Panel, Icon, Icons } from "theme.slint";
+import { Theme, Badge, Tone, Panel, Icon, Icons, FocusRing } from "theme.slint";
+import { Labels } from "labels.slint";
 
+// title·detail은 원본 자료(과목명, 교원 · 강의실)라 번역하지 않는다.
 export struct CardData {
     title: string,
     detail: string,
-    day: int,
-    start: int,
-    span: int,
+    day: int,       // 요일 열 (0부터)
+    start: int,     // 시작 교시 (0부터)
+    span: int,      // 연속 교시 수
     hue: int,
     locked: bool,
+    students: int,
+    capacity: int,
 }
 
 export struct PeriodRow {
@@ -15,109 +19,253 @@ export struct PeriodRow {
     time: string,
 }
 
-// 시간표 격자의 강의 카드 (그림 6)
-component CourseCard inherits Rectangle {
-    in property <CardData> data;
-    in property <bool> selected;
-    callback clicked;
+export struct UnassignedData {
+    title: string,
+    code: string,
+    students: int,
+    remaining: int,
+    reason: int,
+}
 
-    property <color> accent: data.hue == 0 ? #3B6FD1 : data.hue == 1 ? #3E8E5A : data.hue == 2 ? #8A63C7 : #D08A2E;
-    property <color> fill: data.hue == 0 ? #E3ECFA : data.hue == 1 ? #E3F1E7 : data.hue == 2 ? #EEE6F8 : #FCEFD9;
+// verdict: 0 = 가능, 1 = 선호 경고, 2 = 불가
+export struct AltData {
+    day: int,
+    start: int,
+    span: int,
+    room: string,
+    verdict: int,
+    affected: int,
+    constraint: string,
+    shortage: int,
+}
 
-    background: fill;
-    border-radius: 4px;
-    border-width: selected ? 2px : 0px;
-    border-color: Theme.action;
-    clip: true;
-    accessible-role: AccessibleRole.button;
-    accessible-label: data.title + ", " + data.detail + (data.locked ? ", " + @tr("Locked") : "");
-
-    Rectangle {
-        x: 0;
-        width: 3px;
-        background: root.accent;
+// 잠금 표시: 자물쇠 아이콘과 '잠김' 텍스트를 함께 쓴다 (UI-STATE-04)
+component LockLabel inherits HorizontalLayout {
+    spacing: 2px;
+    horizontal-stretch: 0;
+    alignment: start;
+    Icon {
+        text: Icons.lock;
+        font-size: 11px;
+        color: Theme.text-muted;
     }
-
-    VerticalLayout {
-        alignment: start;
-        padding-left: 10px;
-        padding-right: 6px;
-        padding-top: 4px;
-        spacing: 0px;
-        Text {
-            text: data.title;
-            font-weight: 600;
-            color: Theme.text;
-            overflow: elide;
-        }
-        Text {
-            text: data.detail;
-            font-size: Theme.font-small;
-            color: Theme.text-muted;
-            overflow: elide;
-        }
-        // 잠금은 자물쇠 아이콘과 '잠김' 텍스트를 함께 표시한다 (UI-STATE-04)
-        if data.locked: HorizontalLayout {
-            alignment: start;
-            spacing: 3px;
-            Icon {
-                text: Icons.lock;
-                font-size: 11px;
-                color: Theme.text-muted;
-            }
-            Text {
-                text: @tr("Locked");
-                font-size: Theme.font-small;
-                color: Theme.text-muted;
-            }
-        }
-    }
-
-    TouchArea {
-        clicked => { root.clicked(); }
+    Text {
+        text: @tr("Locked");
+        font-size: Theme.font-small;
+        color: Theme.text-muted;
+        vertical-alignment: center;
+        accessible-role: AccessibleRole.none;
     }
 }
 
-// 주간 격자: 열은 학기 설정의 요일, 행은 실제 교시와 시작 시각
+// 시간표 격자의 강의 카드 (그림 6).
+// 마우스: 클릭으로 선택, 끌어서 이동. 키보드: Tab 포커스, Enter·Space 선택, Ctrl+화살표 이동, 끄는 중 Escape 취소.
+// 끌기와 키보드 이동은 같은 move-card 검사를 거친다 (명세서 7.2, AC-05).
+component CourseCard inherits FocusScope {
+    in property <CardData> data;
+    in property <string> day-label;
+    in property <bool> selected;
+    in property <bool> dragging;
+    in property <int> index;
+    in property <int> count;
+    callback activated();
+    callback move-by(int, int);
+    callback drag-moved(length, length);
+    callback drag-ended(bool);
+
+    property <bool> keyboard-focus;
+    property <bool> drag-started;
+    property <bool> drag-cancelled;
+    property <color> accent: data.hue == 0 ? #3B6FD1 : data.hue == 1 ? #3E8E5A : data.hue == 2 ? #8A63C7 : #D08A2E;
+    property <color> fill: data.hue == 0 ? #E3ECFA : data.hue == 1 ? #E3F1E7 : data.hue == 2 ? #EEE6F8 : #FCEFD9;
+
+    accessible-role: AccessibleRole.list-item;
+    accessible-label: data.title + ", " + data.detail + ", " + Labels.slot(root.day-label, data.start, data.span) + (data.locked ? ", " + @tr("Locked") : "");
+    accessible-item-selectable: true;
+    accessible-item-selected: root.selected;
+    accessible-item-index: root.index;
+    accessible-item-count: root.count;
+    accessible-action-default => {
+        root.activated();
+    }
+
+    focus-gained(reason) => {
+        root.keyboard-focus = reason == FocusReason.tab-navigation;
+    }
+    focus-lost(reason) => {
+        root.keyboard-focus = false;
+    }
+    key-pressed(event) => {
+        if (event.text == Key.Escape && root.dragging) {
+            root.drag-cancelled = true;
+            root.drag-ended(true);
+            return accept;
+        }
+        if (event.text == Key.Return || event.text == Key.Space) {
+            root.activated();
+            return accept;
+        }
+        if (event.modifiers.control) {
+            if (event.text == Key.LeftArrow) {
+                root.move-by(-1, 0);
+                return accept;
+            }
+            if (event.text == Key.RightArrow) {
+                root.move-by(1, 0);
+                return accept;
+            }
+            if (event.text == Key.UpArrow) {
+                root.move-by(0, -1);
+                return accept;
+            }
+            if (event.text == Key.DownArrow) {
+                root.move-by(0, 1);
+                return accept;
+            }
+        }
+        return reject;
+    }
+
+    Rectangle {
+        background: root.fill;
+        border-radius: 4px;
+        clip: true;
+        opacity: root.dragging ? 0.55 : 1;
+
+        Rectangle {
+            x: 0;
+            width: 3px;
+            background: root.accent;
+        }
+
+        // 1교시 카드(높이 54px): [제목 … 잠김] / [교원 · 강의실] 두 줄.
+        // 연강 카드: 제목을 다 보이도록 잠김을 셋째 줄에 둔다.
+        VerticalLayout {
+            alignment: start;
+            padding-left: 10px;
+            padding-right: 6px;
+            padding-top: 5px;
+            spacing: 1px;
+            HorizontalLayout {
+                spacing: 4px;
+                Text {
+                    text: data.title;
+                    font-weight: 600;
+                    color: Theme.text;
+                    overflow: elide;
+                    horizontal-stretch: 1;
+                    accessible-role: AccessibleRole.none;
+                }
+                if data.locked && data.span <= 1: LockLabel { }
+            }
+            Text {
+                text: data.detail;
+                font-size: Theme.font-small;
+                color: Theme.text-muted;
+                overflow: elide;
+                accessible-role: AccessibleRole.none;
+            }
+            if data.locked && data.span > 1: LockLabel { }
+        }
+    }
+
+    touch := TouchArea {
+        pointer-event(event) => {
+            if (event.button == PointerEventButton.left) {
+                if (event.kind == PointerEventKind.down) {
+                    root.drag-started = false;
+                    root.drag-cancelled = false;
+                    root.focus();
+                } else if (event.kind == PointerEventKind.up) {
+                    if (root.drag-started && !root.drag-cancelled) {
+                        root.drag-ended(false);
+                    }
+                    root.drag-started = false;
+                }
+            }
+        }
+        moved => {
+            if (self.pressed && !root.drag-cancelled) {
+                if (root.drag-started || abs(self.mouse-x - self.pressed-x) > 4px || abs(self.mouse-y - self.pressed-y) > 4px) {
+                    root.drag-started = true;
+                    root.drag-moved(self.mouse-x - self.pressed-x, self.mouse-y - self.pressed-y);
+                }
+            }
+        }
+        clicked => {
+            root.activated();
+        }
+    }
+
+    // 선택 테두리와 포커스 링은 왼쪽 색 막대 위에 그린다.
+    if root.selected: Rectangle {
+        border-radius: 4px;
+        border-width: 2px;
+        border-color: Theme.action;
+    }
+    if root.keyboard-focus: FocusRing {
+        x: -3px;
+        y: -3px;
+        width: root.width + 6px;
+        height: root.height + 6px;
+    }
+}
+
+// 주간 격자: 열은 학기 설정의 요일, 행은 실제 교시와 시작 시각.
+// 교시가 많거나 창이 좁으면 바깥의 ScrollView가 스크롤한다 (명세서 3.2: 가로 스크롤은 격자·표에 한정).
 export component TimetableGrid inherits Panel {
     in property <[CardData]> cards;
-    in property <[string]> days;
+    in property <[int]> days;        // 요일 번호 (0=월 … 6=일)
     in property <[PeriodRow]> periods;
     in-out property <int> selected: -1;
+    callback activated(int);
+    callback move-card(int, int, int) -> bool;
+    pure callback can-move(int, int, int) -> bool;
 
     property <length> header-h: 36px;
     property <length> period-w: 64px;
     property <length> row-h: 60px;
     property <length> col-w: (root.width - root.period-w) / max(1, root.days.length);
+    // 요일 열이 이보다 좁아지면 스크롤한다
+    out property <length> min-grid-width: root.period-w + root.days.length * 88px;
 
-    min-width: 520px;
+    // 끄는 중인 카드와 놓일 자리
+    property <int> drag-index: -1;
+    property <length> drag-dx;
+    property <length> drag-dy;
+    property <int> drag-day: root.drag-index >= 0 ? root.cards[root.drag-index].day + round(root.drag-dx / root.col-w) : 0;
+    property <int> drag-start: root.drag-index >= 0 ? root.cards[root.drag-index].start + round(root.drag-dy / root.row-h) : 0;
+    property <bool> drag-valid: root.drag-index >= 0 && root.can-move(root.drag-index, root.drag-day, root.drag-start);
+
     height: root.header-h + root.periods.length * root.row-h;
     clip: true;
-    accessible-role: AccessibleRole.table;
+    accessible-role: AccessibleRole.list;
     accessible-label: @tr("Weekly timetable");
+    accessible-item-count: root.cards.length;
 
-    // 머리글 배경
+    // 머리글 배경: 테두리 안쪽에 두고 위쪽 모서리만 둥글게
     Rectangle {
-        y: 0;
-        height: root.header-h;
+        x: 1px;
+        y: 1px;
+        width: root.width - 2px;
+        height: root.header-h - 1px;
         background: #F3F5F8;
-        border-radius: Theme.radius;
+        border-top-left-radius: Theme.radius - 1px;
+        border-top-right-radius: Theme.radius - 1px;
     }
 
-    // 가로 줄
     for p[i] in root.periods: Rectangle {
-        x: 0;
+        x: 1px;
         y: root.header-h + i * root.row-h;
-        width: root.width;
+        width: root.width - 2px;
         height: 1px;
         background: Theme.border;
     }
-    // 세로 줄
     for d[i] in root.days: Rectangle {
         x: root.period-w + i * root.col-w;
-        y: 0;
+        y: 1px;
         width: 1px;
-        height: root.height;
+        height: root.height - 2px;
         background: Theme.border;
     }
 
@@ -137,7 +285,7 @@ export component TimetableGrid inherits Panel {
         y: 0;
         width: root.col-w;
         height: root.header-h;
-        text: d;
+        text: Labels.weekday(d);
         font-weight: 600;
         color: Theme.text;
         horizontal-alignment: center;
@@ -169,30 +317,96 @@ export component TimetableGrid inherits Panel {
         width: root.col-w - 6px;
         height: c.span * root.row-h - 6px;
         data: c;
+        index: i;
+        count: root.cards.length;
+        day-label: Labels.weekday(root.days[c.day]);
         selected: i == root.selected;
-        clicked => { root.selected = i; }
+        dragging: i == root.drag-index;
+        activated => {
+            root.selected = i;
+            root.activated(i);
+        }
+        move-by(dd, ds) => {
+            if (root.move-card(i, c.day + dd, c.start + ds)) {
+                root.selected = i;
+            }
+        }
+        drag-moved(dx, dy) => {
+            root.drag-index = i;
+            root.drag-dx = dx;
+            root.drag-dy = dy;
+        }
+        drag-ended(cancelled) => {
+            if (root.drag-index == i && !cancelled) {
+                if (root.move-card(i, root.drag-day, root.drag-start)) {
+                    root.selected = i;
+                }
+            }
+            root.drag-index = -1;
+        }
+    }
+
+    // 놓일 자리: 가능하면 파란 테두리, 불가하면 빨간 테두리
+    if root.drag-index >= 0: Rectangle {
+        x: root.period-w + root.drag-day * root.col-w + 3px;
+        y: root.header-h + root.drag-start * root.row-h + 3px;
+        width: root.col-w - 6px;
+        height: root.cards[root.drag-index].span * root.row-h - 6px;
+        border-radius: 4px;
+        border-width: 2px;
+        border-color: root.drag-valid ? Theme.action : Theme.danger;
+        background: root.drag-valid ? #2456A61A : #B423181A;
     }
 }
 
 // 미배정 분반 카드 (그림 6 왼쪽)
 export component UnassignedCard inherits Panel {
-    in property <string> title;
-    in property <string> detail;
-    in property <string> remaining;
-    in property <string> reason;
+    in property <UnassignedData> data;
     accessible-role: AccessibleRole.list-item;
-    accessible-label: root.title + ", " + root.reason;
+    accessible-label: data.title + ", " + data.code + ", " + Labels.students(data.students) + ", " + Labels.periods-left(data.remaining) + ", " + Labels.unassigned-reason(data.reason);
 
     VerticalLayout {
         padding: 12px;
         spacing: 6px;
-        Text { text: root.title; font-size: 15px; font-weight: 700; color: Theme.text; }
-        Text { text: root.detail; font-size: Theme.font-small; color: Theme.text-muted; }
+        Text { text: data.title; font-size: 15px; font-weight: 700; color: Theme.text; accessible-role: AccessibleRole.none; }
+        Text { text: data.code + " · " + Labels.students(data.students); font-size: Theme.font-small; color: Theme.text-muted; accessible-role: AccessibleRole.none; }
         Rectangle { height: 1px; background: Theme.border; }
-        Text { text: root.remaining; font-size: Theme.font-small; color: Theme.text-muted; }
+        Text { text: Labels.periods-left(data.remaining); font-size: Theme.font-small; color: Theme.text-muted; accessible-role: AccessibleRole.none; }
         HorizontalLayout {
             alignment: start;
-            Badge { text: root.reason; tone: Tone.warning; }
+            Badge { text: Labels.unassigned-reason(data.reason); tone: Tone.warning; accessible-role: AccessibleRole.none; }
+        }
+    }
+}
+
+// 대안 배치 한 줄 (그림 6 오른쪽)
+export component AlternativeRow inherits Panel {
+    in property <AltData> data;
+    in property <string> day-label;
+    property <string> slot: Labels.slot(root.day-label, data.start, data.span);
+    property <string> verdict: data.verdict == 0 ? @tr("Available") : data.verdict == 1 ? @tr("Soft warning") : @tr("Not allowed");
+    property <string> note: data.verdict == 0 ? data.room + " · " + Labels.affected(data.affected)
+        : data.verdict == 1 ? Labels.soft-constraint(data.constraint)
+        : Labels.pcs-short(data.shortage);
+
+    accessible-role: AccessibleRole.list-item;
+    accessible-label: root.slot + ", " + root.verdict + ", " + root.note;
+
+    HorizontalLayout {
+        padding: 10px;
+        VerticalLayout {
+            spacing: 2px;
+            horizontal-stretch: 1;
+            Text { text: root.slot; font-weight: 600; color: Theme.text; accessible-role: AccessibleRole.none; }
+            Text { text: root.note; font-size: Theme.font-small; color: Theme.text-muted; overflow: elide; accessible-role: AccessibleRole.none; }
+        }
+        VerticalLayout {
+            alignment: start;
+            Badge {
+                text: root.verdict;
+                tone: data.verdict == 0 ? Tone.success : data.verdict == 1 ? Tone.warning : Tone.danger;
+                accessible-role: AccessibleRole.none;
+            }
         }
     }
 }
