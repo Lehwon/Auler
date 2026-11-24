@@ -1,0 +1,19 @@
+[package]
+name = "auler-store"
+description = "Auler 작업공간 저장소: SQLite 스키마·마이그레이션, 단일 쓰기 스레드, 변경 이력, 확정본"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+auler-domain.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+# SQLite를 함께 빌드해 시스템 라이브러리에 기대지 않는다.
+rusqlite = { version = "0.43.0", features = ["bundled"] }
+
+[dev-dependencies]
+auler-samples.workspace = true
+rusqlite = { version = "0.43.0", features = ["bundled"] }
