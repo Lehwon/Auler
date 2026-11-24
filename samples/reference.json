@@ -1,0 +1,1797 @@
+{
+  "schema": "auler.input.v1",
+  "term": {
+    "year": 2027,
+    "season": "1"
+  },
+  "setup": {
+    "start": "2027-03-02",
+    "end": "2027-06-15",
+    "days": [
+      "mon",
+      "tue",
+      "wed",
+      "thu",
+      "fri"
+    ],
+    "periods": [
+      {
+        "label": "1",
+        "start": "09:00",
+        "end": "09:50"
+      },
+      {
+        "label": "2",
+        "start": "10:00",
+        "end": "10:50"
+      },
+      {
+        "label": "3",
+        "start": "11:00",
+        "end": "11:50"
+      },
+      {
+        "label": "4",
+        "start": "12:00",
+        "end": "12:50"
+      },
+      {
+        "label": "5",
+        "start": "13:00",
+        "end": "13:50"
+      },
+      {
+        "label": "6",
+        "start": "14:00",
+        "end": "14:50"
+      },
+      {
+        "label": "7",
+        "start": "15:00",
+        "end": "15:50"
+      },
+      {
+        "label": "8",
+        "start": "16:00",
+        "end": "16:50"
+      },
+      {
+        "label": "9",
+        "start": "17:00",
+        "end": "17:50"
+      }
+    ],
+    "rules": {
+      "required_course_overlap": "hard",
+      "block_may_cross_break": false,
+      "room_turnaround_minutes": 0
+    }
+  },
+  "equipment": [
+    {
+      "code": "PC",
+      "name": "실습용 PC",
+      "scope": "per_person"
+    },
+    {
+      "code": "KIT",
+      "name": "임베디드 실습 키트",
+      "scope": "per_person"
+    },
+    {
+      "code": "BEAM",
+      "name": "빔프로젝터",
+      "scope": "per_room"
+    }
+  ],
+  "rooms": [
+    {
+      "building": "공학관",
+      "number": "301",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 30,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 30,
+          "available": 26
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "302",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 32,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 32,
+          "available": 30
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "305",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 36,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 36
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "본관",
+      "number": "201",
+      "kind": "lab",
+      "department": "교무처 학사지원팀",
+      "total_seats": 35,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 32
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "shared": true,
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "201",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "202",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "203",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 45,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "401",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 90,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 2
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "402",
+      "kind": "seminar",
+      "department": "공과대학 행정실",
+      "total_seats": 24,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "403",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 40,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1,
+          "available": 0
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "공학관",
+      "number": "B101",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 24,
+      "equipment": [
+        {
+          "code": "KIT",
+          "owned": 24
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "info_source": "시설팀 2027-1 강의실 현황"
+    },
+    {
+      "building": "본관",
+      "number": "305",
+      "kind": "lecture",
+      "department": "교무처 학사지원팀",
+      "total_seats": 50,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ],
+      "shared": true,
+      "schedule_checked": "2027-02-20",
+      "info_source": "시설팀 2027-1 강의실 현황"
+    }
+  ],
+  "instructors": [
+    {
+      "code": "P01",
+      "name": "김민수",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P02",
+      "name": "이서연",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P03",
+      "name": "박지훈",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P04",
+      "name": "최유진",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P05",
+      "name": "정현우",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P06",
+      "name": "강수빈",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P07",
+      "name": "조민재",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P08",
+      "name": "윤하은",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P09",
+      "name": "장도윤",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P10",
+      "name": "임서준",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P11",
+      "name": "한지민",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P12",
+      "name": "오승현",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P13",
+      "name": "서예린",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P14",
+      "name": "신동혁",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P15",
+      "name": "권나연",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P16",
+      "name": "황재원",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P17",
+      "name": "안소희",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P18",
+      "name": "송태민",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P19",
+      "name": "전하린",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P20",
+      "name": "홍성민",
+      "department": "수학과"
+    },
+    {
+      "code": "P21",
+      "name": "김민수",
+      "department": "수학과"
+    },
+    {
+      "code": "P22",
+      "name": "유채원",
+      "department": "외부 겸임"
+    },
+    {
+      "code": "P23",
+      "name": "고준영",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P24",
+      "name": "문다인",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P25",
+      "name": "양시우",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P26",
+      "name": "배지호",
+      "department": "컴퓨터공학과"
+    },
+    {
+      "code": "P27",
+      "name": "백수아",
+      "department": "교양학부"
+    },
+    {
+      "code": "P28",
+      "name": "허건우",
+      "department": "컴퓨터공학과"
+    }
+  ],
+  "groups": [
+    {
+      "code": "Y1A",
+      "name": "1학년 A반",
+      "grade": 1
+    },
+    {
+      "code": "Y1B",
+      "name": "1학년 B반",
+      "grade": 1
+    },
+    {
+      "code": "Y2A",
+      "name": "2학년 A반",
+      "grade": 2
+    },
+    {
+      "code": "Y2B",
+      "name": "2학년 B반",
+      "grade": 2
+    },
+    {
+      "code": "Y3",
+      "name": "3학년",
+      "grade": 3
+    },
+    {
+      "code": "Y4",
+      "name": "4학년",
+      "grade": 4
+    }
+  ],
+  "courses": [
+    {
+      "code": "CSE1001",
+      "name": "컴퓨터공학개론"
+    },
+    {
+      "code": "CSE1002",
+      "name": "프로그래밍기초"
+    },
+    {
+      "code": "MTH1001",
+      "name": "미적분학"
+    },
+    {
+      "code": "CSE1003",
+      "name": "이산수학"
+    },
+    {
+      "code": "CSE2010",
+      "name": "자료구조"
+    },
+    {
+      "code": "CSE2020",
+      "name": "객체지향프로그래밍"
+    },
+    {
+      "code": "CSE2030",
+      "name": "컴퓨터구조"
+    },
+    {
+      "code": "CSE2040",
+      "name": "디지털논리회로"
+    },
+    {
+      "code": "CSE2050",
+      "name": "확률과통계"
+    },
+    {
+      "code": "ENG2001",
+      "name": "공학영어"
+    },
+    {
+      "code": "CSE3010",
+      "name": "운영체제"
+    },
+    {
+      "code": "CSE3020",
+      "name": "알고리즘"
+    },
+    {
+      "code": "CSE3030",
+      "name": "데이터베이스"
+    },
+    {
+      "code": "CSE3040",
+      "name": "컴퓨터네트워크"
+    },
+    {
+      "code": "CSE3050",
+      "name": "소프트웨어공학"
+    },
+    {
+      "code": "CSE3060",
+      "name": "인공지능"
+    },
+    {
+      "code": "CSE3070",
+      "name": "웹프로그래밍"
+    },
+    {
+      "code": "CSE3080",
+      "name": "컴파일러"
+    },
+    {
+      "code": "GEN3001",
+      "name": "공학윤리"
+    },
+    {
+      "code": "CSE4010",
+      "name": "캡스톤디자인"
+    },
+    {
+      "code": "CSE4020",
+      "name": "정보보호"
+    },
+    {
+      "code": "CSE4030",
+      "name": "기계학습"
+    },
+    {
+      "code": "CSE4040",
+      "name": "클라우드컴퓨팅"
+    },
+    {
+      "code": "CSE4050",
+      "name": "졸업세미나"
+    },
+    {
+      "code": "CSE4060",
+      "name": "모바일프로그래밍"
+    },
+    {
+      "code": "CSE4070",
+      "name": "컴퓨터그래픽스"
+    },
+    {
+      "code": "CSE4080",
+      "name": "분산시스템"
+    }
+  ],
+  "sections": [
+    {
+      "course": "CSE1001",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P01"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 55,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE1001",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P02"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 55,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE1002",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P04"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE1002",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P05"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "MTH1001",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P21"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 55,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "MTH1001",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P20"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 55,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE1003",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P06"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 55,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE1003",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P07"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 55,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE2010",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P03"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A",
+          "required": true
+        }
+      ],
+      "enrollment": 28,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE2010",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P08"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B",
+          "required": true
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE2010",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "P09"
+        }
+      ],
+      "enrollment": 20,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE2020",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P09"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A",
+          "required": true
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE2020",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P10"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B",
+          "required": true
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE2030",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P11"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A",
+          "required": true
+        }
+      ],
+      "enrollment": 50,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CSE2030",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P11"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B",
+          "required": true
+        }
+      ],
+      "enrollment": 50,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CSE2040",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P12"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 24,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE2040",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P12"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 24,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE2050",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P20"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        },
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 80,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "ENG2001",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P22"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "ENG2001",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P22"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CSE3010",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P13"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3",
+          "required": true
+        }
+      ],
+      "enrollment": 45,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE3010",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P14"
+        }
+      ],
+      "enrollment": 30,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE3020",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P15"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3",
+          "required": true
+        }
+      ],
+      "enrollment": 45,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE3030",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P16"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3"
+        }
+      ],
+      "enrollment": 40,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE3030",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P16"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE3040",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P17"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3"
+        }
+      ],
+      "enrollment": 40,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "BEAM",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE3050",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P18"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3",
+          "required": true
+        }
+      ],
+      "enrollment": 45,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CSE3060",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P19"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3"
+        },
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 40,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE3060",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P19"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE3070",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P23"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE3080",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P24"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3"
+        }
+      ],
+      "enrollment": 35,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "GEN3001",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P27"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3"
+        },
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 85,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CSE4010",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P01"
+        },
+        {
+          "code": "P05"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 20,
+      "kind": "mixed",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE4010",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "P25"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 20,
+      "kind": "mixed",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE4010",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "P26"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 20,
+      "kind": "mixed",
+      "room_kind": "seminar",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CSE4020",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P28"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 40,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE4030",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P02"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 40,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE4040",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P23"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE4050",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P18"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4",
+          "required": true
+        }
+      ],
+      "enrollment": 60,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 1
+    },
+    {
+      "course": "CSE4060",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P26"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CSE4070",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P28"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 35,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CSE4080",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "P14"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4"
+        }
+      ],
+      "enrollment": 35,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "key": "C01",
+      "target": {
+        "instructor": {
+          "code": "P03"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "start": "13:00",
+            "end": "16:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "weight": 3,
+      "status": "confirmed",
+      "text": "수요일 13~16시는 가능하면 비워 주세요.",
+      "confirmed_by": "학과 조교",
+      "note": "교수 면담 때 구두로 받은 요청"
+    },
+    {
+      "key": "C02",
+      "target": {
+        "instructor": {
+          "code": "P03"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "1"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "담당 교원은 목요일 1교시에 수업할 수 없습니다.",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "C03",
+      "target": {
+        "instructor": {
+          "code": "P03"
+        }
+      },
+      "status": "pending",
+      "text": "오전에 수업하기 어렵습니다."
+    },
+    {
+      "key": "C04",
+      "target": {
+        "room": {
+          "building": "공학관",
+          "number": "305"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "13:00",
+            "end": "17:00"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "목요일 오후 전자공학과 실습",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "C05",
+      "target": {
+        "room": {
+          "building": "본관",
+          "number": "305"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "first_period": "1",
+            "last_period": "3"
+          },
+          {
+            "day": "wed",
+            "first_period": "1",
+            "last_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "월·수 오전 교양 강의",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "C06",
+      "target": {
+        "instructor": {
+          "code": "P22"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "first_period": "1",
+            "last_period": "9"
+          },
+          {
+            "day": "tue",
+            "first_period": "1",
+            "last_period": "9"
+          },
+          {
+            "day": "wed",
+            "first_period": "1",
+            "last_period": "9"
+          },
+          {
+            "day": "thu",
+            "first_period": "1",
+            "last_period": "9"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "겸임교원, 금요일에만 출강 가능",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "C07",
+      "target": {
+        "instructor": {
+          "code": "P10"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "1",
+            "last_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "from": "2027-04-01",
+      "until": "2027-04-30",
+      "text": "4월 한 달간 화요일 오전 학과 회의",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "C08",
+      "target": {
+        "instructor": {
+          "code": "P15"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "13:00",
+            "end": "18:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "금요일 오후는 가급적 비워 주세요.",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "C09",
+      "target": {
+        "group": "Y4"
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "start": "15:00",
+            "end": "17:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "4학년 수요일 15~17시 취업 특강",
+      "confirmed_by": "학과 조교"
+    }
+  ],
+  "placements": [
+    {
+      "course": "CSE4010",
+      "section": "01",
+      "part": 1,
+      "day": "mon",
+      "start_period": "6",
+      "room": {
+        "building": "공학관",
+        "number": "301"
+      },
+      "locked": true
+    },
+    {
+      "course": "CSE4050",
+      "section": "01",
+      "part": 1,
+      "day": "fri",
+      "start_period": "7",
+      "room": {
+        "building": "공학관",
+        "number": "202"
+      },
+      "locked": true
+    }
+  ]
+}

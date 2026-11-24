@@ -1,0 +1,12 @@
+[package]
+name = "auler-domain"
+description = "Auler 도메인 모델: 기준자료, 학기 배치, 편성 조건, 공통 입력 규격"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true

@@ -1,0 +1,6057 @@
+{
+  "schema": "auler.input.v1",
+  "term": {
+    "year": 2027,
+    "season": "2"
+  },
+  "setup": {
+    "start": "2027-09-01",
+    "end": "2027-12-14",
+    "days": [
+      "mon",
+      "tue",
+      "wed",
+      "thu",
+      "fri"
+    ],
+    "periods": [
+      {
+        "label": "1",
+        "start": "09:00",
+        "end": "09:50"
+      },
+      {
+        "label": "2",
+        "start": "10:00",
+        "end": "10:50"
+      },
+      {
+        "label": "3",
+        "start": "11:00",
+        "end": "11:50"
+      },
+      {
+        "label": "4",
+        "start": "12:00",
+        "end": "12:50"
+      },
+      {
+        "label": "5",
+        "start": "13:00",
+        "end": "13:50"
+      },
+      {
+        "label": "6",
+        "start": "14:00",
+        "end": "14:50"
+      },
+      {
+        "label": "7",
+        "start": "15:00",
+        "end": "15:50"
+      },
+      {
+        "label": "8",
+        "start": "16:00",
+        "end": "16:50"
+      },
+      {
+        "label": "9",
+        "start": "17:00",
+        "end": "17:50"
+      }
+    ],
+    "rules": {
+      "required_course_overlap": "hard",
+      "block_may_cross_break": false,
+      "room_turnaround_minutes": 0
+    }
+  },
+  "equipment": [
+    {
+      "code": "PC",
+      "name": "실습용 PC",
+      "scope": "per_person"
+    },
+    {
+      "code": "KIT",
+      "name": "임베디드 실습 키트",
+      "scope": "per_person"
+    },
+    {
+      "code": "BEAM",
+      "name": "빔프로젝터",
+      "scope": "per_room"
+    }
+  ],
+  "rooms": [
+    {
+      "building": "제1공학관",
+      "number": "101",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 40,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "101",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 50,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "101",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제1공학관",
+      "number": "201",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "201",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 80,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "201",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 120,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제1공학관",
+      "number": "301",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 40,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "301",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 50,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "301",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제1공학관",
+      "number": "401",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "401",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 80,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "401",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 120,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제1공학관",
+      "number": "501",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 40,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "501",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 50,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "501",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제1공학관",
+      "number": "601",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 60,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "601",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 80,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "601",
+      "kind": "lecture",
+      "department": "공과대학 행정실",
+      "total_seats": 120,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "701",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 32,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 32
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "702",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 34,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 34
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "703",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 30,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 30
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "704",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 38,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 38
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "705",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 30,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 30,
+          "available": 27
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "706",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 34,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 34
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "707",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 30,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 30,
+          "available": 28
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제2공학관",
+      "number": "708",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 37,
+      "equipment": [
+        {
+          "code": "PC",
+          "owned": 37,
+          "available": 35
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "B101",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 30,
+      "equipment": [
+        {
+          "code": "KIT",
+          "owned": 30
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "과학관",
+      "number": "B102",
+      "kind": "lab",
+      "department": "공과대학 행정실",
+      "total_seats": 30,
+      "equipment": [
+        {
+          "code": "KIT",
+          "owned": 30
+        },
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제1공학관",
+      "number": "801",
+      "kind": "seminar",
+      "department": "공과대학 행정실",
+      "total_seats": 25,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    },
+    {
+      "building": "제1공학관",
+      "number": "802",
+      "kind": "seminar",
+      "department": "공과대학 행정실",
+      "total_seats": 25,
+      "equipment": [
+        {
+          "code": "BEAM",
+          "owned": 1
+        }
+      ]
+    }
+  ],
+  "instructors": [
+    {
+      "code": "S001",
+      "name": "한도담",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S002",
+      "name": "전로운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S003",
+      "name": "정자운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S004",
+      "name": "송구름",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S005",
+      "name": "조자운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S006",
+      "name": "신라온",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S007",
+      "name": "윤새봄",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S008",
+      "name": "김한결",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S009",
+      "name": "권누리",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S010",
+      "name": "장바다",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S011",
+      "name": "김보람",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S012",
+      "name": "신다솜",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S013",
+      "name": "권다솜",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S014",
+      "name": "서한결",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S015",
+      "name": "전바다",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S016",
+      "name": "송한결",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S017",
+      "name": "안하람",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S018",
+      "name": "강누리",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S019",
+      "name": "조바다",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S020",
+      "name": "윤자운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S021",
+      "name": "김구름",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S022",
+      "name": "서도담",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S023",
+      "name": "오구름",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S024",
+      "name": "정바다",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S025",
+      "name": "전구름",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S026",
+      "name": "송한결",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S027",
+      "name": "황자운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S028",
+      "name": "신로운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S029",
+      "name": "안하늘",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S030",
+      "name": "조소리",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S031",
+      "name": "김가온",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S032",
+      "name": "권다솜",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S033",
+      "name": "임자운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S034",
+      "name": "전보람",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S035",
+      "name": "조새봄",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S036",
+      "name": "송한결",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S037",
+      "name": "황하늘",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S038",
+      "name": "조자운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S039",
+      "name": "안채운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S040",
+      "name": "신채운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S041",
+      "name": "홍새봄",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S042",
+      "name": "임새봄",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S043",
+      "name": "임보람",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S044",
+      "name": "오차미",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S045",
+      "name": "윤가온",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S046",
+      "name": "박구름",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S047",
+      "name": "권소리",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S048",
+      "name": "안라온",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S049",
+      "name": "한로운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S050",
+      "name": "오가온",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S051",
+      "name": "김미르",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S052",
+      "name": "김미르",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S053",
+      "name": "안이든",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S054",
+      "name": "황자운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S055",
+      "name": "권미르",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S056",
+      "name": "김라온",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S057",
+      "name": "강소리",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S058",
+      "name": "이바다",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S059",
+      "name": "전도담",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S060",
+      "name": "김한결",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S061",
+      "name": "강하늘",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S062",
+      "name": "권채운",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S063",
+      "name": "정바다",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S064",
+      "name": "전바다",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S065",
+      "name": "홍하늘",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S066",
+      "name": "서온새",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S067",
+      "name": "강이든",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S068",
+      "name": "오이든",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S069",
+      "name": "홍온새",
+      "department": "컴퓨터학부"
+    },
+    {
+      "code": "S070",
+      "name": "이새봄",
+      "department": "컴퓨터학부"
+    }
+  ],
+  "groups": [
+    {
+      "code": "Y1A",
+      "name": "1학년 A반",
+      "grade": 1
+    },
+    {
+      "code": "Y1B",
+      "name": "1학년 B반",
+      "grade": 1
+    },
+    {
+      "code": "Y1C",
+      "name": "1학년 C반",
+      "grade": 1
+    },
+    {
+      "code": "Y2A",
+      "name": "2학년 A반",
+      "grade": 2
+    },
+    {
+      "code": "Y2B",
+      "name": "2학년 B반",
+      "grade": 2
+    },
+    {
+      "code": "Y2C",
+      "name": "2학년 C반",
+      "grade": 2
+    },
+    {
+      "code": "Y3A",
+      "name": "3학년 A반",
+      "grade": 3
+    },
+    {
+      "code": "Y3B",
+      "name": "3학년 B반",
+      "grade": 3
+    },
+    {
+      "code": "Y4A",
+      "name": "4학년 A반",
+      "grade": 4
+    },
+    {
+      "code": "Y4B",
+      "name": "4학년 B반",
+      "grade": 4
+    }
+  ],
+  "courses": [
+    {
+      "code": "CS2001",
+      "name": "정보이론특강"
+    },
+    {
+      "code": "CS3002",
+      "name": "수치해석특강"
+    },
+    {
+      "code": "CS4003",
+      "name": "임베디드응용"
+    },
+    {
+      "code": "CS1004",
+      "name": "설계기초"
+    },
+    {
+      "code": "CS2005",
+      "name": "모바일응용"
+    },
+    {
+      "code": "CS3006",
+      "name": "로봇응용"
+    },
+    {
+      "code": "CS4007",
+      "name": "자료처리개론"
+    },
+    {
+      "code": "CS1008",
+      "name": "컴퓨팅응용"
+    },
+    {
+      "code": "CS2009",
+      "name": "데이터특강"
+    },
+    {
+      "code": "CS3010",
+      "name": "컴퓨팅특강"
+    },
+    {
+      "code": "CS4011",
+      "name": "컴퓨팅개론"
+    },
+    {
+      "code": "CS1012",
+      "name": "수치해석특강"
+    },
+    {
+      "code": "CS2013",
+      "name": "신호처리응용"
+    },
+    {
+      "code": "CS3014",
+      "name": "설계특강"
+    },
+    {
+      "code": "CS4015",
+      "name": "신호처리응용"
+    },
+    {
+      "code": "CS1016",
+      "name": "최적화개론"
+    },
+    {
+      "code": "CS2017",
+      "name": "수치해석응용"
+    },
+    {
+      "code": "CS3018",
+      "name": "모바일특강"
+    },
+    {
+      "code": "CS4019",
+      "name": "설계응용"
+    },
+    {
+      "code": "CS1020",
+      "name": "그래픽스응용"
+    },
+    {
+      "code": "CS2021",
+      "name": "정보이론기초"
+    },
+    {
+      "code": "CS3022",
+      "name": "설계기초"
+    },
+    {
+      "code": "CS4023",
+      "name": "클라우드개론"
+    },
+    {
+      "code": "CS1024",
+      "name": "로봇기초"
+    },
+    {
+      "code": "CS2025",
+      "name": "클라우드특강"
+    },
+    {
+      "code": "CS3026",
+      "name": "웹개론"
+    },
+    {
+      "code": "CS4027",
+      "name": "프로그래밍특강"
+    },
+    {
+      "code": "CS1028",
+      "name": "프로그래밍특강"
+    },
+    {
+      "code": "CS2029",
+      "name": "로봇개론"
+    },
+    {
+      "code": "CS3030",
+      "name": "웹기초"
+    },
+    {
+      "code": "CS4031",
+      "name": "지능응용"
+    },
+    {
+      "code": "CS1032",
+      "name": "지능개론"
+    },
+    {
+      "code": "CS2033",
+      "name": "지능특강"
+    },
+    {
+      "code": "CS3034",
+      "name": "네트워크응용"
+    },
+    {
+      "code": "CS4035",
+      "name": "네트워크기초"
+    },
+    {
+      "code": "CS1036",
+      "name": "그래픽스개론"
+    },
+    {
+      "code": "CS2037",
+      "name": "프로그래밍개론"
+    },
+    {
+      "code": "CS3038",
+      "name": "설계기초"
+    },
+    {
+      "code": "CS4039",
+      "name": "데이터기초"
+    },
+    {
+      "code": "CS1040",
+      "name": "수치해석기초"
+    },
+    {
+      "code": "CS2041",
+      "name": "언어기초"
+    },
+    {
+      "code": "CS3042",
+      "name": "네트워크기초"
+    },
+    {
+      "code": "CS4043",
+      "name": "지능기초"
+    },
+    {
+      "code": "CS1044",
+      "name": "최적화기초"
+    },
+    {
+      "code": "CS2045",
+      "name": "신호처리특강"
+    },
+    {
+      "code": "CS3046",
+      "name": "임베디드특강"
+    },
+    {
+      "code": "CS4047",
+      "name": "프로그래밍응용"
+    },
+    {
+      "code": "CS1048",
+      "name": "모바일응용"
+    },
+    {
+      "code": "CS2049",
+      "name": "네트워크응용"
+    },
+    {
+      "code": "CS3050",
+      "name": "수치해석개론"
+    },
+    {
+      "code": "CS4051",
+      "name": "신호처리개론"
+    },
+    {
+      "code": "CS1052",
+      "name": "언어응용"
+    },
+    {
+      "code": "CS2053",
+      "name": "정보이론기초"
+    },
+    {
+      "code": "CS3054",
+      "name": "모바일특강"
+    },
+    {
+      "code": "CS4055",
+      "name": "클라우드특강"
+    },
+    {
+      "code": "CS1056",
+      "name": "자료처리응용"
+    },
+    {
+      "code": "CS2057",
+      "name": "클라우드개론"
+    }
+  ],
+  "sections": [
+    {
+      "course": "CS2001",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S028"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 80,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2001",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S069"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 84,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2001",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S043"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 51,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2001",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S018"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 109,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3002",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S024"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 21,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3002",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S012"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 22,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3002",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S037"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 25,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS4003",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S011"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 27,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS1004",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S070"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 28,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS1004",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S001"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B"
+        }
+      ],
+      "enrollment": 29,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS1004",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S008"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1C"
+        }
+      ],
+      "enrollment": 25,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2005",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S061"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 93,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2005",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S022"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 83,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3006",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S030"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 25,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS3006",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S023"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 71,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS4007",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S051"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 26,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS4007",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S031"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 21,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS4007",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S052"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 23,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS4007",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S063"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 25,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS1008",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S046"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 99,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS1008",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S029"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 27,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2009",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S068"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 21,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2009",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S033"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3010",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S034"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 25,
+      "provisional": true,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3010",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S013"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 25,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3010",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S038"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 23,
+      "provisional": true,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS4011",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S002"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 41,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1012",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S006"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 94,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1012",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S005"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B"
+        }
+      ],
+      "enrollment": 56,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1012",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S042"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1C"
+        }
+      ],
+      "enrollment": 56,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2013",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S067"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A",
+          "required": true
+        }
+      ],
+      "enrollment": 85,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2013",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S035"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B",
+          "required": true
+        }
+      ],
+      "enrollment": 68,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2013",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S015"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C",
+          "required": true
+        }
+      ],
+      "enrollment": 74,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2013",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S017"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A",
+          "required": true
+        }
+      ],
+      "enrollment": 62,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3014",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S003"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 29,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3014",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S007"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 29,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3014",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S019"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 23,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3014",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S044"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 20,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS4015",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S066"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 68,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS4015",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S056"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 74,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1016",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S054"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 74,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2017",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S025"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 20,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2017",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S020"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 28,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2017",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S062"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 27,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2017",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S059"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 27,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3018",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S009"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 94,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS3018",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S039"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 33,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS3018",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S036"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 87,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS3018",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S064"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 71,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS4019",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S057"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 58,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS4019",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S047"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 70,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS4019",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S065"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 67,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS4019",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S049"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 26,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS1020",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S016"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 75,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1020",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S040"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B"
+        }
+      ],
+      "enrollment": 62,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1020",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S041"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1C"
+        }
+      ],
+      "enrollment": 88,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2021",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S055"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A",
+          "required": true
+        }
+      ],
+      "enrollment": 72,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS2021",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S060"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B",
+          "required": true
+        }
+      ],
+      "enrollment": 77,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS3022",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S010"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 81,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3022",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S027"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 106,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS4023",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S014"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 58,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS4023",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S045"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 48,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS4023",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S048"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 42,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS1024",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S026"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 28,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1024",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S053"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 102,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2025",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S004"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 109,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2025",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S050"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 63,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2025",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S021"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 76,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS3026",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S032"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 53,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3026",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S058"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 74,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3026",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S001"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 54,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3026",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S054"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 110,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS4027",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S062"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 68,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS4027",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S020"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 44,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS4027",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S028"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 43,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS4027",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S021"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 47,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS1028",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S005"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 110,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS2029",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S048"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 29,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 2,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3030",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S047"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 63,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3030",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S057"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3030",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S013"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 33,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS4031",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S007"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 26,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS4031",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S067"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 74,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS4031",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S066"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 79,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS1032",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S032"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 57,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS1032",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S024"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B"
+        }
+      ],
+      "enrollment": 58,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS2033",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S018"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 20,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2033",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S029"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 21,
+      "provisional": true,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3034",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S049"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 56,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS3034",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S068"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 85,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS3034",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S056"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 107,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS4035",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S022"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 52,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS4035",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S009"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 68,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS4035",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S040"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 59,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1036",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S006"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 24,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2037",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S025"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 28,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2037",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S016"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 22,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2037",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S069"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 22,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3038",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S017"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 69,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3038",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S026"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 73,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS4039",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S037"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 34,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS4039",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S002"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 93,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS1040",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S058"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 88,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS1040",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S045"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B"
+        }
+      ],
+      "enrollment": 51,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS2041",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S015"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 26,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2041",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S033"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 24,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2041",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S059"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 25,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2041",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S008"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 30,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3042",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S043"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 32,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3042",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S004"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 28,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3042",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S014"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 56,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3042",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S034"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 31,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS4043",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S010"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 109,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS4043",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S042"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 50,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1044",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S060"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 26,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS1044",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S011"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 21,
+      "provisional": true,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS1044",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S039"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1C",
+          "required": true
+        }
+      ],
+      "enrollment": 20,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ],
+      "equipment": [
+        {
+          "code": "PC",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS2045",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S061"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 103,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2045",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S041"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 57,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2045",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S070"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 83,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS3046",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S035"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 27,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS3046",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S044"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 73,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS4047",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S023"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 110,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS4047",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S051"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4B"
+        }
+      ],
+      "enrollment": 63,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS1048",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S031"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 84,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS1048",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S065"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B"
+        }
+      ],
+      "enrollment": 106,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS1048",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S046"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1C"
+        }
+      ],
+      "enrollment": 73,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS1048",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S036"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 32,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2049",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S027"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A",
+          "required": true
+        }
+      ],
+      "enrollment": 107,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS2049",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S052"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B",
+          "required": true
+        }
+      ],
+      "enrollment": 41,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS2049",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S003"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C",
+          "required": true
+        }
+      ],
+      "enrollment": 76,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS3050",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S030"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 21,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS3050",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S012"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 20,
+      "kind": "lab",
+      "room_kind": "lab",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ],
+      "equipment": [
+        {
+          "code": "KIT",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "course": "CS4051",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S038"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 41,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 4,
+      "split": [
+        2,
+        2
+      ]
+    },
+    {
+      "course": "CS1052",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S064"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A"
+        }
+      ],
+      "enrollment": 43,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS1052",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S063"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B"
+        }
+      ],
+      "enrollment": 52,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2053",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S019"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 76,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2053",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S053"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 63,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS2053",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S055"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 33,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3054",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S050"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 55,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3054",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S001"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3B"
+        }
+      ],
+      "enrollment": 25,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS3054",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S070"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y3A"
+        }
+      ],
+      "enrollment": 101,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS4055",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S006"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y4A"
+        }
+      ],
+      "enrollment": 106,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3
+    },
+    {
+      "course": "CS1056",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S050"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1A",
+          "required": true
+        }
+      ],
+      "enrollment": 94,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS1056",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S038"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1B",
+          "required": true
+        }
+      ],
+      "enrollment": 56,
+      "provisional": true,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS1056",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S062"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y1C",
+          "required": true
+        }
+      ],
+      "enrollment": 96,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 2
+    },
+    {
+      "course": "CS2057",
+      "section": "01",
+      "instructors": [
+        {
+          "code": "S061"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 69,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2057",
+      "section": "02",
+      "instructors": [
+        {
+          "code": "S015"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2B"
+        }
+      ],
+      "enrollment": 53,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2057",
+      "section": "03",
+      "instructors": [
+        {
+          "code": "S058"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2C"
+        }
+      ],
+      "enrollment": 71,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    },
+    {
+      "course": "CS2057",
+      "section": "04",
+      "instructors": [
+        {
+          "code": "S036"
+        }
+      ],
+      "groups": [
+        {
+          "group": "Y2A"
+        }
+      ],
+      "enrollment": 92,
+      "kind": "lecture",
+      "room_kind": "lecture",
+      "weekly_periods": 3,
+      "split": [
+        2,
+        1
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "key": "X001",
+      "target": {
+        "instructor": {
+          "code": "S015"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "2",
+            "last_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X002",
+      "target": {
+        "instructor": {
+          "code": "S060"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "6",
+            "last_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X003",
+      "target": {
+        "instructor": {
+          "code": "S035"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "first_period": "5",
+            "last_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X004",
+      "target": {
+        "instructor": {
+          "code": "S068"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "6",
+            "last_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X005",
+      "target": {
+        "instructor": {
+          "code": "S057"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "start": "13:00",
+            "end": "16:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X006",
+      "target": {
+        "instructor": {
+          "code": "S007"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "start": "14:00",
+            "end": "17:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X007",
+      "target": {
+        "instructor": {
+          "code": "S003"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "10:00",
+            "end": "12:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X008",
+      "target": {
+        "instructor": {
+          "code": "S031"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X009",
+      "target": {
+        "instructor": {
+          "code": "S020"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "6",
+            "last_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X010",
+      "target": {
+        "instructor": {
+          "code": "S028"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "6",
+            "last_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X011",
+      "target": {
+        "instructor": {
+          "code": "S046"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "first_period": "4",
+            "last_period": "5"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X012",
+      "target": {
+        "instructor": {
+          "code": "S029"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X013",
+      "target": {
+        "instructor": {
+          "code": "S062"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "13:00",
+            "end": "16:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X014",
+      "target": {
+        "instructor": {
+          "code": "S026"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "start": "15:00",
+            "end": "18:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X015",
+      "target": {
+        "instructor": {
+          "code": "S022"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "14:00",
+            "end": "16:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X016",
+      "target": {
+        "instructor": {
+          "code": "S005"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X017",
+      "target": {
+        "instructor": {
+          "code": "S045"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "first_period": "6"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X018",
+      "target": {
+        "instructor": {
+          "code": "S016"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "first_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X019",
+      "target": {
+        "instructor": {
+          "code": "S043"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "first_period": "7",
+            "last_period": "8"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X020",
+      "target": {
+        "instructor": {
+          "code": "S012"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "6",
+            "last_period": "8"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X021",
+      "target": {
+        "instructor": {
+          "code": "S006"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "start": "11:00",
+            "end": "14:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X022",
+      "target": {
+        "instructor": {
+          "code": "S037"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "13:00",
+            "end": "15:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X023",
+      "target": {
+        "instructor": {
+          "code": "S028"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "start": "11:00",
+            "end": "13:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X024",
+      "target": {
+        "instructor": {
+          "code": "S016"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X025",
+      "target": {
+        "instructor": {
+          "code": "S008"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "first_period": "5"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X026",
+      "target": {
+        "instructor": {
+          "code": "S022"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "3",
+            "last_period": "5"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X027",
+      "target": {
+        "instructor": {
+          "code": "S060"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X028",
+      "target": {
+        "instructor": {
+          "code": "S049"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "2",
+            "last_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X029",
+      "target": {
+        "instructor": {
+          "code": "S060"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "13:00",
+            "end": "15:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X030",
+      "target": {
+        "instructor": {
+          "code": "S032"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "15:00",
+            "end": "18:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X031",
+      "target": {
+        "instructor": {
+          "code": "S009"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "14:00",
+            "end": "16:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X032",
+      "target": {
+        "instructor": {
+          "code": "S063"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X033",
+      "target": {
+        "instructor": {
+          "code": "S048"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "first_period": "1",
+            "last_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X034",
+      "target": {
+        "instructor": {
+          "code": "S062"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "6",
+            "last_period": "8"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X035",
+      "target": {
+        "instructor": {
+          "code": "S044"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X036",
+      "target": {
+        "instructor": {
+          "code": "S010"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X037",
+      "target": {
+        "instructor": {
+          "code": "S040"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "start": "11:00",
+            "end": "13:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X038",
+      "target": {
+        "instructor": {
+          "code": "S066"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "09:00",
+            "end": "11:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X039",
+      "target": {
+        "instructor": {
+          "code": "S056"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "11:00",
+            "end": "12:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X040",
+      "target": {
+        "instructor": {
+          "code": "S065"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X041",
+      "target": {
+        "instructor": {
+          "code": "S038"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "5",
+            "last_period": "6"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X042",
+      "target": {
+        "instructor": {
+          "code": "S019"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "1",
+            "last_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X043",
+      "target": {
+        "instructor": {
+          "code": "S033"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "1",
+            "last_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X044",
+      "target": {
+        "instructor": {
+          "code": "S004"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "first_period": "1",
+            "last_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X045",
+      "target": {
+        "instructor": {
+          "code": "S034"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "start": "10:00",
+            "end": "13:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X046",
+      "target": {
+        "instructor": {
+          "code": "S011"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "start": "10:00",
+            "end": "12:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X047",
+      "target": {
+        "instructor": {
+          "code": "S048"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "11:00",
+            "end": "14:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X048",
+      "target": {
+        "instructor": {
+          "code": "S059"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X049",
+      "target": {
+        "instructor": {
+          "code": "S021"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "1",
+            "last_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X050",
+      "target": {
+        "instructor": {
+          "code": "S041"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "2",
+            "last_period": "4"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X051",
+      "target": {
+        "instructor": {
+          "code": "S052"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "1",
+            "last_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X052",
+      "target": {
+        "instructor": {
+          "code": "S067"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X053",
+      "target": {
+        "instructor": {
+          "code": "S025"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "14:00",
+            "end": "16:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X054",
+      "target": {
+        "instructor": {
+          "code": "S055"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "start": "15:00",
+            "end": "18:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X055",
+      "target": {
+        "instructor": {
+          "code": "S020"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "13:00",
+            "end": "14:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X056",
+      "target": {
+        "instructor": {
+          "code": "S034"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X057",
+      "target": {
+        "instructor": {
+          "code": "S019"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "first_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X058",
+      "target": {
+        "instructor": {
+          "code": "S029"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "1",
+            "last_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X059",
+      "target": {
+        "instructor": {
+          "code": "S051"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "5",
+            "last_period": "7"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X060",
+      "target": {
+        "instructor": {
+          "code": "S040"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "first_period": "3",
+            "last_period": "4"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X061",
+      "target": {
+        "instructor": {
+          "code": "S070"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "09:00",
+            "end": "11:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X062",
+      "target": {
+        "instructor": {
+          "code": "S031"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "11:00",
+            "end": "14:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X063",
+      "target": {
+        "instructor": {
+          "code": "S042"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "start": "15:00",
+            "end": "17:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X064",
+      "target": {
+        "instructor": {
+          "code": "S032"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X065",
+      "target": {
+        "instructor": {
+          "code": "S059"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "first_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X066",
+      "target": {
+        "instructor": {
+          "code": "S041"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "1",
+            "last_period": "2"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X067",
+      "target": {
+        "instructor": {
+          "code": "S037"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "4",
+            "last_period": "5"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X068",
+      "target": {
+        "instructor": {
+          "code": "S023"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "mon",
+            "first_period": "1",
+            "last_period": "3"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X069",
+      "target": {
+        "instructor": {
+          "code": "S027"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "14:00",
+            "end": "15:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X070",
+      "target": {
+        "instructor": {
+          "code": "S011"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "12:00",
+            "end": "13:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X071",
+      "target": {
+        "instructor": {
+          "code": "S066"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "start": "15:00",
+            "end": "18:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X072",
+      "target": {
+        "instructor": {
+          "code": "S041"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    },
+    {
+      "key": "X073",
+      "target": {
+        "instructor": {
+          "code": "S036"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "3",
+            "last_period": "4"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X074",
+      "target": {
+        "instructor": {
+          "code": "S001"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "tue",
+            "first_period": "4"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X075",
+      "target": {
+        "instructor": {
+          "code": "S064"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "first_period": "6"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X076",
+      "target": {
+        "instructor": {
+          "code": "S017"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "first_period": "4",
+            "last_period": "5"
+          }
+        ]
+      },
+      "strength": "hard",
+      "status": "confirmed",
+      "text": "불가 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X077",
+      "target": {
+        "instructor": {
+          "code": "S044"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "fri",
+            "start": "11:00",
+            "end": "14:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X078",
+      "target": {
+        "instructor": {
+          "code": "S030"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "thu",
+            "start": "10:00",
+            "end": "11:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X079",
+      "target": {
+        "instructor": {
+          "code": "S008"
+        }
+      },
+      "rule": {
+        "kind": "avoid_times",
+        "windows": [
+          {
+            "day": "wed",
+            "start": "15:00",
+            "end": "18:00"
+          }
+        ]
+      },
+      "strength": "soft",
+      "status": "confirmed",
+      "text": "가능하면 피할 시간",
+      "confirmed_by": "학과 조교"
+    },
+    {
+      "key": "X080",
+      "target": {
+        "instructor": {
+          "code": "S069"
+        }
+      },
+      "status": "pending",
+      "text": "확인이 필요한 요청"
+    }
+  ]
+}
