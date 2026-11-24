@@ -90,7 +90,10 @@ fn layout_fits_minimum_window_on_every_page() {
             for page in 0..=6 {
                 ui.set_page(page);
                 let (w, h) = (ui.get_layout_min_width(), ui.get_layout_min_height());
-                eprintln!("min-size size={}x{} lang={language} page={page}: {w:.0}x{h:.0}", size.width, size.height);
+                eprintln!(
+                    "min-size size={}x{} lang={language} page={page}: {w:.0}x{h:.0}",
+                    size.width, size.height
+                );
                 assert!(
                     w <= 1024.0 && h <= 640.0,
                     "창 {}×{}, 언어 {language}, 화면 {page}: 최소 {w}×{h}",
