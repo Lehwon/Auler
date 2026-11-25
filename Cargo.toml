@@ -10,7 +10,10 @@ repository = "https://github.com/Lehwon/Auler"
 
 [workspace.dependencies]
 auler-domain = { path = "crates/auler-domain" }
+auler-engine = { path = "crates/auler-engine" }
+auler-io = { path = "crates/auler-io" }
 auler-samples = { path = "crates/auler-samples" }
+auler-store = { path = "crates/auler-store" }
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.154"
 

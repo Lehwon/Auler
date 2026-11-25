@@ -1,34 +1,26 @@
-import { Button, ComboBox, LineEdit, ScrollView, StandardTableView } from "std-widgets.slint";
+import { ComboBox, ScrollView, StandardTableView } from "std-widgets.slint";
 import { Theme, Badge, Tone, Panel, Icons, IconButton, LockSwitch } from "theme.slint";
+import { PageHeader, KeyValue, ActionButton, FilterBar, SearchField, StatusBanner } from "components.slint";
 import { Labels } from "labels.slint";
 import { TopBar, NavItem, StatusBar } from "shell.slint";
 import { CardData, PeriodRow, UnassignedData, AltData, TimetableGrid, UnassignedCard, AlternativeRow } from "timetable.slint";
 import { AboutPage } from "about.slint";
+import { SetupFields, WorkspaceStart, WorkspaceSetup } from "workspace.slint";
+import { HomeStats, SemesterHome, HomeTargetList } from "home.slint";
+import { CatalogField, CatalogPage, CatalogRow } from "catalog.slint";
+import { ImportPage, ImportRow, ImportView } from "import.slint";
+import { ConstraintPage, ConstraintCell, ConstraintEditor, ConstraintGridRow, ConstraintRow, ConstraintView } from "constraints.slint";
+import { WorkbenchPage, WorkChange, WorkChoice, WorkItem, WorkView } from "workbench.slint";
+import { FinalizationPage, FinalRow, FinalView, ReviewQueuePage, ReviewQueueRow, ReviewQueueView } from "review_screen.slint";
+import { ExportPage, ExportView, ExportCommand, ExportConstraint } from "export.slint";
+import { BackupCount, BackupPane, BackupView, RestoreConfirmation } from "backup.slint";
 
-export { CardData, PeriodRow, UnassignedData, AltData, Labels }
-
-// 페이지 머리말: 제목, 부제, 오른쪽 행동 (주 행동은 한 개)
-component PageHeader inherits HorizontalLayout {
-    in property <string> title;
-    in property <string> subtitle;
-    spacing: 8px;
-    VerticalLayout {
-        spacing: 4px;
-        horizontal-stretch: 1;
-        Text { text: root.title; font-size: Theme.font-title; font-weight: 700; color: Theme.text; overflow: elide; }
-        Text { text: root.subtitle; font-size: Theme.font-small; color: Theme.text-muted; overflow: elide; }
-    }
-    @children
-}
-
-component KeyValue inherits HorizontalLayout {
-    in property <string> key;
-    in property <string> value;
-    height: 32px;
-    spacing: 8px;
-    Text { text: root.key; color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; }
-    Text { text: root.value; color: Theme.text; font-weight: 600; vertical-alignment: center; }
-}
+export { CardData, PeriodRow, UnassignedData, AltData, Labels, SetupFields, HomeStats, CatalogRow, CatalogField, ImportRow, ImportView }
+export { ConstraintCell, ConstraintEditor, ConstraintGridRow, ConstraintRow, ConstraintView }
+export { WorkChange, WorkChoice, WorkItem, WorkView }
+export { FinalRow, FinalView, ReviewQueueRow, ReviewQueueView }
+export { ExportView, ExportCommand, ExportConstraint }
+export { BackupCount, BackupView }
 
 // 선택한 배치의 상세 정보와 대안. 넓은 화면에서는 고정 패널, 좁은 화면에서는 오버레이.
 // 내용이 길면 패널 안에서 스크롤한다.
@@ -39,6 +31,7 @@ component DetailPanel inherits Panel {
     in property <[int]> days;
     in property <[AltData]> alternatives;
     in property <bool> closable;
+    in property <bool> interactive: true;
     callback lock-toggled();
     callback close();
 
@@ -85,6 +78,7 @@ component DetailPanel inherits Panel {
                         alignment: center;
                         LockSwitch {
                             checked: root.card.locked;
+                            enabled: root.interactive;
                             label: @tr("Lock");
                             toggled => { root.lock-toggled(); }
                         }
@@ -113,6 +107,8 @@ component TimetablePage inherits Rectangle {
     in property <int> conflict-count;
     in property <bool> can-undo;
     in property <bool> can-redo;
+    in property <bool> interactive: true;
+    in property <string> version-label;
     in-out property <int> selected: -1;
     callback lock-toggled(int);
     callback move-card(int, int, int) -> bool;
@@ -128,23 +124,22 @@ component TimetablePage inherits Rectangle {
     property <string> selected-day: root.has-selection ? Labels.weekday(root.days[root.cards[root.selected].day]) : "";
 
     VerticalLayout {
-        padding: 20px;
+        padding: Theme.page-padding;
         spacing: 14px;
 
         PageHeader {
             title: @tr("Timetable");
-            subtitle: @tr("Weekly workbench") + " · " + Labels.draft(3);
+            subtitle: @tr("Weekly workbench") + " · " + root.version-label;
             VerticalLayout { alignment: center; IconButton { icon: Icons.undo; label: @tr("Undo"); enabled: root.can-undo; clicked => { root.undo(); } } }
             VerticalLayout { alignment: center; IconButton { icon: Icons.redo; label: @tr("Redo"); enabled: root.can-redo; clicked => { root.redo(); } } }
-            Button { text: @tr("Reschedule"); }
-            Button { text: @tr("Auto schedule"); primary: true; }
-            Button { text: @tr("Validate & finalize"); }
+            ActionButton { text: @tr("Reschedule"); enabled: root.interactive; }
+            ActionButton { text: @tr("Auto schedule"); primary: true; enabled: root.interactive; }
+            ActionButton { text: @tr("Validate & finalize"); enabled: root.interactive; }
         }
 
-        HorizontalLayout {
-            spacing: 8px;
+        FilterBar {
             ComboBox {
-                width: 140px;
+                width: root.compact ? 124px : 140px;
                 model: [@tr("By year"), @tr("By instructor"), @tr("By room"), @tr("All")];
                 accessible-label: @tr("View");
             }
@@ -153,25 +148,23 @@ component TimetablePage inherits Rectangle {
                 model: [@tr("Year 2")];
                 accessible-label: @tr("Year");
             }
-            LineEdit {
+            SearchField {
                 min-width: 120px;
                 preferred-width: 200px;
                 horizontal-stretch: 0;
                 placeholder-text: @tr("Search courses");
-                accessible-label: @tr("Search courses");
             }
             Rectangle { horizontal-stretch: 1; }
-            VerticalLayout { alignment: center; Badge { text: @tr("Lock") + " " + root.locked-count; } }
+            VerticalLayout { alignment: center; Badge { text: @tr("Lock") + " " + root.locked-count; icon: Icons.lock; } }
             VerticalLayout { alignment: center; Badge { text: @tr("Unassigned") + " " + root.unassigned-count; tone: Tone.warning; } }
             VerticalLayout {
                 alignment: center;
                 Badge { text: @tr("Hard conflicts") + " " + root.conflict-count; tone: root.conflict-count == 0 ? Tone.success : Tone.danger; }
             }
-            if root.compact: Button {
+            if root.compact: ActionButton {
                 text: @tr("Details");
                 checkable: true;
-                checked: root.detail-open;
-                clicked => { root.detail-open = !root.detail-open; }
+                checked <=> root.detail-open;
             }
         }
 
@@ -189,7 +182,7 @@ component TimetablePage inherits Rectangle {
                         Text { text: @tr("Unassigned"); font-weight: 700; color: Theme.text; horizontal-stretch: 1; vertical-alignment: center; }
                         Badge { text: root.unassigned-count; tone: Tone.warning; }
                     }
-                    LineEdit { placeholder-text: @tr("Search sections"); accessible-label: @tr("Search sections"); }
+                    SearchField { placeholder-text: @tr("Search sections"); }
                     us := ScrollView {
                         vertical-stretch: 1;
                         content-width: us.visible-width;
@@ -226,6 +219,7 @@ component TimetablePage inherits Rectangle {
 
             if !root.compact: DetailPanel {
                 width: 300px;
+                interactive: root.interactive;
                 has-selection: root.has-selection;
                 card: root.has-selection ? root.cards[root.selected] : root.cards[0];
                 day-label: root.selected-day;
@@ -246,6 +240,7 @@ component TimetablePage inherits Rectangle {
         closable: true;
         has-selection: root.has-selection;
         card: root.has-selection ? root.cards[root.selected] : root.cards[0];
+        interactive: root.interactive;
         day-label: root.selected-day;
         days: root.days;
         alternatives: root.alternatives;
@@ -257,23 +252,21 @@ component TimetablePage inherits Rectangle {
 // 기준자료 (축소판): 큰 표(보이는 행만 생성) 확인용
 component DataPage inherits VerticalLayout {
     in property <[[StandardListViewItem]]> rows;
-    padding: 20px;
+    padding: Theme.page-padding;
     spacing: 14px;
 
     PageHeader {
         title: @tr("Data");
         subtitle: @tr("Sections, instructors and rooms for the term");
-        Button { text: @tr("Import"); }
-        Button { text: @tr("Add section"); primary: true; }
+        ActionButton { text: @tr("Import"); }
+        ActionButton { text: @tr("Add section"); primary: true; }
     }
-    HorizontalLayout {
-        spacing: 8px;
-        LineEdit {
+    FilterBar {
+        SearchField {
             min-width: 160px;
             preferred-width: 260px;
             horizontal-stretch: 0;
             placeholder-text: @tr("Search by course name or code");
-            accessible-label: @tr("Search by course name or code");
         }
         Rectangle { horizontal-stretch: 1; }
         Text { text: @tr("Total") + " " + root.rows.length; color: Theme.text-muted; vertical-alignment: center; }
@@ -297,8 +290,10 @@ component DataPage inherits VerticalLayout {
 
 component PlaceholderPage inherits VerticalLayout {
     in property <string> title;
-    padding: 20px;
-    PageHeader { title: root.title; subtitle: @tr("Not implemented yet"); }
+    padding: Theme.page-padding;
+    spacing: Theme.space-large;
+    PageHeader { title: root.title; }
+    StatusBanner { message: @tr("Not implemented yet"); }
     Rectangle { vertical-stretch: 1; }
 }
 
@@ -325,7 +320,53 @@ export component AppWindow inherits Window {
     in property <bool> can-undo;
     in property <bool> can-redo;
     in property <string> app-version;
+    in property <bool> live-workspace;
+    in-out property <bool> workspace-start;
+    in-out property <int> setup-mode: -1;
+    in property <bool> workspace-open;
+    in property <bool> sample-workspace;
+    in-out property <string> workspace-error;
+    in property <int> setup-year;
+    in property <int> setup-season;
+    in property <string> selected-term-label;
+    in property <[string]> term-options;
+    in property <int> term-index: -1;
+    in property <int> draft-version;
+    in property <int> finalized-version;
+    in property <int> review-count;
+    in property <HomeStats> home-stats;
+    in property <[[StandardListViewItem]]> recent-work;
+    in property <[string]> hard-conflicts;
+    in property <int> catalog-tab;
+    in property <int> catalog-subtype;
+    in property <int> catalog-filter;
+    in property <int> catalog-grade;
+    in property <[string]> catalog-grades;
+    in property <string> catalog-query;
+    in property <[CatalogRow]> catalog-rows;
+    in property <[string]> catalog-columns;
+    in property <[float]> catalog-column-weights;
+    in property <[string]> catalog-all-columns;
+    in property <[bool]> catalog-visible-columns;
+    in property <[CatalogField]> catalog-fields;
+    in property <[string]> catalog-preview;
+    in property <string> catalog-detail-title;
+    in property <string> catalog-error;
+    in property <int> catalog-editor;
+    in property <int> catalog-sort-column: -1;
+    in property <bool> catalog-descending;
+    in property <int> catalog-checked-count;
+    in property <ImportView> import-view;
+    in property <ConstraintView> constraint-view;
+    in property <WorkView> workbench-view;
+    in property <ReviewQueueView> review-queue;
+    in property <FinalView> final-view;
+    in-out property <int> home-filter;
+    property <string> context-version: root.live-workspace
+        ? root.term-index < 0 ? "" : root.home-stats.editing ? Labels.draft(root.draft-version) : Labels.finalized(root.finalized-version)
+        : Labels.draft(3);
     in-out property <int> page: 3;
+    changed page => { if root.page != 5 { root.export-closed(); } }
     in-out property <int> language-index: 0;
     in-out property <int> selected: 3;
     callback language-selected(int);
@@ -335,6 +376,55 @@ export component AppWindow inherits Window {
     pure callback can-move(int, int, int) -> bool;
     callback undo();
     callback redo();
+    callback open-workspace();
+    callback open-example();
+    callback restore-backup();
+    callback begin-setup(int);
+    callback submit-setup(SetupFields);
+    callback term-selected(int);
+    callback open-recent-task(int);
+    callback catalog-option(int, int);
+    callback catalog-search(string);
+    callback catalog-select(int);
+    callback catalog-check(int, bool);
+    callback catalog-column(int, bool);
+    callback catalog-sort(int);
+    callback catalog-begin(int);
+    callback catalog-edit-field(int, string);
+    callback catalog-apply();
+    callback catalog-close();
+    callback catalog-export();
+    callback import-command(int);
+    callback import-select(int);
+    callback import-check(int, bool);
+    callback open-review(int);
+    callback constraint-option(int, int);
+    callback constraint-action(int, int);
+    callback constraint-text(int, string);
+    callback constraint-grid-cell(int, int, int);
+    callback work-action(int, int);
+    callback work-option(int, int);
+    callback work-search(bool, string);
+    callback work-slot(int, int);
+    callback review-queue-action(int, int);
+    callback finalize-action(int, int);
+    in property <ExportView> export-view;
+    callback export-command(ExportCommand, int);
+    callback export-closed();
+    callback export-viewport(float);
+    in property <BackupView> backup-view;
+    in-out property <bool> export-backup-active;
+    callback save-backup();
+    callback open-restored();
+    callback keep-workspace();
+
+    public function navigate-home-target(target: int) {
+        root.home-filter = target;
+        root.page = target == 9 ? 1 : target <= 2 ? target : target <= 4 || target == 7 ? 3 : target == 5 ? 4 : 5;
+        if target == 2 { root.constraint-option(0, 3); }
+        if target == 7 { root.finalize-action(0, 0); }
+        if target == 9 { root.catalog-option(0, 3); root.catalog-option(1, 0); }
+    }
 
     // 창 폭이 이보다 좁으면 시간표 상세 패널을 오버레이로 바꾼다 (내비 레일 56 + 페이지 1180).
     // 레이아웃이 창 크기 제약에 쓰이므로 바인딩이 아니라 폭이 바뀔 때 값을 정한다(순환 방지).
@@ -351,12 +441,42 @@ export component AppWindow inherits Window {
         TopBar {
             department: root.department;
             term-label: Labels.term-label(root.year, root.term);
-            version: Labels.draft(3);
+            version: root.context-version;
+            workspace-visible: !root.workspace-start && root.setup-mode < 0;
+            live-workspace: root.live-workspace;
+            term-options: root.term-options;
+            term-index: root.term-index;
             language-index: root.language-index;
             language-selected(index) => { root.language-selected(index); }
+            term-selected(index) => { root.term-selected(index); }
+            change-workspace => { root.workspace-error = ""; root.workspace-start = true; }
         }
 
-        HorizontalLayout {
+        if root.workspace-start && root.setup-mode < 0: WorkspaceStart {
+            vertical-stretch: 1;
+            can-return: root.workspace-open;
+            error-message: root.workspace-error == "" ? root.backup-view.error : root.workspace-error;
+            saved-path: root.backup-view.restored ? root.backup-view.saved : "";
+            busy: root.backup-view.busy || root.backup-view.pending;
+            new-workspace => { root.begin-setup(0); }
+            open-workspace => { root.open-workspace(); }
+            open-example => { root.open-example(); }
+            restore-backup => { root.restore-backup(); }
+            return-to-workspace => { root.workspace-error = ""; root.workspace-start = false; }
+        }
+        if root.setup-mode >= 0: WorkspaceSetup {
+            vertical-stretch: 1;
+            mode: root.setup-mode;
+            department: root.setup-mode == 0 ? "" : root.department;
+            initial-year: root.setup-year;
+            initial-season: root.setup-season;
+            copy-source: root.selected-term-label;
+            error-message: root.workspace-error;
+            cancelled => { root.workspace-error = ""; root.setup-mode = -1; }
+            submitted(fields) => { root.submit-setup(fields); }
+        }
+
+        if !root.workspace-start && root.setup-mode < 0: HorizontalLayout {
             vertical-stretch: 1;
 
             Rectangle {
@@ -364,13 +484,13 @@ export component AppWindow inherits Window {
                 accessible-role: AccessibleRole.tab-list;
                 accessible-label: @tr("Main menu");
                 VerticalLayout {
-                    padding: 8px;
-                    spacing: 4px;
+                    padding: Theme.space-medium;
+                    spacing: Theme.space-small;
                     NavItem { icon: Icons.home; label: @tr("Home"); compact: root.page == 3; active: root.page == 0; clicked => { root.page = 0; } }
-                    NavItem { icon: Icons.data; label: @tr("Data"); compact: root.page == 3; active: root.page == 1; clicked => { root.page = 1; } }
-                    NavItem { icon: Icons.constraints; label: @tr("Constraints"); compact: root.page == 3; active: root.page == 2; clicked => { root.page = 2; } }
-                    NavItem { icon: Icons.timetable; label: @tr("Timetable"); compact: root.page == 3; active: root.page == 3; clicked => { root.page = 3; } }
-                    NavItem { icon: Icons.review; label: @tr("Review"); compact: root.page == 3; active: root.page == 4; count: 3; clicked => { root.page = 4; } }
+                    NavItem { icon: Icons.data; label: @tr("Data"); compact: root.page == 3; active: root.page == 1 || (root.page == 8 && !root.import-view.from-review); clicked => { root.page = 1; } }
+                    NavItem { icon: Icons.constraints; label: @tr("Constraints"); compact: root.page == 3; active: root.page == 2; clicked => { root.home-filter = 0; root.page = 2; } }
+                    NavItem { icon: Icons.timetable; label: @tr("Timetable"); compact: root.page == 3; active: root.page == 3; clicked => { root.home-filter = 0; root.page = 3; } }
+                    NavItem { icon: Icons.review; label: @tr("Review"); compact: root.page == 3; active: root.page == 4 || (root.page == 8 && root.import-view.from-review); count: root.live-workspace ? root.review-count : 3; clicked => { root.page = 4; } }
                     NavItem { icon: Icons.export; label: @tr("Export & Handover"); compact: root.page == 3; active: root.page == 5; clicked => { root.page = 5; } }
                     Rectangle { vertical-stretch: 1; }
                     NavItem { icon: Icons.settings; label: @tr("Settings"); compact: root.page == 3; active: root.page == 6; clicked => { root.page = 6; } }
@@ -383,7 +503,7 @@ export component AppWindow inherits Window {
                 }
             }
 
-            if root.page == 3: TimetablePage {
+            if root.page == 3 && !root.live-workspace: TimetablePage {
                 horizontal-stretch: 1;
                 cards: root.cards;
                 days: root.days;
@@ -395,6 +515,7 @@ export component AppWindow inherits Window {
                 conflict-count: root.conflict-count;
                 can-undo: root.can-undo;
                 can-redo: root.can-redo;
+                version-label: root.context-version;
                 compact: root.compact-timetable;
                 selected <=> root.selected;
                 lock-toggled(i) => { root.lock-toggled(i); }
@@ -403,24 +524,174 @@ export component AppWindow inherits Window {
                 undo => { root.undo(); }
                 redo => { root.redo(); }
             }
-            if root.page == 1: DataPage {
+            if root.page == 3 && root.live-workspace && root.home-filter != 4 && root.home-filter != 7: WorkbenchPage {
+                horizontal-stretch: 1;
+                view: root.workbench-view;
+                cards: root.cards;
+                days: root.days;
+                periods: root.periods;
+                editable: root.home-stats.editing;
+                compact: root.compact-timetable;
+                locked: root.locked-count;
+                unassigned: root.unassigned-count;
+                conflicts: root.conflict-count;
+                version: root.context-version;
+                can-undo: root.can-undo;
+                can-redo: root.can-redo;
+                selected <=> root.selected;
+                action(kind, index) => { root.work-action(kind, index); }
+                option(kind, value) => { root.work-option(kind, value); }
+                search(pending, value) => { root.work-search(pending, value); }
+                pick-slot(day, period) => { root.work-slot(day, period); }
+                can-move(i, day, period) => { return root.can-move(i, day, period); }
+                move-card(i, day, period) => { return root.move-card(i, day, period); }
+                validate => { root.navigate-home-target(7); }
+            }
+            if root.page == 1 && !root.live-workspace: DataPage {
                 horizontal-stretch: 1;
                 rows: root.rows;
+            }
+            if root.page == 1 && root.live-workspace: CatalogPage {
+                horizontal-stretch: 1;
+                tab: root.catalog-tab;
+                subtype: root.catalog-subtype;
+                data-filter: root.catalog-filter;
+                grade: root.catalog-grade;
+                grades: root.catalog-grades;
+                query: root.catalog-query;
+                rows: root.catalog-rows;
+                columns: root.catalog-columns;
+                column-weights: root.catalog-column-weights;
+                all-columns: root.catalog-all-columns;
+                visible-columns: root.catalog-visible-columns;
+                fields: root.catalog-fields;
+                preview: root.catalog-preview;
+                detail-title: root.catalog-detail-title;
+                error-message: root.catalog-error;
+                editor: root.catalog-editor;
+                sort-column: root.catalog-sort-column;
+                descending: root.catalog-descending;
+                checked-count: root.catalog-checked-count;
+                bulk-enabled: root.catalog-tab != 4;
+                editing: root.home-stats.editing;
+                has-term: root.term-index >= 0;
+                import-available: root.term-index >= 0;
+                compact: root.compact-timetable;
+                tab-changed(tab) => { root.catalog-option(0, tab); }
+                subtype-changed(subtype) => { root.catalog-option(1, subtype); }
+                filter-changed(filter) => { root.catalog-option(2, filter); }
+                grade-changed(grade) => { root.catalog-option(3, grade); }
+                query-changed(query) => { root.catalog-search(query); }
+                row-selected(index) => { root.catalog-select(index); }
+                row-checked(index, checked) => { root.catalog-check(index, checked); }
+                column-toggled(column, visible) => { root.catalog-column(column, visible); }
+                sort-by(column) => { root.catalog-sort(column); }
+                begin(mode) => { root.catalog-begin(mode); }
+                field-edited(index, value) => { root.catalog-edit-field(index, value); }
+                apply => { root.catalog-apply(); }
+                close-detail => { root.catalog-close(); }
+                import-data => { root.import-command(8); }
+                export-data => { root.catalog-export(); }
             }
             if root.page == 7: AboutPage {
                 horizontal-stretch: 1;
                 version: root.app-version;
                 open-url(url) => { root.open-url(url); }
             }
-            if root.page != 1 && root.page != 3 && root.page != 7: PlaceholderPage {
+            if root.live-workspace && root.page == 0: SemesterHome {
                 horizontal-stretch: 1;
-                title: root.page == 0 ? @tr("Home") : root.page == 2 ? @tr("Constraints") : root.page == 4 ? @tr("Review") : root.page == 5 ? @tr("Export & Handover") : @tr("Settings");
+                department: root.department;
+                term-label: root.selected-term-label;
+                version: root.context-version;
+                stats: root.home-stats;
+                tasks: root.recent-work;
+                error-message: root.workspace-error;
+                has-term: root.term-index >= 0;
+                compact: root.compact-timetable;
+                new-term => { root.begin-setup(1); }
+                copy-term => { root.begin-setup(2); }
+                navigate(target) => { root.navigate-home-target(target); }
+                open-task(index) => { root.open-recent-task(index); }
+            }
+            if root.live-workspace && root.page == 2: ConstraintPage {
+                horizontal-stretch: 1;
+                view: root.constraint-view;
+                compact: root.compact-timetable;
+                action(kind, index) => { root.constraint-action(kind, index); }
+                option(field, value) => { root.constraint-option(field, value); }
+                text(field, value) => { root.constraint-text(field, value); }
+                grid-cell(day, period, first) => { root.constraint-grid-cell(day, period, first); }
+            }
+            if root.live-workspace && root.page == 3 && root.home-filter == 4: HomeTargetList {
+                horizontal-stretch: 1;
+                title: @tr("Hard conflicts");
+                empty-message: @tr("No hard conflicts in the current version.");
+                entries: root.hard-conflicts;
+            }
+            if root.live-workspace && root.page == 3 && root.home-filter == 7: FinalizationPage {
+                horizontal-stretch: 1;
+                view: root.final-view;
+                action(kind, index) => { root.finalize-action(kind, index); }
+                navigate(target) => { root.navigate-home-target(target); }
+            }
+            if root.live-workspace && root.page == 4: ReviewQueuePage {
+                horizontal-stretch: 1;
+                view: root.review-queue;
+                compact: root.compact-timetable;
+                select(index) => { root.review-queue-action(1, index); }
+                filter(index) => { root.review-queue-action(0, index); }
+                open(index) => { root.open-review(index); }
+                navigate(target) => { root.navigate-home-target(target); }
+            }
+            if root.live-workspace && root.page == 5: ExportPage {
+                horizontal-stretch: 1;
+                view: root.export-view;
+                backup-view: root.backup-view;
+                backup-active <=> root.export-backup-active;
+                compact: root.compact-timetable;
+                action(command, index) => { root.export-command(command, index); }
+                viewport(width) => { root.export-viewport(width); }
+                finalize => { root.navigate-home-target(7); }
+                save-backup => { root.save-backup(); }
+                restore-backup => { root.restore-backup(); }
+            }
+            if root.live-workspace && root.page == 8: ImportPage {
+                horizontal-stretch: 1;
+                view: root.import-view;
+                compact: root.compact-timetable;
+                command(code) => { root.import-command(code); }
+                select-row(row) => { root.import-select(row); }
+                check-row(row, checked) => { root.import-check(row, checked); }
+            }
+            if root.live-workspace && root.page == 6: VerticalLayout {
+                horizontal-stretch: 1;
+                padding: Theme.page-padding;
+                spacing: Theme.space-medium;
+                PageHeader { title: @tr("Settings"); subtitle: @tr("Workspace storage"); }
+                BackupPane {
+                    vertical-stretch: 1;
+                    view: root.backup-view;
+                    save-backup => { root.save-backup(); }
+                    restore-backup => { root.restore-backup(); }
+                }
+            }
+            if root.page != 1 && root.page != 3 && root.page != 7 && !root.live-workspace: PlaceholderPage {
+                horizontal-stretch: 1;
+                title: root.page == 0 ? @tr("Home") : root.page == 2 ? @tr("Constraints") : root.page == 4 ? @tr("Review") : root.page == 5 ? @tr("Export & Handover") : root.page == 8 ? @tr("Import") : @tr("Settings");
             }
         }
 
         StatusBar {
-            left-text: @tr("Local workspace");
-            right-text: "Auler " + root.app-version + " · " + @tr("Sample department data");
+            left-text: root.backup-view.busy && root.workspace-start ? @tr("Checking workspace copy…") : root.workspace-start ? @tr("You can start without signing in.") : @tr("Local workspace");
+            right-text: "Auler " + root.app-version + (root.sample-workspace || !root.live-workspace ? " · " + @tr("Sample department data") : "");
         }
+    }
+
+    if root.backup-view.pending: RestoreConfirmation {
+        width: root.width;
+        height: root.height;
+        view: root.backup-view;
+        open => { root.open-restored(); }
+        cancel => { root.keep-workspace(); }
     }
 }

@@ -1,5 +1,6 @@
 import { AboutSlint, ScrollView } from "std-widgets.slint";
 import { Theme, Panel, Icon, Icons, FocusRing } from "theme.slint";
+import { PageHeader } from "components.slint";
 
 // 웹 링크. 누르면 기본 브라우저로 연다(Rust가 정해 둔 주소만 연다).
 // 화면 읽기 프로그램에는 버튼으로, 설명에 주소를 알린다.
@@ -9,6 +10,8 @@ component LinkButton inherits FocusScope {
     callback open(string);
     property <bool> keyboard-focus;
 
+    min-width: Theme.min-target;
+    min-height: Theme.min-target;
     accessible-role: AccessibleRole.button;
     accessible-label: root.text;
     accessible-description: root.url;
@@ -34,7 +37,7 @@ component LinkButton inherits FocusScope {
         alignment: start;
         Text {
             text: root.text;
-            color: touch.has-hover ? #1B4280 : Theme.action;
+            color: touch.has-hover ? Theme.action-hover : Theme.action;
             vertical-alignment: center;
             accessible-role: AccessibleRole.none;
         }
@@ -86,13 +89,12 @@ export component AboutPage inherits VerticalLayout {
     in property <string> version;
     callback open-url(string);
 
-    padding: 20px;
+    padding: Theme.page-padding;
     spacing: 14px;
 
-    VerticalLayout {
-        spacing: 4px;
-        Text { text: @tr("About Auler"); font-size: Theme.font-title; font-weight: 700; color: Theme.text; }
-        Text { text: @tr("Version {0}", root.version); font-size: Theme.font-small; color: Theme.text-muted; }
+    PageHeader {
+        title: @tr("About Auler");
+        subtitle: @tr("Version {0}", root.version);
     }
 
     sv := ScrollView {

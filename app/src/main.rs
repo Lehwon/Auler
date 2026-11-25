@@ -7,18 +7,22 @@ use slint::ComponentHandle;
 
 fn main() -> Result<(), slint::PlatformError> {
     let ui = AppWindow::new()?;
-    auler::init(&ui, auler::startup_language());
-
-    // 개발용: AULER_PAGE(0~7)로 시작 화면을 고정한다 (캡처·측정 자동화).
-    if let Some(page) = std::env::var("AULER_PAGE")
+    let page = std::env::var("AULER_PAGE")
         .ok()
-        .and_then(|p| p.parse::<i32>().ok())
-    {
+        .and_then(|p| p.parse::<i32>().ok());
+    let scenario = Scenario::from_env();
+    if page.is_some() || scenario.is_some() {
+        auler::init(&ui, auler::startup_language());
+    } else {
+        let workspace = std::env::args_os().nth(1).map(std::path::PathBuf::from);
+        auler::workspace::init(&ui, auler::startup_language(), workspace.as_deref());
+    }
+    if let Some(page) = page {
         ui.set_page(page.clamp(0, auler::LAST_PAGE));
     }
 
     // 개발용: AULER_BENCH(scroll|drag|idle)로 상호작용 벤치마크를 돌리고 끝낸다.
-    let bench = Scenario::from_env().map(|scenario| {
+    let bench = scenario.map(|scenario| {
         ui.set_page(scenario.page());
         bench::start(&ui, scenario)
     });

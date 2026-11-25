@@ -226,7 +226,7 @@ msgid "Total"
 msgstr "총"
 
 msgid "Sections"
-msgstr "분반 목록"
+msgstr "분반"
 
 msgid "Code"
 msgstr "학수번호"
@@ -335,3 +335,1662 @@ msgstr "전체 오픈소스 구성 요소와 라이선스"
 # Slint 표준 위젯(AboutSlint)
 msgid "Version {}"
 msgstr "버전 {}"
+
+msgid "{0} · {1}"
+msgstr "{0} · {1}"
+
+msgid "{0} rooms · {1} instructors"
+msgstr "강의실 {0}개 · 교원 {1}명"
+
+msgid "Academic term"
+msgstr "학기"
+
+msgid "Academic year"
+msgstr "학년도"
+
+msgid "AI connections (optional)"
+msgstr "AI 연결 (선택)"
+
+msgid "Back to workspace"
+msgstr "작업공간으로 돌아가기"
+
+msgid "Cancel"
+msgstr "취소"
+
+msgid "Choose a workspace file saved on this PC."
+msgstr "이 PC에 저장된 작업공간 파일을 선택하세요."
+
+msgid "Choose a workspace for your department."
+msgstr "학과에서 사용할 작업공간을 선택하세요."
+
+msgid "Choose save location"
+msgstr "저장 위치 선택"
+
+msgid "Complete"
+msgstr "완료"
+
+msgid "Connections are unavailable in this build."
+msgstr "이 버전에서는 AI 연결을 사용할 수 없습니다."
+
+msgid "Continue with ChatGPT"
+msgstr "Continue with ChatGPT"
+
+msgid "Copy previous term"
+msgstr "이전 학기 복사"
+
+msgid "Copy sections and the weekly calendar from {0}."
+msgstr "{0}의 분반과 주간 교시표를 복사합니다."
+
+msgid "Copy term"
+msgstr "학기 복사"
+
+msgid "Create"
+msgstr "만들기"
+
+msgid "Create a term"
+msgstr "학기 만들기"
+
+msgid "Create a term to start entering departmental data."
+msgstr "학기를 만든 뒤 학과 자료를 입력할 수 있습니다."
+
+msgid "Current step"
+msgstr "현재 단계"
+
+msgid "Daily period grid"
+msgstr "일일 교시표"
+
+msgid "Define the academic term and teaching hours."
+msgstr "학년도와 수업 시간을 등록하세요."
+
+msgid "Department"
+msgstr "학과명"
+
+msgid "Finalization"
+msgstr "확정 현황"
+
+msgid "Finalize and export"
+msgstr "확정·출력"
+
+msgid "Finalized v{0}"
+msgstr "확정본 v{0}"
+
+msgid "First semester"
+msgstr "1학기"
+
+msgid "First start"
+msgstr "첫 교시 시작"
+
+msgid "In the current version"
+msgstr "현재 버전 기준"
+
+msgid "MCP settings"
+msgstr "MCP 설정"
+
+msgid "Meetings missing a time or room"
+msgstr "시간이나 강의실이 없는 배치"
+
+msgid "Minutes between"
+msgstr "교시 간 휴식 (분)"
+
+msgid "Minutes per period"
+msgstr "수업 시간 (분)"
+
+msgid "New workspace"
+msgstr "새 작업공간"
+
+msgid "No finalized version yet"
+msgstr "아직 확정본이 없습니다"
+
+msgid "No saved work for this term yet."
+msgstr "이 학기에 저장된 작업이 없습니다."
+
+msgid "Open"
+msgstr "열기"
+
+msgid "Open existing workspace"
+msgstr "기존 작업공간 열기"
+
+msgid "Open sample"
+msgstr "예제 열기"
+
+msgid "Open sample department"
+msgstr "예제 학과 열기"
+
+msgid "Open selected task"
+msgstr "선택한 작업 열기"
+
+msgid "Open timetable"
+msgstr "시간표 열기"
+
+msgid "Pending constraints"
+msgstr "확인 대기 조건"
+
+msgid "Periods"
+msgstr "교시 수"
+
+msgid "Prepare data"
+msgstr "자료 준비"
+
+msgid "Read-only"
+msgstr "읽기 전용"
+
+msgid "Recent work"
+msgstr "최근 작업"
+
+msgid "Registered sections"
+msgstr "등록 분반"
+
+msgid "Restore"
+msgstr "복원"
+
+msgid "Restore backup"
+msgstr "백업 복원"
+
+msgid "Restore to a new workspace file."
+msgstr "백업 파일을 새 작업공간으로 복원합니다."
+
+msgid "Review before finalizing"
+msgstr "확정 전에 확인"
+
+msgid "Review conflicts"
+msgstr "충돌 검토"
+
+msgid "Review constraints"
+msgstr "조건 검토"
+
+msgid "Review the copied sections and add conditions for the new term. Placements and conditions start empty."
+msgstr "복사한 분반을 확인하고 새 학기의 편성 조건을 등록하세요. 배치와 조건은 비어 있습니다."
+
+msgid "Review unassigned"
+msgstr "미배정 검토"
+
+msgid "Schedule"
+msgstr "시간표 편성"
+
+msgid "Second semester"
+msgstr "2학기"
+
+msgid "Set the department, term and save location."
+msgstr "학과와 학기, 저장 위치를 설정합니다."
+
+msgid "Source"
+msgstr "출처"
+
+msgid "Start without AI"
+msgstr "AI 없이 시작하기"
+
+msgid "Start your semester timetable"
+msgstr "학기 시간표를 시작하세요"
+
+msgid "Summer session"
+msgstr "여름학기"
+
+msgid "Task"
+msgstr "작업"
+
+msgid "Teaching days"
+msgstr "수업 요일"
+
+msgid "Time"
+msgstr "시간"
+
+msgid "Try Auler with fictional courses, people and rooms."
+msgstr "가상 과목, 교원, 강의실로 기능을 연습합니다."
+
+msgid "View data"
+msgstr "기준자료 보기"
+
+msgid "Winter session"
+msgstr "겨울학기"
+
+msgid "Workspaces"
+msgstr "작업공간"
+
+msgid "You can prepare and schedule a term offline."
+msgstr "인터넷 없이 자료를 준비하고 시간표를 편성할 수 있습니다."
+
+msgid "You can start without signing in."
+msgstr "로그인 없이 시작할 수 있습니다."
+
+msgid "The workspace operation failed. {0}"
+msgstr "작업공간을 처리하지 못했습니다. {0}"
+
+msgid "Enter the department name."
+msgstr "학과명을 입력하세요."
+
+msgid "Check the academic year and term."
+msgstr "학년도와 학기를 확인하세요."
+
+msgid "Select at least one teaching day and check that the period times fit in one day."
+msgstr "수업 요일을 하나 이상 선택하고 교시표가 자정을 넘는지 확인하세요."
+
+msgid "This workspace is open in another Auler window."
+msgstr "다른 Auler 창에서 이 작업공간을 열고 있습니다."
+
+msgid "A file already exists at this location. Choose a new name."
+msgstr "해당 위치에 파일이 이미 있습니다. 다른 이름을 선택하세요."
+
+msgid "Choose an Auler workspace file."
+msgstr "Auler 작업공간 파일을 선택하세요."
+
+msgid "Open this workspace with a newer version of Auler."
+msgstr "Auler 최신 버전에서 작업공간을 여세요."
+
+msgid "This term already exists. Choose another year or term."
+msgstr "이미 등록된 학기입니다. 다른 학년도나 학기를 선택하세요."
+
+msgid "Created term"
+msgstr "학기 만들기"
+
+msgid "Copied term"
+msgstr "학기 복사"
+
+msgid "Local solver"
+msgstr "로컬 솔버"
+
+msgid "Standard XLSX"
+msgstr "표준 XLSX"
+
+msgid "Local"
+msgstr "로컬"
+
+msgid "Time not assigned"
+msgstr "시간 미배정"
+
+msgid "Room not assigned"
+msgstr "강의실 미지정"
+
+msgid "No changes"
+msgstr "변경 없음"
+
+msgid "Ready to apply"
+msgstr "적용 가능"
+
+msgid "Validation failed"
+msgstr "검증 실패"
+
+msgid "Partially applied"
+msgstr "부분 적용"
+
+msgid "Applied"
+msgstr "적용 완료"
+
+msgid "Rejected"
+msgstr "거절됨"
+
+msgid "Cancelled"
+msgstr "취소됨"
+
+msgid "Base changed"
+msgstr "기준 변경됨"
+
+msgid "No pending constraints."
+msgstr "확인 대기 조건이 없습니다."
+
+msgid "No confirmed constraints."
+msgstr "확인된 편성 조건이 없습니다."
+
+msgid "No hard conflicts in the current version."
+msgstr "현재 버전에 필수 충돌이 없습니다."
+
+msgid "No review drafts for this term."
+msgstr "이 학기의 검토 초안이 없습니다."
+
+msgid "Validate timetable"
+msgstr "시간표 검증"
+
+msgid "Add sections before validating the timetable."
+msgstr "시간표를 검증하려면 먼저 분반을 등록하세요."
+
+msgid "Required placement checks passed."
+msgstr "필수 배치 검사를 통과했습니다."
+
+msgid "Review the outstanding timetable checks."
+msgstr "시간표에서 해결해야 할 항목을 확인하세요."
+
+msgid "External room checks"
+msgstr "공용실 일정 확인"
+
+msgid "All years"
+msgstr "전체 학년"
+
+msgid "Year {0}"
+msgstr "{0}학년"
+
+msgid "Use a registered code and match its capitalization."
+msgstr "등록된 코드의 대소문자를 그대로 입력하세요."
+
+msgid "Keep at least one teaching period."
+msgstr "수업 교시는 한 개 이상 유지해야 합니다."
+
+msgid "Enter a unique period label."
+msgstr "다른 교시와 겹치지 않는 이름을 입력하세요."
+
+msgid "End time must be later than start time."
+msgstr "종료 시각은 시작 시각보다 늦어야 합니다."
+
+msgid "Check the period order and make sure classes and breaks do not overlap."
+msgstr "교시의 순서와 수업·휴게시간의 겹침을 확인하세요."
+
+msgid "A file already exists here. Choose a different CSV name."
+msgstr "이 위치에 파일이 이미 있습니다. 다른 CSV 파일명을 선택하세요."
+
+msgid "Available seats cannot exceed the total of {0}."
+msgstr "가용 좌석은 총 좌석 {0}석을 넘을 수 없습니다."
+
+msgid "The CSV file could not be saved. {0}"
+msgstr "CSV 파일을 저장하지 못했습니다. {0}"
+
+msgid "Equipment scope (per person or per room)"
+msgstr "장비 필요 단위 (1인당 또는 강의실당)"
+
+msgid "Provisional enrollment"
+msgstr "잠정 인원"
+
+msgid "Period split"
+msgstr "교시 분할"
+
+msgid "Class type"
+msgstr "수업 유형"
+
+msgid "Equipment scope"
+msgstr "장비 필요 단위"
+
+msgid "Schedule checked"
+msgstr "일정 확인일"
+
+msgid "Start time"
+msgstr "시작 시각"
+
+msgid "End time"
+msgstr "종료 시각"
+
+msgid "Export current view"
+msgstr "현재 보기 내보내기"
+
+msgid "Import data"
+msgstr "자료 가져오기"
+
+msgid "Back to data"
+msgstr "기준자료로 돌아가기"
+
+msgid "Choose method"
+msgstr "방법 선택"
+
+msgid "Select file"
+msgstr "파일 선택"
+
+msgid "Review values"
+msgstr "결과 검토"
+
+msgid "Choose or drop an Auler workbook to validate it on this PC."
+msgstr "Auler 표준 파일을 선택하거나 놓으면 이 PC에서 검사합니다."
+
+msgid "Choose XLSX file"
+msgstr "XLSX 파일 선택"
+
+msgid "Save standard template"
+msgstr "표준 양식 저장"
+
+msgid "Enter data directly"
+msgstr "직접 입력"
+
+msgid "Converted draft"
+msgstr "변환된 초안"
+
+msgid "Original input"
+msgstr "원본 입력"
+
+msgid "Values after conversion"
+msgstr "변환된 값"
+
+msgid "Check before applying"
+msgstr "적용 전 확인"
+
+msgid "Compare with current data"
+msgstr "현재 자료와 다시 비교"
+
+msgid "Load corrected workbook"
+msgstr "수정한 파일 불러오기"
+
+msgid "Keep review draft"
+msgstr "검토 초안 보관"
+
+msgid "Apply selected ({0})"
+msgstr "선택 항목 적용 ({0})"
+
+msgid "The workbook matches the Auler template."
+msgstr "Auler 표준 양식 검사를 통과했습니다."
+
+msgid "Check the workbook against the standard template."
+msgstr "파일을 표준 양식과 대조해 확인하세요."
+
+msgid "The XLSX file could not be read. Check that the file opens in Excel."
+msgstr "XLSX를 읽지 못했습니다. Excel에서 파일이 열리는지 확인하세요."
+
+msgid "Choose an XLSX workbook."
+msgstr "XLSX 파일을 선택하세요."
+
+msgid "The data used for this draft changed. Compare the draft with current data."
+msgstr "초안의 기준자료가 변경됐습니다. 현재 자료와 다시 비교하세요."
+
+msgid "Check the issues in this draft before applying changes."
+msgstr "적용 전에 초안의 확인 항목을 검토하세요."
+
+msgid "This term is finalized. Open a correction draft before applying changes."
+msgstr "확정된 학기입니다. 수정용 초안을 연 뒤 적용하세요."
+
+msgid "Review the selected rows and include any records they depend on."
+msgstr "선택 항목과 그 항목이 참조하는 기록을 함께 확인하세요."
+
+msgid "Undone"
+msgstr "실행 취소됨"
+
+msgid "New"
+msgstr "신규"
+
+msgid "Update"
+msgstr "갱신"
+
+msgid "Term setup"
+msgstr "학기 설정"
+
+msgid "Check the original code and enter it as text to preserve leading zeros."
+msgstr "원본 코드를 확인한 뒤 앞자리 0을 보존하도록 텍스트로 입력하세요."
+
+msgid "Enter the building and room number."
+msgstr "건물과 호실을 함께 입력하세요."
+
+msgid "Check the instructor code and name in the original workbook."
+msgstr "원본 파일의 교원 코드와 이름을 확인하세요."
+
+msgid "Check this value against the standard template."
+msgstr "표준 양식에 맞춰 값을 확인하세요."
+
+msgid "Paste the formula result as a value."
+msgstr "수식 결과를 값으로 붙여넣으세요."
+
+msgid "Use the current Auler template."
+msgstr "현재 Auler 표준 양식을 사용하세요."
+
+msgid "Enter exactly one term in the Term worksheet."
+msgstr "학기 시트에는 학기 한 개만 입력하세요."
+
+msgid "Match the first row of headings to the template."
+msgstr "첫 행의 머리글을 양식과 맞추세요."
+
+msgid "{0} · through row {1} · {2} columns"
+msgstr "{0} · {1}행까지 · 열 {2}개"
+
+msgid "Choose a workbook for {0}, or switch to the workbook’s term."
+msgstr "{0} 파일을 선택하거나 파일의 학기로 전환하세요."
+
+msgid "New {0} · Update {1} · Unchanged {2} · Needs review {3} · Errors {4}"
+msgstr "신규 {0} · 갱신 {1} · 동일 {2} · 확인 필요 {3} · 오류 {4}"
+
+msgid "Applied {n} selected row."
+msgid_plural "Applied {n} selected rows."
+msgstr[0] "선택한 {n}개 행을 적용했습니다."
+
+msgid "Select {0} prerequisite rows for this record."
+msgstr "이 항목을 적용하려면 참조하는 행 {0}개도 선택하세요."
+
+msgid "Check worksheet {0}. The template requires it exactly once."
+msgstr "{0} 시트를 확인하세요. 양식에 한 개만 있어야 합니다."
+
+msgid "Select applicable rows"
+msgstr "적용 가능한 행 선택"
+
+msgid "Clear selection"
+msgstr "선택 해제"
+
+msgid "Edit selected"
+msgstr "선택 항목 수정"
+
+msgid "Edit calendar entries one at a time."
+msgstr "교시표 항목은 한 번에 하나씩 수정하세요."
+
+msgid "This record will be removed when you confirm."
+msgstr "확인하면 이 기록이 삭제됩니다."
+
+msgid "Check the format and value of this field."
+msgstr "이 항목의 형식과 값을 확인하세요."
+
+msgid "Placements or constraints use this period or a later period."
+msgstr "이 교시나 이후 교시를 사용 중인 배치 또는 조건이 있습니다."
+
+msgid "A new record identifier could not be allocated."
+msgstr "새 기록의 식별 번호를 지정할 수 없습니다."
+
+msgid "This record is in use. Review the affected records before deleting it."
+msgstr "다른 기록에서 사용 중입니다. 영향을 받는 항목을 먼저 확인하세요."
+
+msgid "A record with this code already exists."
+msgstr "이 코드로 등록된 기록이 이미 있습니다."
+
+msgid "The workspace changed. Close the editor and reopen the current record."
+msgstr "작업공간이 변경되었습니다. 편집을 닫고 최신 기록을 열어 주세요."
+
+msgid "Changes were saved. Reopen the workspace to reload them."
+msgstr "변경을 저장했습니다. 다시 불러오려면 작업공간을 열어 주세요."
+
+msgid "A related record in this workspace"
+msgstr "이 작업공간의 관련 기록"
+
+msgid "Select {0}"
+msgstr "{0} 선택"
+
+msgid "Delete {0}"
+msgstr "{0} 삭제"
+
+msgid "Section {0}"
+msgstr "분반 {0}"
+
+msgid "{0} · {1} → {2}"
+msgstr "{0} · {1} → {2}"
+
+msgid "(empty)"
+msgstr "(비어 있음)"
+
+msgid "Course code"
+msgstr "학수번호"
+
+msgid "Instructor codes (separated by ;)"
+msgstr "교원 코드 (;로 구분)"
+
+msgid "Groups (code and yes/no; separate groups with ;)"
+msgstr "수강 집단 (코드와 필수 여부 예/아니오, 집단은 ;로 구분)"
+
+msgid "Provisional enrollment (yes/no)"
+msgstr "인원 잠정 여부 (예/아니오)"
+
+msgid "Period split (e.g. 2+1)"
+msgstr "교시 분할 (예 2+1)"
+
+msgid "Class type (lecture, lab or mixed)"
+msgstr "수업 유형 (이론, 실습, 혼합)"
+
+msgid "Room type"
+msgstr "강의실 유형"
+
+msgid "Equipment needs (code quantity; …)"
+msgstr "필수 장비 (코드 수량, ;로 구분)"
+
+msgid "Name"
+msgstr "이름"
+
+msgid "Track"
+msgstr "트랙"
+
+msgid "Building"
+msgstr "건물"
+
+msgid "Room number"
+msgstr "호실"
+
+msgid "Total seats"
+msgstr "총 좌석"
+
+msgid "Available seats"
+msgstr "가용 좌석"
+
+msgid "Shared room"
+msgstr "공용실"
+
+msgid "Schedule checked (YYYY-MM-DD)"
+msgstr "일정 확인일 (YYYY-MM-DD)"
+
+msgid "Equipment (code owned available [from until]; …)"
+msgstr "장비 (코드 보유 가용 [점검 시작일 종료일], ;로 구분)"
+
+msgid "Equipment scope (per_person or per_room)"
+msgstr "장비 필요 단위 (1인당 또는 강의실당)"
+
+msgid "Label"
+msgstr "표시 이름"
+
+msgid "Start time (HH:MM)"
+msgstr "시작 시각 (HH:MM)"
+
+msgid "End time (HH:MM)"
+msgstr "종료 시각 (HH:MM)"
+
+msgid "Export data"
+msgstr "기준자료 내보내기"
+
+msgid "Add record"
+msgstr "자료 추가"
+
+msgid "Courses & sections"
+msgstr "과목·분반"
+
+msgid "Instructors"
+msgstr "교원"
+
+msgid "Student groups"
+msgstr "수강 집단"
+
+msgid "Rooms & equipment"
+msgstr "강의실·장비"
+
+msgid "Period grid"
+msgstr "교시표"
+
+msgid "Courses"
+msgstr "과목"
+
+msgid "Rooms"
+msgstr "강의실"
+
+msgid "Equipment"
+msgstr "장비"
+
+msgid "Breaks"
+msgstr "휴게시간"
+
+msgid "Data type"
+msgstr "자료 유형"
+
+msgid "All statuses"
+msgstr "모든 상태"
+
+msgid "Provisional"
+msgstr "잠정"
+
+msgid "Columns"
+msgstr "열 표시"
+
+msgid "No records yet. Add a record or import a file."
+msgstr "등록된 자료가 없습니다. 자료를 추가하거나 파일을 가져오세요."
+
+msgid "No records match this search."
+msgstr "검색과 일치하는 자료가 없습니다."
+
+msgid "{0} shown · {1} selected"
+msgstr "표시 {0}개 · 선택 {1}개"
+
+msgid "Edit"
+msgstr "편집"
+
+msgid "Delete"
+msgstr "삭제"
+
+msgid "Preview changes"
+msgstr "변경 미리보기"
+
+msgid "Apply selected"
+msgstr "선택 항목 적용"
+
+msgid "Confirm delete"
+msgstr "삭제 확인"
+
+msgid "Save"
+msgstr "저장"
+
+msgid "Remove this worksheet or use the name in the standard template."
+msgstr "이 시트를 제거하거나 표준 양식의 시트 이름을 사용하세요."
+
+msgid "Required course"
+msgstr "필수과목"
+
+msgid "Yes"
+msgstr "예"
+
+msgid "No"
+msgstr "아니요"
+
+msgid "Type"
+msgstr "유형"
+
+msgid "Target"
+msgstr "대상"
+
+msgid "Date range"
+msgstr "적용 기간"
+
+msgid "Times to avoid"
+msgstr "피할 시간"
+
+msgid "Priority"
+msgstr "우선순위"
+
+msgid "Required course overlaps"
+msgstr "필수과목 시간 중복"
+
+msgid "Lessons may span breaks"
+msgstr "휴게시간을 넘는 연강 허용"
+
+msgid "Room turnaround in minutes"
+msgstr "강의실 준비 시간(분)"
+
+msgid "Private note"
+msgstr "비공개 메모"
+
+msgid "Room"
+msgstr "강의실"
+
+msgid "Original request"
+msgstr "요청 원문"
+
+msgid "Weight"
+msgstr "가중치"
+
+msgid "Confirmed by"
+msgstr "확인자"
+
+msgid "Enter a value under {0}."
+msgstr "{0} 열에 값을 입력하세요."
+
+msgid "Check the format and value under {0}."
+msgstr "{0} 열의 값과 형식을 확인하세요."
+
+msgid "Add the {0} heading from the template."
+msgstr "표준 양식의 {0} 열을 추가하세요."
+
+msgid "Keep one {0} heading."
+msgstr "{0} 열은 하나만 남기세요."
+
+msgid "The heading {0} is outside the template. Check the first row."
+msgstr "{0} 열은 표준 양식에 없습니다. 첫 행의 머리글을 확인하세요."
+
+msgid "Use the same {1} for each row of constraint {0}."
+msgstr "같은 조건({0})의 모든 행에서 {1} 값을 일치시키세요."
+
+msgid "Upcoming step"
+msgstr "다음 단계"
+
+msgid "Only selected valid rows apply. Records missing from the workbook are kept."
+msgstr "선택한 유효 행만 적용합니다. 파일에 없는 기존 자료는 그대로 유지합니다."
+
+msgid "Review remaining rows"
+msgstr "남은 행 검토"
+
+msgid "Submitted values"
+msgstr "제출된 값"
+
+msgid "Hard constraint"
+msgstr "필수 제약"
+
+msgid "Soft constraint"
+msgstr "선호 제약"
+
+msgid "Pending confirmation"
+msgstr "확인 대기"
+
+msgid "Effect on current placements"
+msgstr "현재 배치에 미치는 영향"
+
+msgid "No current placements are affected."
+msgstr "영향을 받는 배치가 없습니다."
+
+msgid "{n} current placement affected"
+msgid_plural "{n} current placements affected"
+msgstr[0] "현재 배치 {n}건에 영향"
+
+msgid "Weekly constraint grid"
+msgstr "주간 편성 조건 격자"
+
+msgid "Constraint details"
+msgstr "조건 상세"
+
+msgid "Edit constraint"
+msgstr "조건 수정"
+
+msgid "Pending requests take effect after confirmation."
+msgstr "확인 후 편성에 적용됩니다."
+
+msgid "Student group"
+msgstr "수강 집단"
+
+msgid "Target type"
+msgstr "대상 유형"
+
+msgid "Unspecified"
+msgstr "미확인"
+
+msgid "Confirmed and used for scheduling"
+msgstr "조건을 확인하고 편성에 적용"
+
+msgid "Weight (1 to 10)"
+msgstr "가중치(1~10)"
+
+msgid "Leave both dates blank for the whole term."
+msgstr "학기 전체에 적용하려면 두 날짜를 비워 두세요."
+
+msgid "First date"
+msgstr "시작일"
+
+msgid "Last date"
+msgstr "종료일"
+
+msgid "Remove"
+msgstr "삭제"
+
+msgid "Remove {0}"
+msgstr "{0} 삭제"
+
+msgid "Day"
+msgstr "요일"
+
+msgid "Clock times"
+msgstr "시각"
+
+msgid "Time format"
+msgstr "시간 형식"
+
+msgid "First period"
+msgstr "시작 교시"
+
+msgid "Last period"
+msgstr "종료 교시"
+
+msgid "Update time"
+msgstr "시간 변경"
+
+msgid "Add time"
+msgstr "시간 추가"
+
+msgid "Cancel time edit"
+msgstr "시간 수정 취소"
+
+msgid "Remove this condition from the current draft?"
+msgstr "현재 초안에서 이 조건을 삭제할까요?"
+
+msgid "Save constraint"
+msgstr "조건 저장"
+
+msgid "Remove constraint"
+msgstr "조건 삭제"
+
+msgid "Hard and soft constraints and pending requests"
+msgstr "필수 제약, 선호 제약, 확인 대기 요청"
+
+msgid "Add constraint"
+msgstr "조건 추가"
+
+msgid "Create a term to enter constraints."
+msgstr "편성 조건을 입력하려면 학기를 만드세요."
+
+msgid "Search targets and requests"
+msgstr "대상과 요청 검색"
+
+msgid "All targets"
+msgstr "전체 대상"
+
+msgid "Any date range"
+msgstr "전체 기간"
+
+msgid "Whole term"
+msgstr "학기 전체"
+
+msgid "Specific dates"
+msgstr "특정 기간"
+
+msgid "List view"
+msgstr "목록 보기"
+
+msgid "No constraints match this view."
+msgstr "이 보기에 해당하는 조건이 없습니다."
+
+msgid "Time restriction"
+msgstr "시간 제한"
+
+msgid "Manual entry"
+msgstr "직접 입력"
+
+msgid "Select a target from the current term."
+msgstr "현재 학기의 대상을 선택하세요."
+
+msgid "Choose a teaching day and add a valid time range."
+msgstr "수업 요일과 시간 범위를 지정해 추가하세요."
+
+msgid "Enter two dates in YYYY-MM-DD format within the term, in order."
+msgstr "학기 내 날짜 두 개를 YYYY-MM-DD 형식으로 순서대로 입력하세요."
+
+msgid "Choose hard or soft before confirming."
+msgstr "조건을 확인하려면 필수 또는 선호를 선택하세요."
+
+msgid "Choose a whole number from 1 to 10 for a soft constraint."
+msgstr "선호 조건의 가중치를 1~10 사이의 정수로 입력하세요."
+
+msgid "{0} · Period {1}"
+msgstr "{0} · {1}교시"
+
+msgid "{0} · Periods {1}–{2}"
+msgstr "{0} · {1}~{2}교시"
+
+msgid "{0} · Period {1} · {2}"
+msgstr "{0} · {1}교시 · {2}"
+
+msgid "Confirmed"
+msgstr "확인됨"
+
+msgid "Add or update the edited time range before saving."
+msgstr "저장하기 전에 수정 중인 시간 범위를 추가하거나 반영하세요."
+
+msgid "Saved constraint"
+msgstr "편성 조건 저장"
+
+msgid "Removed constraint"
+msgstr "편성 조건 삭제"
+
+msgid "Use the grid to toggle periods. Edit exact clock times in the time list."
+msgstr "격자에서 교시를 켜거나 끌 수 있습니다. 시각 범위는 시간 목록에서 편집하세요."
+
+msgid "Select a cell to inspect a condition. Select again to cycle through matches."
+msgstr "셀을 선택해 조건을 확인하세요. 다시 선택하면 같은 셀의 다음 조건이 열립니다."
+
+msgid "All {0}"
+msgstr "전체 {0}"
+
+msgid "Hard {0}"
+msgstr "필수 {0}"
+
+msgid "Soft {0}"
+msgstr "선호 {0}"
+
+msgid "Pending {0}"
+msgstr "확인 대기 {0}"
+
+msgid "{0} · {1} · Locked"
+msgstr "{0} · {1} · 잠금"
+
+msgid "This time range is already listed."
+msgstr "이미 목록에 있는 시간 범위입니다."
+
+msgid "A locked placement is affected. It stays in place when you save."
+msgstr "잠긴 배치에 영향을 주는 조건입니다. 저장해도 배치 위치는 유지됩니다."
+
+msgid "No time set"
+msgstr "시간 미지정"
+
+msgid "{n} constraint"
+msgid_plural "{n} constraints"
+msgstr[0] "조건 {n}개"
+
+msgid "Set by a clock-time range"
+msgstr "시각 범위로 지정됨"
+
+msgid "Remove avoided period"
+msgstr "피할 교시에서 제외"
+
+msgid "Add avoided period"
+msgstr "피할 교시로 추가"
+
+msgid "Add, update or cancel the time edit to use the grid."
+msgstr "격자를 사용하려면 수정 중인 시간 범위를 추가하거나 반영하세요. 취소할 수도 있습니다."
+
+msgid "Unavailable"
+msgstr "배정 불가"
+
+msgid "External check needed"
+msgstr "외부 확인 필요"
+
+msgid "Preference warning"
+msgstr "선호 경고"
+
+msgid "Select a class or an unassigned meeting."
+msgstr "수업 카드나 미배정 배치 단위를 선택하세요."
+
+msgid "Unlock this placement to change its time or room."
+msgstr "시간이나 강의실을 바꾸려면 배치 잠금을 해제하세요."
+
+msgid "Hide alternatives"
+msgstr "대안 닫기"
+
+msgid "Choose location"
+msgstr "배정 위치 선택"
+
+msgid "Start period"
+msgstr "시작 교시"
+
+msgid "Room alternatives"
+msgstr "강의실 대안"
+
+msgid "Add rooms in Data to review placement options."
+msgstr "배정 위치를 검토하려면 기준자료에서 강의실을 추가하세요."
+
+msgid "Preview placement in {0}"
+msgstr "{0} 배치 미리보기"
+
+msgid "Placement preview"
+msgstr "배치 미리보기"
+
+msgid "Proposed location"
+msgstr "변경할 위치"
+
+msgid "Apply placement"
+msgstr "배치 적용"
+
+msgid "Schedule result"
+msgstr "편성 결과"
+
+msgid "Cancelling local scheduling…"
+msgstr "로컬 편성 취소 중…"
+
+msgid "This runs on your PC. Review the result before applying it to the draft."
+msgstr "이 PC에서 계산합니다. 초안에 적용하기 전에 결과를 검토하세요."
+
+msgid "All meetings"
+msgstr "전체 배치 단위"
+
+msgid "Unassigned meetings"
+msgstr "미배정 배치 단위"
+
+msgid "Selected meeting"
+msgstr "선택한 배치 단위"
+
+msgid "Schedule scope"
+msgstr "편성 범위"
+
+msgid "Select a meeting before using this scope."
+msgstr "이 범위를 사용하려면 배치 단위를 먼저 선택하세요."
+
+msgid "Proposed schedule changes"
+msgstr "제안된 편성 변경"
+
+msgid "Keep current draft"
+msgstr "현재 초안 유지"
+
+msgid "Run scheduling"
+msgstr "편성 실행"
+
+msgid "Apply to draft"
+msgstr "초안에 적용"
+
+msgid "Create a term to begin scheduling."
+msgstr "편성을 시작하려면 학기를 만드세요."
+
+msgid "View filter"
+msgstr "보기 필터"
+
+msgid "Weekly grid"
+msgstr "주간 격자"
+
+msgid "No unassigned meetings in this view."
+msgstr "이 보기에 미배정 항목이 없습니다."
+
+msgid "No placements in this view."
+msgstr "이 보기에 배치된 수업이 없습니다."
+
+msgid "No time assigned"
+msgstr "시간 미배정"
+
+msgid "Room required"
+msgstr "강의실 배정 필요"
+
+msgid "The draft changed. Review a new preview before applying."
+msgstr "초안이 바뀌었습니다. 새 미리보기를 검토한 다음 적용하세요."
+
+msgid "Local scheduling stopped. Start it again to retry."
+msgstr "로컬 편성이 중단되었습니다. 편성을 다시 실행하세요."
+
+msgid "Preparing local scheduling…"
+msgstr "로컬 편성 준비 중…"
+
+msgid "Resolve conflicts in locked or fixed placements before applying a result."
+msgstr "결과를 적용하려면 잠겼거나 고정된 배치의 충돌을 먼저 해결하세요."
+
+msgid "Placed meeting"
+msgstr "배치 적용"
+
+msgid "Locked meeting"
+msgstr "배치 잠금"
+
+msgid "Unlocked meeting"
+msgstr "배치 잠금 해제"
+
+msgid "Applied schedule result"
+msgstr "편성 결과 적용"
+
+msgid "{0} · Part {1}"
+msgstr "{0} · 배치 {1}"
+
+msgid "{0} · Need {1}, available {2}"
+msgstr "{0} · 필요 {1}, 사용 가능 {2}"
+
+msgid "Draft v{0} · Locked {1} · Hard conditions {2} · Soft conditions {3}"
+msgstr "초안 v{0} · 잠금 {1}건 · 필수 조건 {2}건 · 선호 조건 {3}건"
+
+msgid "{0} · {1} ms · Best result {2}/{3} placed"
+msgstr "{0} · {1}ms · 최선 결과 {2}/{3}건 배치"
+
+msgid "Preparing"
+msgstr "준비 중"
+
+msgid "Improving preferences"
+msgstr "선호 조건 개선 중"
+
+msgid "Searching"
+msgstr "탐색 중"
+
+msgid "{0} · {1} placed · {2} unassigned"
+msgstr "{0} · 배치 {1}건 · 미배정 {2}건"
+
+msgid "Scheduling cancelled"
+msgstr "편성 취소됨"
+
+msgid "Time limit reached"
+msgstr "시간 제한에 도달함"
+
+msgid "No complete result"
+msgstr "완전한 배치 해 없음"
+
+msgid "Scheduling complete"
+msgstr "편성 완료"
+
+msgid "Hard conflicts {0} → {1} · Unassigned {2} → {3} · Preference cost {4} → {5} · Locked placements kept {6}"
+msgstr "필수 충돌 {0} → {1} · 미배정 {2} → {3} · 선호 위반 점수 {4} → {5} · 잠긴 배치 {6}건 유지"
+
+msgid "Fixed or locked placements need review"
+msgstr "고정·잠긴 배치 확인 필요"
+
+msgid "No valid time and room combination"
+msgstr "유효한 시간과 강의실 조합 없음"
+
+msgid "Unassigned when time ran out"
+msgstr "시간 제한까지 미배정"
+
+msgid "Unassigned when cancelled"
+msgstr "취소 시점에 미배정"
+
+msgid "Conflicts with other meetings"
+msgstr "다른 수업과 충돌"
+
+msgid "The meeting spans a registered break."
+msgstr "배치가 등록된 휴게시간을 넘습니다."
+
+msgid "Choose a registered room."
+msgstr "등록된 강의실을 선택하세요."
+
+msgid "Choose a room with the required room type."
+msgstr "필요한 유형의 강의실을 선택하세요."
+
+msgid "Seats required"
+msgstr "좌석 부족"
+
+msgid "Equipment required"
+msgstr "장비 필요"
+
+msgid "Equipment is under inspection during the term."
+msgstr "학기 중 장비 점검 기간이 있습니다."
+
+msgid "Confirm the shared-room schedule first."
+msgstr "공용 강의실의 외부 일정을 먼저 확인하세요."
+
+msgid "Enrollment is provisional."
+msgstr "잠정 인원입니다."
+
+msgid "Overlaps another meeting"
+msgstr "다른 수업과 시간 중복"
+
+msgid "Room turnaround is too short"
+msgstr "강의실 준비 시간 부족"
+
+msgid "Outside the condition’s allowed times"
+msgstr "편성 조건에 해당하는 제한 시간"
+
+msgid "The section is unavailable."
+msgstr "분반을 찾을 수 없습니다."
+
+msgid "Select a teaching day and a period that fits the meeting."
+msgstr "수업 요일과 필요한 시수를 수용할 수 있는 교시를 선택하세요."
+
+msgid "Choose a day and period in Details or select an empty grid cell."
+msgstr "상세에서 요일과 교시를 선택하거나 격자의 빈 칸을 선택하세요."
+
+msgid "{0} → {1}"
+msgstr "{0} → {1}"
+
+msgid "New placement"
+msgstr "신규 배정"
+
+msgid "Moved"
+msgstr "이동"
+
+msgid "Applying this result leaves {n} previously placed meeting unassigned."
+msgid_plural "Applying this result leaves {n} previously placed meetings unassigned."
+msgstr[0] "이 결과를 적용하면 기존 배치 {n}건이 미배정으로 바뀝니다."
+
+msgid "Other rooms at this time"
+msgstr "이 시간의 다른 강의실"
+
+msgid "Choose a slot within the weekly grid."
+msgstr "주간 격자 안의 시간대를 선택하세요."
+
+msgid "The current draft was kept."
+msgstr "현재 초안을 유지했습니다."
+
+msgid "Resolve the placement checks before applying this result."
+msgstr "결과를 적용하려면 배치 점검 항목을 먼저 해결하세요."
+
+msgid "{n} period"
+msgid_plural "{n} periods"
+msgstr[0] "{n}교시"
+
+msgid "Lecture room"
+msgstr "강의실"
+
+msgid "Laboratory"
+msgstr "실습실"
+
+msgid "Seminar room"
+msgstr "세미나실"
+
+msgid "Other room type"
+msgstr "기타 유형"
+
+msgid "{n} available seat"
+msgid_plural "{n} available seats"
+msgstr[0] "사용 가능 좌석 {n}개"
+
+msgid "Review proposed data, conditions and timetable changes"
+msgstr "자료·편성 조건·배치 변경 제안을 확인합니다."
+
+msgid "Review filters"
+msgstr "검토함 필터"
+
+msgid "Unassigned {0}"
+msgstr "미배정 {0}"
+
+msgid "Hard conflicts {0}"
+msgstr "필수 충돌 {0}"
+
+msgid "Review tasks"
+msgstr "검토 작업"
+
+msgid "No review drafts match this filter."
+msgstr "이 필터에 해당하는 검토 초안이 없습니다."
+
+msgid "Reference version"
+msgstr "참조 버전"
+
+msgid "Created"
+msgstr "생성 시각"
+
+msgid "Request {0}"
+msgstr "요청 {0}"
+
+msgid "Open review draft"
+msgstr "검토 초안 열기"
+
+msgid "Required checks"
+msgstr "필수 점검"
+
+msgid "Missing locked placements"
+msgstr "누락된 잠금 배치"
+
+msgid "Check room schedules"
+msgstr "강의실 일정 확인"
+
+msgid "Remaining warnings"
+msgstr "남은 경고"
+
+msgid "Preference warnings"
+msgstr "선호 경고"
+
+msgid "Provisional placements"
+msgstr "잠정 인원 배치"
+
+msgid "Finalized timetable"
+msgstr "시간표 확정본"
+
+msgid "Confirm timetable finalization"
+msgstr "시간표 확정 확인"
+
+msgid "Back to draft checks"
+msgstr "초안 점검으로 돌아가기"
+
+msgid "Finalized version"
+msgstr "확정 버전"
+
+msgid "Create correction draft"
+msgstr "수정용 초안 만들기"
+
+msgid "Finalized placements"
+msgstr "확정된 배치"
+
+msgid "Placements"
+msgstr "배치 수"
+
+msgid "Locked placements"
+msgstr "잠긴 배치"
+
+msgid "Version for export"
+msgstr "출력 버전"
+
+msgid "I reviewed the remaining warnings and pending conditions."
+msgstr "남은 경고와 확인 대기 조건을 검토했습니다."
+
+msgid "Open last finalized version"
+msgstr "최근 확정본 열기"
+
+msgid "Finalize timetable"
+msgstr "시간표 확정"
+
+msgid "Review draft"
+msgstr "검토 초안"
+
+msgid "Back to review"
+msgstr "검토함으로 돌아가기"
+
+msgid "Reject the selected rows?"
+msgstr "선택한 행을 거절할까요?"
+
+msgid "Cancel this review draft?"
+msgstr "이 검토 초안을 취소할까요?"
+
+msgid "Reject selected"
+msgstr "선택 항목 거절"
+
+msgid "Cancel draft"
+msgstr "초안 취소"
+
+msgid "Keep reviewing"
+msgstr "계속 검토"
+
+msgid "Opened correction draft"
+msgstr "수정용 초안 열기"
+
+msgid "Acknowledge the remaining warnings before finalizing."
+msgstr "확정하기 전에 남은 경고를 확인하세요."
+
+msgid "Data {0}"
+msgstr "자료 {0}"
+
+msgid "Constraints {0}"
+msgstr "조건 {0}"
+
+msgid "Placements {0}"
+msgstr "배치 {0}"
+
+msgid "Complete {0}"
+msgstr "완료 {0}"
+
+msgid "Needs attention {0}"
+msgstr "확인 필요 {0}"
+
+msgid "Only selected valid changes apply."
+msgstr "선택한 유효 변경만 적용합니다."
+
+msgid "Finalization saves a read-only version. Use a correction draft for later edits."
+msgstr "확정하면 읽기 전용 버전이 저장됩니다. 이후 변경은 수정용 초안에서 합니다."
+
+msgid "Review draft details"
+msgstr "검토 초안 상세"
+
+msgid "Could not open the saved PDF."
+msgstr "저장한 PDF를 열 수 없습니다."
+
+msgid "Could not prepare the output. {0}"
+msgstr "출력을 준비할 수 없습니다. {0}"
+
+msgid "Create files from a saved final version of the timetable."
+msgstr "저장된 확정본에서 파일을 생성합니다."
+
+msgid "Timetable export"
+msgstr "시간표 출력"
+
+msgid "Handover"
+msgstr "인수인계"
+
+msgid "Saved to {0}"
+msgstr "저장 위치 {0}"
+
+msgid "Validate and finalize the timetable before exporting it."
+msgstr "출력하기 전에 시간표를 검토하고 확정하세요."
+
+msgid "Handover settings"
+msgstr "인수인계 설정"
+
+msgid "Export settings"
+msgstr "출력 설정"
+
+msgid "Final version"
+msgstr "확정 버전"
+
+msgid "File format"
+msgstr "파일 형식"
+
+msgid "PDF (A4)"
+msgstr "PDF (A4)"
+
+msgid "Excel (XLSX)"
+msgstr "Excel (XLSX)"
+
+msgid "All sections"
+msgstr "전체 분반"
+
+msgid "View target"
+msgstr "보기 대상"
+
+msgid "Output language"
+msgstr "출력 언어"
+
+msgid "Korean"
+msgstr "한국어"
+
+msgid "English"
+msgstr "영어"
+
+msgid "Layout"
+msgstr "배치 형식"
+
+msgid "Page orientation"
+msgstr "용지 방향"
+
+msgid "Landscape"
+msgstr "가로"
+
+msgid "Portrait"
+msgstr "세로"
+
+msgid "Display fields"
+msgstr "표시 항목"
+
+msgid "The JSON file contains the timetable and reference data, including instructor names, departments, class sizes, and the conditions you select."
+msgstr "JSON 파일에 시간표와 교원 이름·소속, 분반 인원을 포함한 기준자료, 선택한 조건이 들어갑니다."
+
+msgid "Open saved PDF for printing"
+msgstr "저장한 PDF 열기"
+
+msgid "Preparing output…"
+msgstr "출력 준비 중…"
+
+msgid "Save handover file"
+msgstr "인계 파일 저장"
+
+msgid "Save file"
+msgstr "파일 저장"
+
+msgid "Conditions to include"
+msgstr "포함할 조건"
+
+msgid "Print preview"
+msgstr "인쇄 미리보기"
+
+msgid "Workbook preview"
+msgstr "Excel 미리보기"
+
+msgid "Previous page"
+msgstr "이전 쪽"
+
+msgid "Next page"
+msgstr "다음 쪽"
+
+msgid "{0} / {1}"
+msgstr "{0} / {1}"
+
+msgid "Private notes, request reasons, and access tokens are excluded."
+msgstr "비공개 메모, 요청 사유, 접근 토큰은 제외됩니다."
+
+msgid "There are no confirmed conditions in this version."
+msgstr "이 버전에는 확인된 조건이 없습니다."
+
+msgid "There are no scheduled classes in this view."
+msgstr "이 보기에는 배치된 수업이 없습니다."
+
+msgid "Generate preview"
+msgstr "미리보기 만들기"
+
+msgid "Zoom out"
+msgstr "축소"
+
+msgid "Zoom in"
+msgstr "확대"
+
+msgid "Timetable page preview"
+msgstr "시간표 쪽 미리보기"
+
+msgid "Replace existing file?"
+msgstr "기존 파일을 덮어쓸까요?"
+
+msgid "Replace file"
+msgstr "덮어쓰기"
+
+msgid "Course name"
+msgstr "과목명"
+
+msgid "Grid"
+msgstr "격자"
+
+msgid "List"
+msgstr "목록"
+
+msgid "A file already exists there. Choose another name or confirm replacement."
+msgstr "같은 경로에 파일이 있습니다. 이름을 바꾸거나 덮어쓰기를 확인하세요."
+
+msgid "Choose a regular file."
+msgstr "일반 파일을 선택하세요."
+
+msgid "Could not read the preview image. Generate it again."
+msgstr "미리보기 이미지를 읽을 수 없습니다. 다시 만들어 보세요."
+
+msgid "The output stopped. Try again."
+msgstr "출력 작업이 중단됐습니다. 다시 시도하세요."
+
+msgid "Choose a .{0} file."
+msgstr ".{0} 파일을 선택하세요."
+
+msgid "Preparing preview…"
+msgstr "미리보기 준비 중…"
+
+msgid "Generate a preview to check the page layout before saving."
+msgstr "저장하기 전에 미리보기를 만들어 쪽 배치를 확인하세요."
+
+msgid "Example school CSV profile"
+msgstr "학교 제출 CSV 예시"
+
+msgid "School submission"
+msgstr "학교 제출"
+
+msgid "Submission settings"
+msgstr "제출 설정"
+
+msgid "Active school profile"
+msgstr "현재 양식"
+
+msgid "Open profile JSON"
+msgstr "양식 JSON 열기"
+
+msgid "Use example profile"
+msgstr "예시 양식 사용"
+
+msgid "File encoding"
+msgstr "파일 인코딩"
+
+msgid "Header row included"
+msgstr "머리글 포함"
+
+msgid "No header row"
+msgstr "머리글 없음"
+
+msgid "The CSV includes all scheduled classes in this final version."
+msgstr "이 확정본에 배치된 모든 수업을 CSV에 포함합니다."
+
+msgid "Save submission CSV"
+msgstr "제출 CSV 저장"
+
+msgid "Submission preview"
+msgstr "제출 미리보기"
+
+msgid "{0} submission rows"
+msgstr "제출 {0}행"
+
+msgid "Save example JSON"
+msgstr "예시 JSON 저장"
+
+msgid "Backup & Restore"
+msgstr "백업·복원"
+
+msgid "Workspace storage"
+msgstr "작업공간 저장소"
+
+msgid "Create or restore a full workspace copy."
+msgstr "작업공간 전체를 백업하거나 복원합니다."
+
+msgid "Checking workspace copy…"
+msgstr "작업공간 복사본 확인 중…"
+
+msgid "Verified copy saved to {0}"
+msgstr "검증한 복원본을 저장했습니다. {0}"
+
+msgid "Could not open the verified copy at {0}. {1}"
+msgstr "{0}에 있는 복원본을 열 수 없습니다. {1}"
+
+msgid "Verified backup saved to {0}"
+msgstr "검증한 백업을 저장했습니다. {0}"
+
+msgid "Current workspace"
+msgstr "현재 작업공간"
+
+msgid "A full backup includes private notes and change history. Windows restricts the backup file to this account."
+msgstr "전체 백업에는 비공개 메모와 변경 이력이 포함됩니다. Windows에서 현재 계정만 백업 파일을 열 수 있습니다."
+
+msgid "Save workspace backup"
+msgstr "작업공간 백업 저장"
+
+msgid "Restore a backup"
+msgstr "백업 복원"
+
+msgid "Choose a backup and a new workspace file. Auler checks the copy before you open it."
+msgstr "백업과 새 작업공간 파일을 선택하세요. 복원본을 열기 전에 Auler가 검사합니다."
+
+msgid "Restore to new file"
+msgstr "새 파일로 복원"
+
+msgid "Verified restored workspace"
+msgstr "복원본 확인"
+
+msgid "Database integrity and record counts match the backup."
+msgstr "데이터베이스 무결성 검사를 통과했고 백업과 기록 수가 일치합니다."
+
+msgid "Keep working"
+msgstr "현재 화면으로 돌아가기"
+
+msgid "Open restored workspace"
+msgstr "복원본 열기"
+
+msgid "Semesters"
+msgstr "학기"
+
+msgid "Scheduled meetings"
+msgstr "배치"
+
+msgid "Finalized versions"
+msgstr "확정 버전"
+
+msgid "That file already exists. Choose a new file name for the copy."
+msgstr "이미 있는 파일입니다. 복사본에 새 파일 이름을 지정하세요."
+
+msgid "Auler could not protect the copy for this Windows account. Choose another location."
+msgstr "현재 Windows 계정 전용 권한을 적용할 수 없습니다. 다른 저장 위치를 선택하세요."
+
+msgid "The copy failed its database integrity or record count check."
+msgstr "복사본의 데이터베이스 무결성 또는 기록 수 검사에 실패했습니다."
+
+msgid "The workspace copy stopped. Try again."
+msgstr "작업공간 복사가 중단됐습니다. 다시 시도하세요."
+
+msgid "Could not create the workspace copy. {0}"
+msgstr "작업공간 복사본을 만들 수 없습니다. {0}"

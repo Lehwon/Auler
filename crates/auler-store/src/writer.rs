@@ -12,7 +12,10 @@ use rusqlite::{Connection, OptionalExtension, params};
 
 use crate::error::{Result, StoreError};
 use crate::read::{self, TermRow};
-use crate::{Applied, ChangeMeta, FinalizedInfo, Op, Origin, Record, RecordRef};
+use crate::review::ReviewStep;
+use crate::{
+    Applied, ChangeMeta, FinalizationChecks, FinalizedInfo, Op, Origin, Record, RecordRef,
+};
 
 /// 실행 취소 기록 상한. 메모리를 일정하게 쓰려고 오래된 것부터 버린다
 pub const UNDO_LIMIT: usize = 200;
@@ -22,10 +25,11 @@ struct Entry {
     ops: Vec<Op>,
     inverse: Vec<Op>,
     summary: String,
+    review: Option<ReviewStep>,
 }
 
 pub(crate) struct Writer {
-    conn: Connection,
+    pub(crate) conn: Connection,
     undo: VecDeque<Entry>,
     redo: Vec<Entry>,
 }
@@ -100,38 +104,7 @@ impl Writer {
             ));
         }
         let tx = self.conn.transaction()?;
-        let current = read::revision(&tx)?;
-        if let Some(base) = meta.base_revision
-            && base != current
-        {
-            return Err(StoreError::StaleRevision {
-                expected: base,
-                current,
-            });
-        }
-        let mut term_row = term.map(|k| read::term_row(&tx, k)).transpose()?;
-        let mut inverse = Vec::with_capacity(ops.len());
-        for op in ops {
-            inverse.push(apply_op(&tx, &mut term_row, op)?);
-        }
-        inverse.reverse();
-        let revision = current + 1;
-        tx.execute(
-            "INSERT INTO changes (revision, term_id, at, actor, origin, request_id, base_revision, summary, ops, inverse)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
-            params![
-                revision as i64,
-                term_row.as_ref().map(|t| t.id),
-                now_ms(),
-                meta.actor,
-                meta.origin.as_str(),
-                meta.request_id,
-                meta.base_revision.map(|b| b as i64),
-                meta.summary,
-                json(&ops)?,
-                json(&inverse)?,
-            ],
-        )?;
+        let (revision, inverse) = record_ops(&tx, term, ops, meta)?;
         tx.commit()?;
         Ok((
             Applied {
@@ -140,6 +113,24 @@ impl Writer {
             },
             inverse,
         ))
+    }
+
+    pub(crate) fn remember_change(
+        &mut self,
+        term: Option<TermKey>,
+        ops: Vec<Op>,
+        inverse: Vec<Op>,
+        summary: String,
+        review: Option<ReviewStep>,
+    ) {
+        self.redo.clear();
+        self.push_undo(Entry {
+            term,
+            ops,
+            inverse,
+            summary,
+            review,
+        });
     }
 
     fn push_undo(&mut self, entry: Entry) {
@@ -160,19 +151,25 @@ impl Writer {
     ) -> Result<Applied> {
         let (applied, inverse) = self.commit_change(term, &ops, meta)?;
         if !applied.duplicate {
-            self.redo.clear();
-            self.push_undo(Entry {
-                term,
-                ops,
-                inverse,
-                summary: meta.summary.clone(),
-            });
+            self.remember_change(term, ops, inverse, meta.summary.clone(), None);
         }
         Ok(applied)
     }
 
+    pub fn preview_changes(
+        &mut self,
+        term: Option<TermKey>,
+        ops: &[Op],
+        meta: &ChangeMeta,
+    ) -> Result<()> {
+        let tx = self.conn.transaction()?;
+        record_ops(&tx, term, ops, meta)?;
+        tx.rollback()?;
+        Ok(())
+    }
+
     pub fn undo(&mut self, actor: &str) -> Result<Applied> {
-        let entry = self.undo.pop_back().ok_or(StoreError::NothingToUndo)?;
+        let mut entry = self.undo.pop_back().ok_or(StoreError::NothingToUndo)?;
         let meta = ChangeMeta {
             actor: actor.to_owned(),
             origin: Origin::Undo,
@@ -180,13 +177,14 @@ impl Writer {
             base_revision: None,
             summary: entry.summary.clone(),
         };
-        match self.commit_change(entry.term, &entry.inverse, &meta) {
+        match self.commit_history(&mut entry, &meta) {
             Ok((applied, inverse)) => {
                 self.redo.push(Entry {
                     term: entry.term,
                     ops: entry.inverse,
                     inverse,
                     summary: entry.summary,
+                    review: entry.review,
                 });
                 Ok(applied)
             }
@@ -198,7 +196,7 @@ impl Writer {
     }
 
     pub fn redo(&mut self, actor: &str) -> Result<Applied> {
-        let entry = self.redo.pop().ok_or(StoreError::NothingToRedo)?;
+        let mut entry = self.redo.pop().ok_or(StoreError::NothingToRedo)?;
         let meta = ChangeMeta {
             actor: actor.to_owned(),
             origin: Origin::Redo,
@@ -206,13 +204,14 @@ impl Writer {
             base_revision: None,
             summary: entry.summary.clone(),
         };
-        match self.commit_change(entry.term, &entry.inverse, &meta) {
+        match self.commit_history(&mut entry, &meta) {
             Ok((applied, inverse)) => {
                 self.push_undo(Entry {
                     term: entry.term,
                     ops: entry.inverse,
                     inverse,
                     summary: entry.summary,
+                    review: entry.review,
                 });
                 Ok(applied)
             }
@@ -221,6 +220,30 @@ impl Writer {
                 Err(e)
             }
         }
+    }
+
+    fn commit_history(
+        &mut self,
+        entry: &mut Entry,
+        meta: &ChangeMeta,
+    ) -> Result<(Applied, Vec<Op>)> {
+        let Some(review) = &mut entry.review else {
+            return self.commit_change(entry.term, &entry.inverse, meta);
+        };
+        let tx = self.conn.transaction()?;
+        let (revision, inverse) = record_ops(&tx, entry.term, &entry.inverse, meta)?;
+        review.update(&tx, revision, meta.origin)?;
+        tx.commit()?;
+        if meta.origin == Origin::Redo {
+            review.applied_revision = revision;
+        }
+        Ok((
+            Applied {
+                revision,
+                duplicate: false,
+            },
+            inverse,
+        ))
     }
 
     /// 학기를 만든다. 되돌리기 대상이 아니다
@@ -245,6 +268,62 @@ impl Writer {
         let term_id = tx.last_insert_rowid();
         let revision = record_plain_change(&tx, Some(term_id), meta)?;
         tx.commit()?;
+        Ok(Applied {
+            revision,
+            duplicate: false,
+        })
+    }
+
+    pub fn copy_term(
+        &mut self,
+        source: TermKey,
+        target: TermKey,
+        meta: &ChangeMeta,
+    ) -> Result<Applied> {
+        if let Some(revision) = self.existing_request(&meta.request_id)? {
+            return Ok(Applied {
+                revision,
+                duplicate: true,
+            });
+        }
+        let previous = read::term_row(&self.conn, source)?;
+        match read::term_row(&self.conn, target) {
+            Ok(_) => return Err(StoreError::TermExists(target)),
+            Err(StoreError::UnknownTerm(_)) => {}
+            Err(error) => return Err(error),
+        }
+        let setup = TermSetup {
+            key: target,
+            start: None,
+            end: None,
+            ..previous.setup
+        };
+        validate_setup(&setup)?;
+        let tx = self.conn.transaction()?;
+        let sections: Vec<Section> = read::bodies(
+            &tx,
+            "SELECT body FROM sections WHERE term_id = ?1 ORDER BY id",
+            [previous.id],
+        )?;
+        let mut last_id: i64 =
+            tx.query_row("SELECT COALESCE(MAX(id), 0) FROM sections", [], |row| {
+                row.get(0)
+            })?;
+        let mut ops = Vec::with_capacity(sections.len());
+        for mut section in sections {
+            last_id = last_id
+                .checked_add(1)
+                .ok_or_else(|| StoreError::Invalid("분반 ID 범위를 초과함".into()))?;
+            section.id = SectionId(last_id);
+            ops.push(Op::Put(Record::Section(section)));
+        }
+        tx.execute(
+            "INSERT INTO terms (year, season, setup) VALUES (?1, ?2, ?3)",
+            params![target.year, target.season.code(), json(&setup)?],
+        )?;
+        let (revision, inverse) = record_ops(&tx, Some(target), &ops, meta)?;
+        tx.commit()?;
+        self.remember_change(Some(target), ops, inverse, meta.summary.clone(), None);
         Ok(Applied {
             revision,
             duplicate: false,
@@ -285,26 +364,33 @@ impl Writer {
         &mut self,
         key: TermKey,
         expected: u64,
+        acknowledge_warnings: Option<bool>,
         meta: &ChangeMeta,
     ) -> Result<FinalizedInfo> {
         if let Some(id) = &meta.request_id {
             let done = self
                 .conn
                 .query_row(
-                    "SELECT version, revision, at, actor FROM finalized WHERE request_id = ?1",
+                    "SELECT term_id, version, revision, at, actor FROM finalized WHERE request_id = ?1",
                     [id],
                     |r| {
-                        Ok(FinalizedInfo {
+                        Ok((r.get::<_, i64>(0)?, FinalizedInfo {
                             term: key,
-                            version: r.get(0)?,
-                            revision: r.get::<_, i64>(1)? as u64,
-                            at_ms: r.get(2)?,
-                            actor: r.get(3)?,
-                        })
+                            version: r.get(1)?,
+                            revision: r.get::<_, i64>(2)? as u64,
+                            at_ms: r.get(3)?,
+                            actor: r.get(4)?,
+                        }))
                     },
                 )
                 .optional()?;
-            if let Some(done) = done {
+            if let Some((term_id, done)) = done {
+                if read::term_row(&self.conn, key)?.id != term_id
+                    || expected.checked_add(1) != Some(done.revision)
+                    || done.actor != meta.actor
+                {
+                    return Err(StoreError::FinalizationRequestConflict);
+                }
                 return Ok(done);
             }
         }
@@ -318,6 +404,12 @@ impl Writer {
             return Err(StoreError::Finalized(key));
         }
         let snapshot = read::load_term(&tx, key)?;
+        if let Some(acknowledged) = acknowledge_warnings {
+            let checks = FinalizationChecks::inspect(&snapshot);
+            if !checks.required_passed() || (checks.needs_acknowledgment() && !acknowledged) {
+                return Err(StoreError::FinalizationBlocked(checks));
+            }
+        }
         let version: u32 = tx.query_row(
             "SELECT COALESCE(MAX(version), 0) + 1 FROM finalized WHERE term_id = ?1",
             [term.id],
@@ -355,6 +447,12 @@ impl Writer {
     /// 확정된 학기에 수정용 초안을 연다. 초안은 마지막 확정본과 같은 상태에서 시작한다
     pub fn start_correction(&mut self, key: TermKey, meta: &ChangeMeta) -> Result<Applied> {
         let tx = self.conn.transaction()?;
+        let current = read::revision(&tx)?;
+        if let Some(expected) = meta.base_revision
+            && current != expected
+        {
+            return Err(StoreError::StaleRevision { expected, current });
+        }
         let term = read::term_row(&tx, key)?;
         let finalized: i64 = tx.query_row(
             "SELECT COUNT(*) FROM finalized WHERE term_id = ?1",
@@ -375,6 +473,47 @@ impl Writer {
 }
 
 /// 자료를 바꾸지 않는 변경(학기 만들기, 확정, 수정용 초안)을 이력에 남긴다
+pub(crate) fn record_ops(
+    tx: &Connection,
+    term: Option<TermKey>,
+    ops: &[Op],
+    meta: &ChangeMeta,
+) -> Result<(u64, Vec<Op>)> {
+    let current = read::revision(tx)?;
+    if let Some(base) = meta.base_revision
+        && base != current
+    {
+        return Err(StoreError::StaleRevision {
+            expected: base,
+            current,
+        });
+    }
+    let mut term_row = term.map(|k| read::term_row(tx, k)).transpose()?;
+    let mut inverse = Vec::with_capacity(ops.len());
+    for op in ops {
+        inverse.push(apply_op(tx, &mut term_row, op)?);
+    }
+    inverse.reverse();
+    let revision = current + 1;
+    tx.execute(
+        "INSERT INTO changes (revision, term_id, at, actor, origin, request_id, base_revision, summary, ops, inverse)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)",
+        params![
+            revision as i64,
+            term_row.as_ref().map(|t| t.id),
+            now_ms(),
+            meta.actor,
+            meta.origin.as_str(),
+            meta.request_id,
+            meta.base_revision.map(|b| b as i64),
+            meta.summary,
+            json(&ops)?,
+            json(&inverse)?,
+        ],
+    )?;
+    Ok((revision, inverse))
+}
+
 fn record_plain_change(conn: &Connection, term_id: Option<i64>, meta: &ChangeMeta) -> Result<u64> {
     let revision = read::revision(conn)? + 1;
     conn.execute(
@@ -394,7 +533,7 @@ fn record_plain_change(conn: &Connection, term_id: Option<i64>, meta: &ChangeMet
     Ok(revision)
 }
 
-fn validate_setup(setup: &TermSetup) -> Result<()> {
+pub(crate) fn validate_setup(setup: &TermSetup) -> Result<()> {
     if setup.days.is_empty() {
         return Err(StoreError::Invalid("수업 요일이 없음".into()));
     }

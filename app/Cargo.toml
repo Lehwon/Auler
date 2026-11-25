@@ -7,7 +7,35 @@ license.workspace = true
 repository.workspace = true
 publish = false
 
+[package.metadata.packager]
+productName = "Auler"
+identifier = "io.github.lehwon.auler"
+publisher = "Lehwon"
+homepage = "https://github.com/Lehwon/Auler"
+formats = ["nsis"]
+resources = [
+    { src = "../LICENSE", target = "LICENSE" },
+    { src = "../THIRD-PARTY.md", target = "THIRD-PARTY.md" },
+    { src = "../docs/install.md", target = "INSTALL.md" },
+    { src = "../templates/auler-standard-v1.ko.xlsx", target = "templates/auler-standard-v1.ko.xlsx" },
+    { src = "../templates/auler-standard-v1.en.xlsx", target = "templates/auler-standard-v1.en.xlsx" },
+    { src = "../templates/school-submission-example.json", target = "templates/school-submission-example.json" },
+]
+
+[package.metadata.packager.nsis]
+installMode = "currentUser"
+languages = ["English", "Korean"]
+displayLanguageSelector = true
+installerIcon = "packaging/auler.ico"
+customLanguageFiles = { Korean = "packaging/Korean.nsh" }
+
 [dependencies]
+auler-domain.workspace = true
+auler-engine.workspace = true
+auler-io = { workspace = true, features = ["pdf"] }
+auler-store.workspace = true
+serde_json.workspace = true
+chrono = { version = "0.4.45", default-features = false, features = ["clock"] }
 # 메모리를 줄이려고 GPU 렌더러(OpenGL)를 빼고 소프트웨어 렌더러만 쓴다.
 # 실측(릴리스, 시간표 화면): GPU 렌더러 Private 98MB, 소프트웨어 렌더러 21MB.
 slint = { version = "1.19.1", default-features = false, features = [
@@ -18,15 +46,20 @@ slint = { version = "1.19.1", default-features = false, features = [
     "software-renderer-systemfonts",
     "software-renderer-path",
     "accessibility",
+    "raw-window-handle-06",
+    "unstable-winit-030",
 ] }
 sys-locale = "0.3.2"
+tempfile = "3.27.0"
 
 [build-dependencies]
 slint-build = "1.19.1"
 
 [target."cfg(windows)".dependencies]
-windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_HiDpi", "Win32_Graphics_Gdi", "Win32_System_Threading", "Win32_System_ProcessStatus", "Win32_UI_Shell"] }
+raw-window-handle = "0.6.2"
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_UI_HiDpi", "Win32_Graphics_Gdi", "Win32_System_Threading", "Win32_System_ProcessStatus", "Win32_UI_Shell", "Win32_UI_Controls_Dialogs"] }
 
 [dev-dependencies]
 i-slint-backend-testing = { version = "1.19.1", features = ["renderer-software"] }
 png = "0.18.1"
+rust_xlsxwriter = "0.104.0"

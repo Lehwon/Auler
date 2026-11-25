@@ -1,0 +1,100 @@
+import { Button, LineEdit } from "std-widgets.slint";
+import { Theme, Tone, Panel, Icon, Icons } from "theme.slint";
+
+export component PageHeader inherits HorizontalLayout {
+    in property <string> title;
+    in property <string> subtitle;
+    spacing: Theme.space-medium;
+    vertical-stretch: 0;
+
+    VerticalLayout {
+        spacing: Theme.space-small;
+        horizontal-stretch: 1;
+        Text {
+            text: root.title;
+            font-size: Theme.font-title;
+            font-weight: 700;
+            color: Theme.text;
+            overflow: elide;
+            accessible-label: root.title;
+        }
+        if root.subtitle != "": Text {
+            text: root.subtitle;
+            font-size: Theme.font-small;
+            color: Theme.text-muted;
+            overflow: elide;
+        }
+    }
+    VerticalLayout {
+        alignment: center;
+        horizontal-stretch: 0;
+        HorizontalLayout {
+            spacing: Theme.space-medium;
+            @children
+        }
+    }
+}
+
+export component KeyValue inherits HorizontalLayout {
+    in property <string> key;
+    in property <string> value;
+    min-height: Theme.control-height;
+    spacing: Theme.space-medium;
+
+    Text {
+        text: root.key;
+        color: Theme.text-muted;
+        vertical-alignment: center;
+        horizontal-stretch: 1;
+    }
+    Text {
+        text: root.value;
+        color: Theme.text;
+        font-weight: 600;
+        vertical-alignment: center;
+    }
+}
+
+export component ActionButton inherits Button {
+    preferred-height: Theme.control-height;
+    max-height: Theme.control-height;
+}
+
+export component FilterBar inherits HorizontalLayout {
+    spacing: Theme.space-medium;
+    @children
+}
+
+export component SearchField inherits LineEdit {
+    accessible-label: root.placeholder-text;
+    preferred-height: Theme.control-height;
+}
+
+export component StatusBanner inherits Panel {
+    in property <string> message;
+    in property <Tone> tone: Tone.info;
+    private property <string> icon: Icons.for-tone(tone);
+
+    background: Theme.tone-background(tone);
+    accessible-role: text;
+    accessible-label: root.message;
+    accessible-live-region: root.tone == Tone.danger ? assertive : polite;
+
+    HorizontalLayout {
+        padding: Theme.space-medium;
+        spacing: Theme.space-medium;
+        if root.icon != "": Icon {
+            width: 20px;
+            text: root.icon;
+            color: Theme.tone-foreground(root.tone);
+        }
+        Text {
+            text: root.message;
+            color: Theme.text;
+            vertical-alignment: center;
+            wrap: word-wrap;
+            horizontal-stretch: 1;
+            accessible-role: none;
+        }
+    }
+}

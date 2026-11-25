@@ -1,5 +1,6 @@
-import { ComboBox, LineEdit } from "std-widgets.slint";
+import { ComboBox } from "std-widgets.slint";
 import { Theme, Badge, Tone, Icon, Dot, FocusRing } from "theme.slint";
+import { ActionButton, SearchField } from "components.slint";
 import { Labels } from "labels.slint";
 
 // 상단바: 학과/학기, 버전, 저장 상태, 검색, 언어
@@ -9,6 +10,12 @@ export component TopBar inherits Rectangle {
     in property <string> term-label;
     in property <string> version;
     in property <int> language-index;
+    in property <bool> workspace-visible: true;
+    in property <bool> live-workspace;
+    in property <[string]> term-options;
+    in property <int> term-index: -1;
+    callback term-selected(int);
+    callback change-workspace();
     callback language-selected(int);
 
     height: 52px;
@@ -16,8 +23,8 @@ export component TopBar inherits Rectangle {
     accessible-role: AccessibleRole.banner;
 
     HorizontalLayout {
-        padding-left: 16px;
-        padding-right: 16px;
+        padding-left: Theme.space-large;
+        padding-right: Theme.space-large;
         spacing: 12px;
 
         HorizontalLayout {
@@ -50,24 +57,35 @@ export component TopBar inherits Rectangle {
             }
         }
 
-        Rectangle { width: 16px; }
+        if root.workspace-visible: Rectangle { width: Theme.space-medium; }
 
-        Text {
-            text: root.department + "  /  " + root.term-label;
+        if root.workspace-visible: Text {
+            text: root.live-workspace ? root.department : root.department + "  /  " + root.term-label;
             color: Theme.text;
             font-weight: 600;
             vertical-alignment: center;
             overflow: elide;
-            min-width: 120px;
+            min-width: 96px;
         }
-        VerticalLayout {
+        if root.workspace-visible && root.term-options.length > 0: VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 0;
+            ComboBox {
+                width: 180px;
+                model: root.term-options;
+                current-index: root.term-index;
+                accessible-label: @tr("Academic term");
+                selected(value) => { root.term-selected(self.current-index); }
+            }
+        }
+        if root.workspace-visible && root.version != "": VerticalLayout {
             alignment: center;
             Badge { text: root.version; tone: Tone.info; }
         }
 
         Rectangle { horizontal-stretch: 1; }
 
-        HorizontalLayout {
+        if root.workspace-visible: HorizontalLayout {
             spacing: 6px;
             horizontal-stretch: 0;
             VerticalLayout {
@@ -81,14 +99,20 @@ export component TopBar inherits Rectangle {
                 vertical-alignment: center;
             }
         }
-        VerticalLayout {
+        if root.workspace-visible && !root.live-workspace: VerticalLayout {
             alignment: center;
-            LineEdit {
+            SearchField {
                 min-width: 120px;
                 preferred-width: 200px;
                 horizontal-stretch: 0;
                 placeholder-text: @tr("Search");
-                accessible-label: @tr("Search");
+            }
+        }
+        if root.workspace-visible && root.live-workspace: VerticalLayout {
+            alignment: center;
+            ActionButton {
+                text: @tr("Workspaces");
+                clicked => { root.change-workspace(); }
             }
         }
         VerticalLayout {
@@ -124,7 +148,7 @@ export component NavItem inherits FocusScope {
     callback clicked;
     property <bool> keyboard-focus;
 
-    height: 40px;
+    height: Theme.navigation-height;
     accessible-role: AccessibleRole.tab;
     accessible-label: root.label;
     accessible-description: root.count > 0 ? Labels.pending(root.count) : "";
@@ -176,6 +200,16 @@ export component NavItem inherits FocusScope {
         }
     }
 
+    if root.compact && root.count > 0: Badge {
+        x: root.width - self.width - 4px;
+        y: 1px;
+        width: root.count > 99 ? 29px : root.count > 9 ? 22px : 18px;
+        height: 18px;
+        text: root.count > 99 ? "99+" : "" + root.count;
+        tone: Tone.info;
+        accessible-role: none;
+    }
+
     touch := TouchArea {
         clicked => {
             root.clicked();
@@ -195,12 +229,12 @@ export component StatusBar inherits Rectangle {
     in property <string> right-text;
 
     height: 28px;
-    background: #EEF1F5;
+    background: Theme.neutral-soft;
     accessible-role: AccessibleRole.content-info;
 
     HorizontalLayout {
-        padding-left: 16px;
-        padding-right: 16px;
+        padding-left: Theme.space-large;
+        padding-right: Theme.space-large;
         spacing: 6px;
         VerticalLayout {
             alignment: center;

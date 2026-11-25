@@ -3,6 +3,7 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicU32, Ordering};
 
+use auler_domain::input::{CodeValue, InputDocument, UnresolvedInput};
 use auler_domain::model::*;
 use auler_domain::resolve::resolve;
 use auler_domain::time::Weekday;
@@ -47,6 +48,109 @@ fn seeded(name: &str) -> (TempPath, Workspace, TermKey) {
     (path, ws, key)
 }
 
+#[test]
+fn copies_previous_term_with_fresh_sections_and_no_schedule_or_requests() {
+    let (_path, workspace, source) = seeded("copy-term");
+    let target = TermKey {
+        season: TermSeason::Second,
+        ..source
+    };
+    let before = workspace.load_term(source).unwrap();
+    let copied = workspace
+        .copy_term(source, target, ChangeMeta::direct("학기 복사"))
+        .unwrap();
+    let after = workspace.load_term(target).unwrap();
+    assert_eq!(after.setup.periods, before.setup.periods);
+    assert_eq!(after.setup.days, before.setup.days);
+    assert_eq!(after.setup.start, None);
+    assert_eq!(after.setup.end, None);
+    assert!(after.placements.is_empty() && after.constraints.is_empty());
+    assert_eq!(after.sections.len(), before.sections.len());
+    assert!(
+        after
+            .sections
+            .iter()
+            .zip(&before.sections)
+            .all(|(new, old)| new.id != old.id && new.code == old.code)
+    );
+    assert_eq!(
+        workspace.history_for_term(target, 10).unwrap()[0].revision,
+        copied.revision
+    );
+    assert_eq!(
+        workspace.load_term(source).unwrap().sections,
+        before.sections
+    );
+    assert!(
+        matches!(workspace.copy_term(source, target, ChangeMeta::direct("중복")), Err(StoreError::TermExists(key)) if key == target)
+    );
+}
+
+#[test]
+fn restores_to_new_file_without_replacing_an_existing_workspace() {
+    let (source, workspace, key) = seeded("restore-source");
+    let target = TempPath::new("restored");
+    let expected = workspace.load_term(key).unwrap();
+    let restored = Workspace::restore(&source.0, &target.0).unwrap();
+    assert_eq!(
+        restored.department().unwrap(),
+        workspace.department().unwrap()
+    );
+    assert_eq!(restored.revision().unwrap(), workspace.revision().unwrap());
+    assert_eq!(restored.load_term(key).unwrap(), expected);
+    assert!(matches!(
+        Workspace::restore(&source.0, &target.0),
+        Err(StoreError::AlreadyExists)
+    ));
+    assert_eq!(restored.load_term(key).unwrap(), expected);
+
+    let bad = TempPath::new("corrupt");
+    std::fs::write(&bad.0, b"not a database").unwrap();
+    let destination = TempPath::new("invalid-restore");
+    assert!(Workspace::restore(&bad.0, &destination.0).is_err());
+    assert!(!destination.0.exists());
+}
+
+#[test]
+fn online_backup_preserves_versions_and_reports_the_restored_counts() {
+    let (source, workspace, term) = seeded("live-backup-source");
+    let version = workspace
+        .finalize(
+            term,
+            workspace.revision().unwrap(),
+            ChangeMeta::direct("Test snapshot"),
+        )
+        .unwrap();
+    let frozen = workspace.load_finalized(term, version.version).unwrap();
+    let backup = TempPath::new("protected-backup");
+    let summary = Workspace::backup_file(&source.0, &backup.0).unwrap();
+    assert_eq!(summary.revision, workspace.revision().unwrap());
+    assert_eq!(summary.finalizations, 1);
+    assert_eq!(summary.sections, frozen.sections.len());
+    assert_eq!(summary.placements, frozen.placements.len());
+    assert!(matches!(
+        Workspace::backup_file(&source.0, &backup.0),
+        Err(StoreError::AlreadyExists)
+    ));
+
+    let restored = TempPath::new("restored-backup");
+    let checked = Workspace::prepare_restore(&backup.0, &restored.0).unwrap();
+    assert_eq!(checked.summary(), &summary);
+    assert!(!restored.0.with_extension("auler-wal").exists());
+    assert!(!restored.0.with_extension("auler-shm").exists());
+    let copy = checked.open().unwrap();
+    assert_eq!(copy.load_finalized(term, version.version).unwrap(), frozen);
+    assert_eq!(
+        workspace.load_finalized(term, version.version).unwrap(),
+        frozen
+    );
+    for suffix in ["-wal", "-shm"] {
+        let mut sidecar = backup.0.clone().into_os_string();
+        sidecar.push(suffix);
+        assert!(!PathBuf::from(sidecar).exists());
+    }
+}
+
 fn section_id(data: &TermData, course: &str, code: &str) -> SectionId {
     let course = data
         .courses
@@ -76,6 +180,533 @@ fn place(section: SectionId, part: u8, day: Weekday, start: u8, room: Option<Roo
         room,
         locked: false,
     }))
+}
+
+fn row(draft: &ReviewDraft, path: &str) -> Disposition {
+    draft
+        .items
+        .iter()
+        .find(|row| row.item.path == path)
+        .unwrap()
+        .item
+        .disposition()
+}
+
+fn selected(paths: &[&str]) -> Vec<String> {
+    paths.iter().map(|path| (*path).to_owned()).collect()
+}
+
+#[test]
+fn review_applies_only_selected_rows_and_keeps_source_across_reopen() {
+    let (path, ws, key) = seeded("review-partial");
+    let before = ws.load_term(key).unwrap();
+    let mut input = auler_samples::reference();
+    input.setup = None;
+    input.courses.clear();
+    input.rooms.clear();
+    input.equipment.clear();
+    input.groups.clear();
+    input.instructors.clear();
+    input.constraints.clear();
+    input.placements.clear();
+    input.sections.truncate(3);
+    input.sections[0].enrollment += 2;
+    input.sections[1].section = CodeValue::number(1);
+    input.sections[1].source = Some(SourceRef {
+        file: Some("study.xlsx".into()),
+        sheet: Some("Sections".into()),
+        row: Some(3),
+        column: Some("B".into()),
+    });
+    let draft = ws
+        .create_review(key, input, ChangeMeta::direct("검토").origin(Origin::Xlsx))
+        .unwrap();
+    assert_eq!(row(&draft, "sections[0]"), Disposition::Update);
+    assert_eq!(row(&draft, "sections[1]"), Disposition::NeedsReview);
+    assert_eq!(row(&draft, "sections[2]"), Disposition::Unchanged);
+    let applied = ws
+        .approve_review(
+            draft.id,
+            draft.version,
+            selected(&["sections[0]"]),
+            "assistant".into(),
+            "once".into(),
+        )
+        .unwrap();
+    let after = ws.load_term(key).unwrap();
+    assert_eq!(after.sections.len(), before.sections.len());
+    assert_eq!(
+        after.sections[0].enrollment.count,
+        before.sections[0].enrollment.count + 2
+    );
+    assert_eq!(&after.sections[1..], &before.sections[1..]);
+    assert_eq!(ws.history(1).unwrap()[0].actor, "assistant");
+    drop(ws);
+
+    let ws = Workspace::open(&path.0).unwrap();
+    let duplicate = ws
+        .approve_review(
+            draft.id,
+            draft.version,
+            selected(&["sections[0]"]),
+            "assistant".into(),
+            "once".into(),
+        )
+        .unwrap();
+    assert!(duplicate.duplicate);
+    assert_eq!(applied.revision, duplicate.revision);
+    let current = ws.review(draft.id).unwrap();
+    assert_eq!(
+        current.status(ws.revision().unwrap()),
+        ReviewStatus::PartiallyApplied
+    );
+    assert_eq!(
+        current
+            .items
+            .iter()
+            .find(|r| r.item.path == "sections[1]")
+            .unwrap()
+            .item
+            .source
+            .as_ref()
+            .unwrap()
+            .row,
+        Some(3)
+    );
+    assert_eq!(row(&current, "sections[1]"), Disposition::NeedsReview);
+}
+
+#[test]
+fn review_rechecks_selection_dependencies_and_rolls_back_new_term() {
+    let path = TempPath::new("review-dependencies");
+    let ws = Workspace::create(&path.0, "Department").unwrap();
+    let input = auler_samples::reference();
+    let key = reference_data().setup.key;
+    let draft = ws
+        .create_review(key, input, ChangeMeta::direct("제안"))
+        .unwrap();
+    assert!(matches!(
+        ws.approve_review(draft.id, draft.version, selected(&["setup", "sections[0]"]), "assistant".into(), "try".into()),
+        Err(StoreError::ReviewBlocked(issues)) if issues.len() == 1 && issues[0].path == "sections[0]"
+    ));
+    assert!(ws.terms().unwrap().is_empty());
+    assert_eq!(ws.revision().unwrap(), 0);
+    assert_eq!(ws.review(draft.id).unwrap().version, draft.version);
+    let all = draft
+        .items
+        .iter()
+        .filter(|row| row.item.disposition() == Disposition::New)
+        .map(|row| row.item.path.clone())
+        .collect();
+    let approved = ws
+        .approve_review(
+            draft.id,
+            draft.version,
+            all,
+            "assistant".into(),
+            "try".into(),
+        )
+        .unwrap();
+    assert_eq!(approved.revision, 1);
+    assert_eq!(ws.load_term(key).unwrap().sections.len(), 42);
+    assert_eq!(
+        ws.review(draft.id).unwrap().status(approved.revision),
+        ReviewStatus::Applied
+    );
+}
+
+#[test]
+fn review_requires_fresh_baseline_and_leaves_finalized_snapshots_intact() {
+    let (_path, ws, key) = seeded("review-baseline");
+    let mut input = InputDocument::new(key.year, key.season.code());
+    let mut course = auler_samples::reference().courses.remove(0);
+    course.name.push_str(" (revised)");
+    input.courses.push(course);
+    let meta = ChangeMeta::direct("제안")
+        .origin(Origin::Mcp)
+        .request("request-1");
+    let draft = ws.create_review(key, input.clone(), meta.clone()).unwrap();
+    assert_eq!(ws.create_review(key, input, meta).unwrap().id, draft.id);
+    let finalized = ws
+        .finalize(key, ws.revision().unwrap(), ChangeMeta::direct("확정"))
+        .unwrap();
+    let snapshot = ws.load_finalized(key, finalized.version).unwrap();
+    assert_eq!(
+        ws.review(draft.id).unwrap().status(finalized.revision),
+        ReviewStatus::BaseChanged
+    );
+    assert!(matches!(
+        ws.approve_review(
+            draft.id,
+            draft.version,
+            selected(&["courses[0]"]),
+            "assistant".into(),
+            "try".into()
+        ),
+        Err(StoreError::StaleRevision { .. })
+    ));
+    let fresh = ws.refresh_review(draft.id, draft.version, None).unwrap();
+    assert!(matches!(
+        ws.approve_review(draft.id, fresh.version, selected(&["courses[0]"]), "assistant".into(), "try".into()),
+        Err(StoreError::Finalized(t)) if t == key
+    ));
+    let closed = ws
+        .close_review(
+            draft.id,
+            fresh.version,
+            ReviewDecision::Cancelled,
+            "assistant".into(),
+        )
+        .unwrap();
+    assert_eq!(
+        closed.status(ws.revision().unwrap()),
+        ReviewStatus::Cancelled
+    );
+    assert_eq!(ws.load_finalized(key, finalized.version).unwrap(), snapshot);
+}
+
+#[test]
+fn version_one_workspace_gains_reviews_without_changing_saved_data() {
+    let (path, ws, key) = seeded("review-migration");
+    let expected = ws.load_term(key).unwrap();
+    let revision = ws.revision().unwrap();
+    drop(ws);
+    {
+        let connection = rusqlite::Connection::open(&path.0).unwrap();
+        connection
+            .execute_batch(
+                "DROP TABLE review_applications;
+                 DROP TABLE review_drafts;
+                 PRAGMA user_version = 1;",
+            )
+            .unwrap();
+    }
+    let ws = Workspace::open(&path.0).unwrap();
+    assert_eq!(ws.load_term(key).unwrap(), expected);
+    assert_eq!(ws.revision().unwrap(), revision);
+    assert!(ws.reviews().unwrap().is_empty());
+}
+
+#[test]
+fn review_undo_and_redo_update_the_saved_review_with_the_data() {
+    let (_path, ws, key) = seeded("review-undo");
+    let mut input = InputDocument::new(key.year, key.season.code());
+    let mut proposed = auler_samples::reference().sections.remove(0);
+    let original = proposed.enrollment;
+    proposed.enrollment += 5;
+    input.sections.push(proposed);
+    let draft = ws
+        .create_review(key, input, ChangeMeta::direct("검토"))
+        .unwrap();
+    ws.approve_review(
+        draft.id,
+        draft.version,
+        selected(&["sections[0]"]),
+        "assistant".into(),
+        "apply".into(),
+    )
+    .unwrap();
+    let undone = ws.undo().unwrap();
+    let review = ws.review(draft.id).unwrap();
+    assert_eq!(review.status(undone.revision), ReviewStatus::Applicable);
+    assert!(review.items[0].decision.is_none());
+    assert_eq!(
+        ws.load_term(key).unwrap().sections[0].enrollment.count,
+        original
+    );
+    let redone = ws.redo().unwrap();
+    let review = ws.review(draft.id).unwrap();
+    assert_eq!(review.status(redone.revision), ReviewStatus::Applied);
+    assert_eq!(
+        review.items[0].decision,
+        Some(RowDecision::Applied {
+            revision: redone.revision
+        })
+    );
+    assert_eq!(
+        ws.load_term(key).unwrap().sections[0].enrollment.count,
+        original + 5
+    );
+}
+
+#[test]
+fn review_redo_restores_an_approval_removed_from_the_revised_input() {
+    let (_path, ws, key) = seeded("review-redo-revised");
+    let data = ws.load_term(key).unwrap();
+    let original_name = &data.courses[0].name;
+    let mut input = InputDocument::new(key.year, key.season.code());
+    input.courses = auler_samples::reference()
+        .courses
+        .into_iter()
+        .take(2)
+        .collect();
+    for course in &mut input.courses {
+        course.name.push_str(" revised");
+    }
+    let applied_name = input.courses[0].name.clone();
+    let draft = ws
+        .create_review(key, input.clone(), ChangeMeta::direct("검토"))
+        .unwrap();
+    let applied = ws
+        .approve_review(
+            draft.id,
+            draft.version,
+            selected(&["courses[0]"]),
+            "assistant".into(),
+            "apply".into(),
+        )
+        .unwrap();
+    input.courses.remove(0);
+    let partial = ws.review(draft.id).unwrap();
+    ws.refresh_review(draft.id, partial.version, Some(input))
+        .unwrap();
+
+    ws.undo().unwrap();
+    let review = ws.review(draft.id).unwrap();
+    assert_eq!(&ws.load_term(key).unwrap().courses[0].name, original_name);
+    assert!(review.items.iter().any(|row| matches!(row.decision,
+        Some(RowDecision::Undone { applied_revision, .. }) if applied_revision == applied.revision)));
+    let redone = ws.redo().unwrap();
+    assert_eq!(ws.load_term(key).unwrap().courses[0].name, applied_name);
+    let review = ws.review(draft.id).unwrap();
+    assert!(review.items.iter().any(|row| row.active_path.is_none()
+        && row.decision
+            == Some(RowDecision::Applied {
+                revision: redone.revision
+            })));
+    assert_eq!(review.counts().changed, 1);
+}
+
+#[test]
+fn review_request_ids_reject_different_payloads_and_selections() {
+    let (_path, ws, key) = seeded("review-retry");
+    let mut input = InputDocument::new(key.year, key.season.code());
+    input.courses = auler_samples::reference()
+        .courses
+        .into_iter()
+        .take(2)
+        .collect();
+    for course in &mut input.courses {
+        course.name.push_str(" (new)");
+    }
+    let meta = ChangeMeta::direct("검토")
+        .origin(Origin::Mcp)
+        .request("replay");
+    let draft = ws.create_review(key, input.clone(), meta.clone()).unwrap();
+    input.courses[0].name.push_str(" (different)");
+    assert!(matches!(
+        ws.create_review(key, input, meta),
+        Err(StoreError::ReviewRequestConflict)
+    ));
+    let done = ws
+        .approve_review(
+            draft.id,
+            draft.version,
+            selected(&["courses[0]"]),
+            "assistant".into(),
+            "apply".into(),
+        )
+        .unwrap();
+    assert!(matches!(
+        ws.approve_review(
+            draft.id,
+            draft.version,
+            selected(&["courses[1]"]),
+            "assistant".into(),
+            "apply".into()
+        ),
+        Err(StoreError::ReviewRequestConflict)
+    ));
+    assert_eq!(ws.revision().unwrap(), done.revision);
+}
+
+#[test]
+fn review_rejection_revalidates_dependents_and_preserves_partial_completion() {
+    let path = TempPath::new("review-reject");
+    let ws = Workspace::create(&path.0, "Department").unwrap();
+    let key = reference_data().setup.key;
+    let mut input = auler_samples::reference();
+    input.sections.truncate(1);
+    let course = input
+        .courses
+        .iter()
+        .position(|course| course.code == input.sections[0].course)
+        .unwrap();
+    let draft = ws
+        .create_review(key, input, ChangeMeta::direct("검토"))
+        .unwrap();
+    assert_eq!(row(&draft, "sections[0]"), Disposition::New);
+    let rejected = ws
+        .reject_review_items(
+            draft.id,
+            draft.version,
+            vec![format!("courses[{course}]")],
+            "assistant".into(),
+        )
+        .unwrap();
+    assert_eq!(row(&rejected, "sections[0]"), Disposition::Error);
+    let applied = ws
+        .approve_review(
+            draft.id,
+            rejected.version,
+            selected(&["setup"]),
+            "assistant".into(),
+            "apply".into(),
+        )
+        .unwrap();
+    let current = ws.review(draft.id).unwrap();
+    let closed = ws
+        .close_review(
+            draft.id,
+            current.version,
+            ReviewDecision::Rejected,
+            "assistant".into(),
+        )
+        .unwrap();
+    assert_eq!(
+        closed.status(applied.revision),
+        ReviewStatus::PartiallyAppliedClosed
+    );
+}
+
+#[test]
+fn review_matches_an_existing_constraint_before_changing_its_strength() {
+    let (_path, ws, key) = seeded("review-constraint");
+    let before = ws.load_term(key).unwrap();
+    let mut input = InputDocument::new(key.year, key.season.code());
+    let mut proposed = auler_samples::reference()
+        .constraints
+        .into_iter()
+        .find(|c| c.strength.as_deref() == Some("soft") && c.status == "confirmed")
+        .unwrap();
+    proposed.strength = Some("hard".into());
+    input.constraints.push(proposed);
+    let draft = ws
+        .create_review(key, input, ChangeMeta::direct("검토"))
+        .unwrap();
+    assert_eq!(row(&draft, "constraints[0]"), Disposition::Update);
+    ws.approve_review(
+        draft.id,
+        draft.version,
+        selected(&["constraints[0]"]),
+        "assistant".into(),
+        "apply".into(),
+    )
+    .unwrap();
+    let after = ws.load_term(key).unwrap();
+    assert_eq!(after.constraints.len(), before.constraints.len());
+    assert_eq!(
+        before
+            .constraints
+            .iter()
+            .zip(&after.constraints)
+            .filter(|(a, b)| a.strength != b.strength)
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn review_keeps_original_input_and_decisions_when_corrections_shift_rows() {
+    let (_path, ws, key) = seeded("review-correction");
+    let mut input = InputDocument::new(key.year, key.season.code());
+    for text in ["needs a room", "needs an instructor"] {
+        input.unresolved.push(UnresolvedInput {
+            what: "request".into(),
+            text: text.into(),
+            reason: "unclear".into(),
+            source: None,
+        });
+    }
+    let draft = ws
+        .create_review(key, input.clone(), ChangeMeta::direct("검토"))
+        .unwrap();
+    let rejected = ws
+        .reject_review_items(
+            draft.id,
+            draft.version,
+            selected(&["unresolved[1]"]),
+            "assistant".into(),
+        )
+        .unwrap();
+    let original = input.clone();
+    input.unresolved.remove(0);
+    let mut course = auler_samples::reference().courses.remove(0);
+    course.name.push_str(" (corrected)");
+    input.courses.push(course);
+    let revised = ws
+        .refresh_review(draft.id, rejected.version, Some(input))
+        .unwrap();
+    assert_eq!(ws.original_review_input(draft.id).unwrap(), original);
+    let historical = revised
+        .items
+        .iter()
+        .find(|r| matches!(r.decision, Some(RowDecision::Rejected { .. })))
+        .unwrap();
+    assert_eq!(historical.item.path, "unresolved[1]");
+    assert_eq!(historical.active_path.as_deref(), Some("unresolved[0]"));
+    assert_eq!(
+        revised
+            .items
+            .iter()
+            .filter(|r| r.decision.is_none())
+            .count(),
+        1
+    );
+    assert_eq!(row(&revised, "courses[0]"), Disposition::Update);
+}
+
+#[test]
+fn review_explains_no_changes_and_finalized_approval_before_a_write() {
+    let (_path, ws, key) = seeded("review-blockers");
+    let unchanged = ws
+        .create_review(key, auler_samples::reference(), ChangeMeta::direct("자료"))
+        .unwrap();
+    let current = ws.revision().unwrap();
+    assert_eq!(unchanged.status(current), ReviewStatus::NoChanges);
+    assert_eq!(
+        unchanged.approval_blocker(current),
+        Some(ApprovalBlocker::NoApplicableRows)
+    );
+    let mut input = InputDocument::new(key.year, key.season.code());
+    let mut course = auler_samples::reference().courses.remove(0);
+    course.name.push_str(" (change)");
+    input.courses.push(course);
+    let final_version = ws
+        .finalize(key, current, ChangeMeta::direct("확정"))
+        .unwrap();
+    let draft = ws
+        .create_review(key, input, ChangeMeta::direct("검토"))
+        .unwrap();
+    assert_eq!(
+        draft.approval_blocker(final_version.revision),
+        Some(ApprovalBlocker::Finalized(key))
+    );
+}
+
+#[test]
+fn new_term_reviews_explain_missing_setup_for_catalog_rows() {
+    let path = TempPath::new("review-missing-setup");
+    let ws = Workspace::create(&path.0, "Department").unwrap();
+    let key = reference_data().setup.key;
+    let mut input = InputDocument::new(key.year, key.season.code());
+    input
+        .courses
+        .push(auler_samples::reference().courses.remove(0));
+    let draft = ws
+        .create_review(key, input, ChangeMeta::direct("검토"))
+        .unwrap();
+    assert!(
+        matches!(draft.approval_blocker(0), Some(ApprovalBlocker::MissingSetup(issues)) if issues[0].path == "setup")
+    );
+    let course = draft
+        .items
+        .iter()
+        .find(|row| row.item.path == "courses[0]")
+        .unwrap();
+    assert_eq!(course.item.prerequisites, ["setup"]);
+    assert_eq!(course.item.disposition(), Disposition::Error);
+    assert!(ws.terms().unwrap().is_empty());
 }
 
 #[test]

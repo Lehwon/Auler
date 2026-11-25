@@ -27,6 +27,10 @@ allow = [
 [licenses.private]
 ignore = true
 
+[[licenses.exceptions]]
+name = "ar_archive_writer"
+allow = ["Apache-2.0 WITH LLVM-exception"]
+
 [bans]
 multiple-versions = "warn"
 wildcards = "deny"

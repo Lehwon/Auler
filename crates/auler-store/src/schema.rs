@@ -106,6 +106,25 @@ const MIGRATIONS: &[&str] = &[
     CREATE INDEX constraints_term ON constraints(term_id);
     CREATE INDEX changes_term ON changes(term_id);
     ",
+    "
+    CREATE TABLE review_drafts (
+        id         INTEGER PRIMARY KEY,
+        origin     TEXT NOT NULL,
+        request_id TEXT,
+        submission TEXT NOT NULL,
+        overview   TEXT NOT NULL DEFAULT '',
+        body       TEXT NOT NULL,
+        UNIQUE (origin, request_id)
+    );
+    CREATE TABLE review_applications (
+        draft_id   INTEGER NOT NULL REFERENCES review_drafts(id),
+        request_id TEXT NOT NULL,
+        revision   INTEGER NOT NULL REFERENCES changes(revision),
+        actor      TEXT NOT NULL,
+        selection  TEXT NOT NULL,
+        PRIMARY KEY (draft_id, request_id)
+    );
+    ",
 ];
 
 /// 이 앱이 아는 마지막 스키마 버전

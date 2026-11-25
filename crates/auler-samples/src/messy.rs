@@ -326,7 +326,7 @@ fn rooms(exp: &mut InputDocument) -> Result<Vec<u8>, XlsxError> {
         };
         let mut c = constraints
             .iter()
-            .find(|c| c.key.as_deref() == Some(key))
+            .find(|c| c.key.as_ref().is_some_and(|value| value.text == key))
             .expect("기준 조건")
             .clone();
         c.text = Some(room_note(r).into());

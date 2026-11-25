@@ -27,7 +27,7 @@ finally {
 }
 
 $rows = $lines |
-    Where-Object { $_ -and $_ -notmatch '^auler v' } |
+    Where-Object { $_ -and $_ -notmatch '^auler(?:-[a-z0-9-]+)? v.* \(' } |
     ForEach-Object {
         $name, $license, $repo = $_ -split '\|', 3
         $parts = ($name.Trim() -split ' ')

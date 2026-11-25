@@ -169,6 +169,23 @@ impl Date {
         self.day
     }
 
+    /// 0001-01-01부터 지난 그레고리력 날짜 수.
+    pub fn ordinal(self) -> i32 {
+        const MONTH_START: [i32; 12] = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+        let preceding_years = i32::from(self.year) - 1;
+        let leap = self.year.is_multiple_of(4)
+            && (!self.year.is_multiple_of(100) || self.year.is_multiple_of(400));
+        preceding_years * 365 + preceding_years / 4 - preceding_years / 100
+            + preceding_years / 400
+            + MONTH_START[usize::from(self.month - 1)]
+            + i32::from(self.day - 1)
+            + i32::from(leap && self.month > 2)
+    }
+
+    pub fn weekday(self) -> Weekday {
+        Weekday::ALL[(self.ordinal() % 7) as usize]
+    }
+
     /// `2027-03-02`를 읽는다.
     pub fn parse(text: &str) -> Option<Self> {
         let mut parts = text.trim().split('-');
@@ -215,7 +232,7 @@ pub struct Break {
     pub end: ClockTime,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PeriodTableError {
     /// 교시가 하나도 없다
     Empty,
@@ -376,10 +393,14 @@ impl PeriodTable {
 
     /// `first`부터 `count`개 교시 사이에 등록된 휴게시간이 끼어 있는지
     pub fn crosses_break(&self, first: usize, count: usize) -> bool {
-        let Some((start, end)) = self.span_time(first, count) else {
-            return false;
-        };
-        self.breaks.iter().any(|b| start < b.end && b.start < end)
+        self.breaks_in_span(first, count).next().is_some()
+    }
+
+    pub fn breaks_in_span(&self, first: usize, count: usize) -> impl Iterator<Item = &Break> {
+        let span = self.span_time(first, count);
+        self.breaks
+            .iter()
+            .filter(move |b| span.is_some_and(|(start, end)| start < b.end && b.start < end))
     }
 }
 

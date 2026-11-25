@@ -2,6 +2,318 @@
 // 과목명·교원명·강의실 같은 원본 자료는 여기서 다루지 않는다(번역하지 않음).
 // Rust 쪽 문구(표의 상태 열)도 이 전역에서 읽어 같은 번역을 쓴다.
 export global Labels {
+    pure callback backup-open-error(string, string) -> string;
+    backup-open-error(path, reason) => { return @tr("Could not open the verified copy at {0}. {1}", path, reason); }
+    out property <string> backup-terms: @tr("Semesters");
+    out property <string> backup-courses: @tr("Courses");
+    out property <string> backup-instructors: @tr("Instructors");
+    out property <string> backup-rooms: @tr("Rooms");
+    out property <string> backup-sections: @tr("Sections");
+    out property <string> backup-placements: @tr("Scheduled meetings");
+    out property <string> backup-versions: @tr("Finalized versions");
+    out property <string> backup-new-path: @tr("That file already exists. Choose a new file name for the copy.");
+    out property <string> backup-permissions: @tr("Auler could not protect the copy for this Windows account. Choose another location.");
+    out property <string> backup-integrity: @tr("The copy failed its database integrity or record count check.");
+    out property <string> backup-stopped: @tr("The workspace copy stopped. Try again.");
+    public pure function backup-error(detail: string) -> string { return @tr("Could not create the workspace copy. {0}", detail); }
+    out property <string> example-school-profile: @tr("Example school CSV profile");
+    out property <string> export-open-pdf-error: @tr("Could not open the saved PDF.");
+    out property <string> export-path-taken: @tr("A file already exists there. Choose another name or confirm replacement.");
+    out property <string> export-regular-file: @tr("Choose a regular file.");
+    out property <string> export-invalid-preview: @tr("Could not read the preview image. Generate it again.");
+    out property <string> export-worker-stopped: @tr("The output stopped. Try again.");
+    public pure function export-extension(extension: string) -> string { return @tr("Choose a .{0} file.", extension); }
+    public pure function export-error(detail: string) -> string { return @tr("Could not prepare the output. {0}", detail); }
+    out property <[string]> seasons: [@tr("First semester"), @tr("Summer session"), @tr("Second semester"), @tr("Winter session")];
+    public pure function academic-term(year: int, season: int) -> string {
+        return @tr("{0} · {1}", year, root.seasons[season]);
+    }
+
+    public pure function finalized(version: int) -> string {
+        return @tr("Finalized v{0}", version);
+    }
+    public pure function last-finalized(version: string, time: string) -> string {
+        return @tr("{0} · {1}", version, time);
+    }
+    public pure function workspace-error(detail: string) -> string {
+        return @tr("The workspace operation failed. {0}", detail);
+    }
+    out property <string> enter-department: @tr("Enter the department name.");
+    out property <string> invalid-term: @tr("Check the academic year and term.");
+    out property <string> invalid-calendar: @tr("Select at least one teaching day and check that the period times fit in one day.");
+    out property <string> workspace-locked: @tr("This workspace is open in another Auler window.");
+    out property <string> workspace-exists: @tr("A file already exists at this location. Choose a new name.");
+    out property <string> not-workspace: @tr("Choose an Auler workspace file.");
+    out property <string> workspace-too-new: @tr("Open this workspace with a newer version of Auler.");
+    out property <string> term-exists: @tr("This term already exists. Choose another year or term.");
+    out property <string> complete: @tr("Complete");
+    out property <string> created-term: @tr("Created term");
+    out property <string> copied-term: @tr("Copied term");
+    out property <string> sample-data: @tr("Sample department data");
+    out property <string> local-solver: @tr("Local solver");
+    out property <string> standard-xlsx: @tr("Standard XLSX");
+    out property <string> local: @tr("Local");
+    out property <string> no-changes: @tr("No changes");
+    out property <string> applicable: @tr("Ready to apply");
+    out property <string> validation-failed: @tr("Validation failed");
+    out property <string> partially-applied: @tr("Partially applied");
+    out property <string> applied: @tr("Applied");
+    out property <string> rejected: @tr("Rejected");
+    out property <string> cancelled: @tr("Cancelled");
+    out property <string> base-changed: @tr("Base changed");
+    out property <string> catalog-add: @tr("Add record");
+    out property <string> all-grades: @tr("All years");
+    public pure function grade-label(grade: int) -> string { return @tr("Year {0}", grade); }
+    out property <string> catalog-edit-selected: @tr("Edit selected");
+    out property <string> catalog-batch-unavailable: @tr("Edit calendar entries one at a time.");
+    out property <string> catalog-delete-preview: @tr("This record will be removed when you confirm.");
+    out property <string> catalog-field-invalid: @tr("Check the format and value of this field.");
+    out property <string> catalog-calendar-in-use: @tr("Placements or constraints use this period or a later period.");
+    out property <string> catalog-capacity: @tr("A new record identifier could not be allocated.");
+    out property <string> catalog-in-use: @tr("This record is in use. Review the affected records before deleting it.");
+    out property <string> catalog-duplicate: @tr("A record with this code already exists.");
+    out property <string> catalog-stale: @tr("The workspace changed. Close the editor and reopen the current record.");
+    out property <string> catalog-refresh-failed: @tr("Changes were saved. Reopen the workspace to reload them.");
+    out property <string> catalog-other-reference: @tr("A related record in this workspace");
+    out property <string> catalog-unknown-code: @tr("Use a registered code and match its capitalization.");
+    out property <string> catalog-calendar-empty: @tr("Keep at least one teaching period.");
+    out property <string> catalog-period-label: @tr("Enter a unique period label.");
+    out property <string> catalog-time-range: @tr("End time must be later than start time.");
+    out property <string> catalog-time-overlap: @tr("Check the period order and make sure classes and breaks do not overlap.");
+    out property <string> catalog-export-exists: @tr("A file already exists here. Choose a different CSV name.");
+    out property <string> import_valid_workbook: @tr("The workbook matches the Auler template.");
+    out property <string> import_invalid_workbook: @tr("Check the workbook against the standard template.");
+    out property <string> import_unreadable: @tr("The XLSX file could not be read. Check that the file opens in Excel.");
+    out property <string> import_choose_xlsx: @tr("Choose an XLSX workbook.");
+    out property <string> import_stale: @tr("The data used for this draft changed. Compare the draft with current data.");
+    out property <string> import_check_document: @tr("Check the issues in this draft before applying changes.");
+    out property <string> import_term_finalized: @tr("This term is finalized. Open a correction draft before applying changes.");
+    out property <string> import_select_dependencies: @tr("Review the selected rows and include any records they depend on.");
+    out property <string> import_undone: @tr("Undone");
+    out property <string> import_new: @tr("New");
+    out property <string> import_updated: @tr("Update");
+    out property <string> import_term_setup: @tr("Term setup");
+    out property <string> import_numeric_code: @tr("Check the original code and enter it as text to preserve leading zeros.");
+    out property <string> import_ambiguous_room: @tr("Enter the building and room number.");
+    out property <string> import_instructor: @tr("Check the instructor code and name in the original workbook.");
+    out property <string> import_check_value: @tr("Check this value against the standard template.");
+    out property <string> import_formula: @tr("Paste the formula result as a value.");
+    out property <string> import_version: @tr("Use the current Auler template.");
+    out property <string> import_one_term: @tr("Enter exactly one term in the Term worksheet.");
+    out property <string> import_headers: @tr("Match the first row of headings to the template.");
+    out property <string> finalized_timetable: @tr("Finalized timetable");
+    out property <string> finalize_correction_opened: @tr("Opened correction draft");
+    out property <string> finalize_add_sections: @tr("Add sections before validating the timetable.");
+    out property <string> finalize_checks_passed: @tr("Required placement checks passed.");
+    out property <string> finalize_checks_pending: @tr("Review the outstanding timetable checks.");
+    out property <string> finalize_acknowledge: @tr("Acknowledge the remaining warnings before finalizing.");
+    public pure function review_filter(filter: int, amount: int) -> string {
+        if filter == 1 { return @tr("Data {0}", amount); }
+        if filter == 2 { return @tr("Constraints {0}", amount); }
+        if filter == 3 { return @tr("Placements {0}", amount); }
+        if filter == 4 { return @tr("Complete {0}", amount); }
+        if filter == 5 { return @tr("Needs attention {0}", amount); }
+        return @tr("All {0}", amount);
+    }
+    out property <string> import_unknown_sheet: @tr("Remove this worksheet or use the name in the standard template.");
+    out property <string> import_required: @tr("Required course");
+    public pure function import_boolean(value: bool) -> string { return value ? @tr("Yes") : @tr("No"); }
+    public pure function import_field(key: string) -> string {
+        if (key == "kind") { return @tr("Type"); }
+        if (key == "target") { return @tr("Target"); }
+        if (key == "period") { return @tr("Date range"); }
+        if (key == "windows") { return @tr("Times to avoid"); }
+        if (key == "strength") { return @tr("Priority"); }
+        if (key == "days" || key == "day") { return @tr("Teaching days"); }
+        if (key == "required_course_overlap") { return @tr("Required course overlaps"); }
+        if (key == "block_may_cross_break") { return @tr("Lessons may span breaks"); }
+        if (key == "room_turnaround_minutes") { return @tr("Room turnaround in minutes"); }
+        if (key == "note") { return @tr("Private note"); }
+        if (key == "room") { return @tr("Room"); }
+        if (key == "term") { return @tr("Academic term"); }
+        if (key == "text") { return @tr("Original request"); }
+        if (key == "weight") { return @tr("Weight"); }
+        if (key == "confirmed_by") { return @tr("Confirmed by"); }
+        return "";
+    }
+    public pure function import_missing_value(field: string) -> string { return @tr("Enter a value under {0}.", field); }
+    public pure function import_invalid_value(field: string) -> string { return @tr("Check the format and value under {0}.", field); }
+    public pure function import_missing_column(field: string) -> string { return @tr("Add the {0} heading from the template.", field); }
+    public pure function import_duplicate_column(field: string) -> string { return @tr("Keep one {0} heading.", field); }
+    public pure function import_unknown_column(field: string) -> string { return @tr("The heading {0} is outside the template. Check the first row.", field); }
+    public pure function import_conflicting_field(key: string, field: string) -> string { return @tr("Use the same {1} for each row of constraint {0}.", key, field); }
+    public pure function import_sheet(name: string, rows: int, columns: int) -> string {
+        return @tr("{0} · through row {1} · {2} columns", name, rows, columns);
+    }
+    public pure function import_wrong_term(term: string) -> string {
+        return @tr("Choose a workbook for {0}, or switch to the workbook’s term.", term);
+    }
+    public pure function import_review_counts(new_rows: int, updates: int, unchanged: int, review: int, errors: int) -> string {
+        return @tr("New {0} · Update {1} · Unchanged {2} · Needs review {3} · Errors {4}", new_rows, updates, unchanged, review, errors);
+    }
+    public pure function import_success(applied: int) -> string { return @tr("Applied {n} selected row." | "Applied {n} selected rows." % applied); }
+    public pure function import_prerequisites(required: int) -> string { return @tr("Select {0} prerequisite rows for this record.", required); }
+    public pure function import_check_sheet(sheet: string) -> string { return @tr("Check worksheet {0}. The template requires it exactly once.", sheet); }
+    public pure function import_diagnostic(source: string, message: string) -> string {
+        return source == "" ? message : @tr("{0} · {1}", source, message);
+    }
+    out property <string> constraint_avoid: @tr("Time restriction");
+    out property <string> constraint_no_time: @tr("No time set");
+    out property <string> constraint_manual: @tr("Manual entry");
+    out property <string> constraint_whole_term: @tr("Whole term");
+    out property <string> constraint_source: @tr("Source");
+    out property <string> constraint_confirmed_by: @tr("Confirmed by");
+    out property <string> constraint_note: @tr("Private note");
+    out property <string> constraint_weight: @tr("Weight");
+    out property <string> constraint_saved: @tr("Saved constraint");
+    out property <string> constraint_removed: @tr("Removed constraint");
+    out property <string> constraint_choose_target: @tr("Select a target from the current term.");
+    out property <string> constraint_choose_window: @tr("Choose a teaching day and add a valid time range.");
+    out property <string> constraint_save_window_first: @tr("Add or update the edited time range before saving.");
+    out property <string> constraint_duplicate_window: @tr("This time range is already listed.");
+    out property <string> constraint_check_dates: @tr("Enter two dates in YYYY-MM-DD format within the term, in order.");
+    out property <string> constraint_choose_strength: @tr("Choose hard or soft before confirming.");
+    out property <string> constraint_check_weight: @tr("Choose a whole number from 1 to 10 for a soft constraint.");
+    public pure function constraint_tab(index: int, amount: int) -> string {
+        return index == 0 ? @tr("All {0}", amount) : index == 1 ? @tr("Hard {0}", amount) : index == 2 ? @tr("Soft {0}", amount) : @tr("Pending {0}", amount);
+    }
+    public pure function constraint_detail(label: string, value: string) -> string { return value == "" ? "" : @tr("{0} · {1}", label, value); }
+    public pure function constraint_window_period(day: string, label: string) -> string { return @tr("{0} · Period {1}", day, label); }
+    public pure function constraint_window_span(day: string, first: string, last: string) -> string { return @tr("{0} · Periods {1}–{2}", day, first, last); }
+    public pure function constraint_affected(section: string, time: string, locked: bool) -> string {
+        return locked ? @tr("{0} · {1} · Locked", section, time) : @tr("{0} · {1}", section, time);
+    }
+    public pure function constraint_cell(day: string, period: string, amount: int) -> string {
+        return @tr("{0} · Period {1} · {2}", day, period, @tr("{n} constraint" | "{n} constraints" % amount));
+    }
+    public pure function constraint_edit_cell(day: string, period: string, clock: bool, chosen: bool) -> string {
+        return @tr("{0} · Period {1} · {2}", day, period,
+            clock ? @tr("Set by a clock-time range") : chosen ? @tr("Remove avoided period") : @tr("Add avoided period"));
+    }
+    out property <string> work_all: @tr("All");
+    out property <string> work_no_location: @tr("No time assigned");
+    out property <string> work_outside_grid: @tr("Choose a slot within the weekly grid.");
+    out property <string> work_choose_room: @tr("Room required");
+    out property <string> work_stale: @tr("The draft changed. Review a new preview before applying.");
+    out property <string> work_solver_stopped: @tr("Local scheduling stopped. Start it again to retry.");
+    out property <string> work_preparing: @tr("Preparing local scheduling…");
+    out property <string> work_locked_conflicts: @tr("Resolve conflicts in locked or fixed placements before applying a result.");
+    out property <string> work_cancelled_draft_kept: @tr("The current draft was kept.");
+    out property <string> work_solver_needs_review: @tr("Resolve the placement checks before applying this result.");
+    out property <string> work_equipment_required: @tr("Equipment required");
+    out property <string> work_placed: @tr("Placed meeting");
+    out property <string> work_locked: @tr("Locked meeting");
+    out property <string> work_unlocked: @tr("Unlocked meeting");
+    out property <string> work_solver_applied: @tr("Applied schedule result");
+    public pure function work_part(title: string, part: int) -> string { return @tr("{0} · Part {1}", title, part); }
+    public pure function work_meeting_counts(periods: int, students-n: int) -> string { return @tr("{0} · {1}", @tr("{n} period" | "{n} periods" % periods), root.students(students-n)); }
+    public pure function work_verdict(value: int) -> string {
+        return value == 3 ? @tr("Unavailable") : value == 2 ? @tr("External check needed") : value == 1 ? @tr("Preference warning") : @tr("Available");
+    }
+    public pure function work_room_facts(kind: int, seats: int) -> string {
+        return @tr("{0} · {1}", kind == 0 ? @tr("Lecture room") : kind == 1 ? @tr("Laboratory") : kind == 2 ? @tr("Seminar room") : @tr("Other room type"),
+            @tr("{n} available seat" | "{n} available seats" % seats));
+    }
+    public pure function work_shortage(label: string, needed: string, available: string) -> string {
+        return @tr("{0} · Need {1}, available {2}", label, needed, available);
+    }
+    public pure function work_diff(from: string, to: string) -> string { return @tr("{0} → {1}", from, to); }
+    public pure function work_removal_warning(n: int) -> string {
+        return @tr("Applying this result leaves {n} previously placed meeting unassigned." | "Applying this result leaves {n} previously placed meetings unassigned." % n);
+    }
+    public pure function work_solve_base(version: int, locked: int, hard: int, soft: int) -> string {
+        return @tr("Draft v{0} · Locked {1} · Hard conditions {2} · Soft conditions {3}", version, locked, hard, soft);
+    }
+    public pure function work_progress(phase: string, ms: string, placed: int, meetings: int) -> string {
+        return @tr("{0} · {1} ms · Best result {2}/{3} placed", phase == "preparing" ? @tr("Preparing") : phase == "improving" ? @tr("Improving preferences") : @tr("Searching"), ms, placed, meetings);
+    }
+    public pure function work_solver_result(status: string, placed: int, pending: int) -> string {
+        return @tr("{0} · {1} placed · {2} unassigned",
+            status == "cancelled" ? @tr("Scheduling cancelled") : status == "timed_out" ? @tr("Time limit reached")
+            : status == "no_solution" ? @tr("No complete result") : @tr("Scheduling complete"), placed, pending);
+    }
+    public pure function work_comparison(hard-before: int, hard-after: int, pending-before: int, pending-after: int, soft-before: string, soft-after: string, locked: int) -> string {
+        return @tr("Hard conflicts {0} → {1} · Unassigned {2} → {3} · Preference cost {4} → {5} · Locked placements kept {6}", hard-before, hard-after, pending-before, pending-after, soft-before, soft-after, locked);
+    }
+    public pure function work_unassigned(cause: string) -> string {
+        if cause == "blocked_by_locks" { return @tr("Fixed or locked placements need review"); }
+        if cause == "no_candidate" { return @tr("No valid time and room combination"); }
+        if cause == "time_limit" { return @tr("Unassigned when time ran out"); }
+        if cause == "cancelled" { return @tr("Unassigned when cancelled"); }
+        return @tr("Conflicts with other meetings");
+    }
+    public pure function work_reason(code: string) -> string {
+        if code == "locked" || code == "unlock_required" { return @tr("Unlock this placement to change its time or room."); }
+        if code == "crosses_break" { return @tr("The meeting spans a registered break."); }
+        if code == "room_required" { return root.work_choose_room; }
+        if code == "unknown_room" { return @tr("Choose a registered room."); }
+        if code == "wrong_room_kind" { return @tr("Choose a room with the required room type."); }
+        if code == "not_enough_seats" { return @tr("Seats required"); }
+        if code == "not_enough_equipment" || code == "unknown_equipment" { return @tr("Equipment required"); }
+        if code == "equipment_inspection" { return @tr("Equipment is under inspection during the term."); }
+        if code == "external_room_schedule" { return @tr("Confirm the shared-room schedule first."); }
+        if code == "provisional_enrollment" { return @tr("Enrollment is provisional."); }
+        if code == "overlap" { return @tr("Overlaps another meeting"); }
+        if code == "room_turnaround" { return @tr("Room turnaround is too short"); }
+        if code == "constraint" { return @tr("Outside the condition’s allowed times"); }
+        if code == "unknown_section" { return @tr("The section is unavailable."); }
+        return @tr("Select a teaching day and a period that fits the meeting.");
+    }
+    public pure function catalog-seats-limit(total: string) -> string { return @tr("Available seats cannot exceed the total of {0}.", total); }
+    public pure function catalog-export-error(detail: string) -> string { return @tr("The CSV file could not be saved. {0}", detail); }
+    public pure function catalog-record-error(record: string, detail: string) -> string { return @tr("{0} · {1}", record, detail); }
+    public pure function select-row(label: string) -> string { return @tr("Select {0}", label); }
+    public pure function catalog-delete-title(label: string) -> string { return @tr("Delete {0}", label); }
+    public pure function catalog-section-reference(label: string) -> string { return @tr("Section {0}", label); }
+    public pure function catalog-change-line(label: string, before: string, after: string) -> string {
+        return @tr("{0} · {1} → {2}", label, before == "" ? @tr("(empty)") : before, after == "" ? @tr("(empty)") : after);
+    }
+    public pure function catalog-label(key: string) -> string {
+        if (key == "course_code") { return @tr("Course code"); }
+        if (key == "section") { return @tr("Section"); }
+        if (key == "course") { return @tr("Course"); }
+        if (key == "instructor") { return @tr("Instructor"); }
+        if (key == "instructor_codes") { return @tr("Instructor codes (separated by ;)"); }
+        if (key == "group_codes") { return @tr("Groups (code and yes/no; separate groups with ;)"); }
+        if (key == "students") { return @tr("Students"); }
+        if (key == "provisional") { return @tr("Provisional enrollment (yes/no)"); }
+        if (key == "split") { return @tr("Period split (e.g. 2+1)"); }
+        if (key == "class_kind") { return @tr("Class type (lecture, lab or mixed)"); }
+        if (key == "room_kind") { return @tr("Room type"); }
+        if (key == "equipment_needs") { return @tr("Equipment needs (code quantity; …)"); }
+        if (key == "code") { return @tr("Code"); }
+        if (key == "name") { return @tr("Name"); }
+        if (key == "department") { return @tr("Department"); }
+        if (key == "year") { return @tr("Year"); }
+        if (key == "track") { return @tr("Track"); }
+        if (key == "building") { return @tr("Building"); }
+        if (key == "room_number") { return @tr("Room number"); }
+        if (key == "total_seats") { return @tr("Total seats"); }
+        if (key == "available_seats") { return @tr("Available seats"); }
+        if (key == "shared") { return @tr("Shared room"); }
+        if (key == "confirmed_date") { return @tr("Schedule checked (YYYY-MM-DD)"); }
+        if (key == "source") { return @tr("Source"); }
+        if (key == "room_equipment") { return @tr("Equipment (code owned available [from until]; …)"); }
+        if (key == "equipment_scope") { return @tr("Equipment scope (per person or per room)"); }
+        if (key == "label") { return @tr("Label"); }
+        if (key == "start") { return @tr("Start time (HH:MM)"); }
+        if (key == "end") { return @tr("End time (HH:MM)"); }
+        if (key == "hours") { return @tr("Hours"); }
+        return @tr("Status");
+    }
+    public pure function catalog-detail-label(key: string) -> string {
+        if (key == "instructor_codes") { return @tr("Instructors"); }
+        if (key == "group_codes") { return @tr("Student groups"); }
+        if (key == "provisional") { return @tr("Provisional enrollment"); }
+        if (key == "split") { return @tr("Period split"); }
+        if (key == "class_kind") { return @tr("Class type"); }
+        if (key == "equipment_needs" || key == "room_equipment") { return @tr("Equipment"); }
+        if (key == "equipment_scope") { return @tr("Equipment scope"); }
+        if (key == "confirmed_date") { return @tr("Schedule checked"); }
+        if (key == "start") { return @tr("Start time"); }
+        if (key == "end") { return @tr("End time"); }
+        return root.catalog-label(key);
+    }
     // 0=월 … 6=일
     out property <[string]> weekdays: [@tr("Mon"), @tr("Tue"), @tr("Wed"), @tr("Thu"), @tr("Fri"), @tr("Sat"), @tr("Sun")];
     out property <string> status-assigned: @tr("Assigned");
@@ -55,6 +367,7 @@ export global Labels {
 
     // 0 = 장비 조건을 만족하는 강의실 없음, 1 = 교원 시간 충돌
     public pure function unassigned-reason(reason: int) -> string {
-        return reason == 0 ? @tr("No room with equipment") : @tr("Instructor time conflict");
+        return reason == 0 ? @tr("No room with equipment") : reason == 1 ? @tr("Instructor time conflict")
+            : reason == 2 ? @tr("Time not assigned") : @tr("Room not assigned");
     }
 }

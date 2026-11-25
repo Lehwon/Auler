@@ -7,7 +7,7 @@
 //! 기록은 내부 ID가 아니라 자연 키(학수번호, 분반 코드, 교원 코드, 건물+호실)로 서로를 가리킨다.
 //! 모든 기록에 원본 위치(`source`)를 붙일 수 있다.
 
-use std::fmt;
+use std::{collections::BTreeMap, fmt};
 
 use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -63,6 +63,20 @@ impl Serialize for CodeValue {
     fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
         match self.text.parse::<i64>() {
             Ok(n) if self.from_number => s.serialize_i64(n),
+            _ if self.from_number => {
+                if let Ok(n) = self.text.parse::<u64>() {
+                    return s.serialize_u64(n);
+                }
+                let n = self
+                    .text
+                    .parse::<f64>()
+                    .map_err(serde::ser::Error::custom)?;
+                if n.is_finite() {
+                    s.serialize_f64(n)
+                } else {
+                    Err(serde::ser::Error::custom("numeric code must be finite"))
+                }
+            }
             _ => s.serialize_str(&self.text),
         }
     }
@@ -122,6 +136,9 @@ pub struct InputDocument {
     /// 항상 [`SCHEMA_V1`]
     pub schema: String,
     pub term: TermInput,
+    /// Exact field locations when a single record is assembled from multiple source rows.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub locations: BTreeMap<String, SourceRef>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub setup: Option<SetupInput>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -154,6 +171,7 @@ impl InputDocument {
                 year,
                 season: season.to_owned(),
             },
+            locations: BTreeMap::new(),
             setup: None,
             equipment: Vec::new(),
             rooms: Vec::new(),
@@ -431,7 +449,7 @@ pub struct RuleInput {
 pub struct ConstraintInput {
     /// 문서 안에서 조건을 구분하는 키 (선택)
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub key: Option<String>,
+    pub key: Option<CodeValue>,
     pub target: TargetInput,
     /// 해석하지 못한 요청은 비워 두고 `status`를 `pending`으로 한다
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -507,6 +525,16 @@ mod tests {
         assert_eq!(v[3].text, "302");
         assert_eq!(serde_json::to_string(&v).unwrap(), r#"["01",1,2,302]"#);
         assert!(serde_json::from_str::<CodeValue>("true").is_err());
+    }
+
+    #[test]
+    fn numeric_codes_remain_numeric_across_a_json_round_trip() {
+        let codes: Vec<CodeValue> = serde_json::from_str("[0.125,18446744073709551615]").unwrap();
+        let encoded = serde_json::to_string(&codes).unwrap();
+        assert_eq!(
+            serde_json::from_str::<Vec<CodeValue>>(&encoded).unwrap(),
+            codes
+        );
     }
 
     #[test]

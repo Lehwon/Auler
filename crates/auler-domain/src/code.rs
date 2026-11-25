@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 /// 코드 길이 상한 (글자 수)
 pub const MAX_CODE_LEN: usize = 32;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CodeError {
     Empty,
     TooLong,
@@ -112,7 +112,7 @@ pub struct RoomKey {
     pub number: String,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum RoomKeyError {
     MissingBuilding,
     MissingNumber,

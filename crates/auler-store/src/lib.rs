@@ -11,9 +11,13 @@
 //! - 확정본은 바꿀 수 없는 스냅숏이다. 확정은 기준 번호를 다시 확인하고 한 트랜잭션으로
 //!   저장한다. 확정 뒤 고치려면 수정용 초안을 연다.
 
+mod backup;
+mod backup_permissions;
 mod error;
+mod finalize;
 mod lock;
 mod read;
+mod review;
 mod schema;
 mod writer;
 
@@ -23,7 +27,10 @@ use auler_domain::model::*;
 use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 
+pub use backup::{BackupSummary, VerifiedRestore};
 pub use error::{Result, StoreError};
+pub use finalize::FinalizationChecks;
+pub use review::*;
 pub use schema::LATEST_VERSION;
 pub use writer::UNDO_LIMIT;
 
@@ -222,6 +229,24 @@ impl Workspace {
         Self::start(path.as_ref(), None)
     }
 
+    pub fn restore(source: impl AsRef<Path>, destination: impl AsRef<Path>) -> Result<Self> {
+        Self::prepare_restore(source, destination)?.open()
+    }
+
+    pub fn prepare_restore(
+        source: impl AsRef<Path>,
+        destination: impl AsRef<Path>,
+    ) -> Result<VerifiedRestore> {
+        backup::restore(source.as_ref(), destination.as_ref())
+    }
+
+    pub fn backup_file(
+        source: impl AsRef<Path>,
+        destination: impl AsRef<Path>,
+    ) -> Result<BackupSummary> {
+        backup::create(source.as_ref(), destination.as_ref())
+    }
+
     fn start(path: &Path, create: Option<&str>) -> Result<Self> {
         match (create.is_some(), path.exists()) {
             (true, true) => return Err(StoreError::AlreadyExists),
@@ -233,6 +258,19 @@ impl Workspace {
             _ => {}
         }
         let lock = lock::WorkspaceLock::acquire(path)?;
+        if create.is_some() {
+            std::fs::File::create_new(path).map_err(|error| {
+                if error.kind() == std::io::ErrorKind::AlreadyExists {
+                    StoreError::AlreadyExists
+                } else {
+                    error.into()
+                }
+            })?;
+        }
+        Self::start_locked(path, create, lock)
+    }
+
+    fn start_locked(path: &Path, create: Option<&str>, lock: lock::WorkspaceLock) -> Result<Self> {
         let conn = match schema::open_writer(path, create.is_some()) {
             Ok(c) => c,
             Err(e) => {
@@ -277,9 +315,36 @@ impl Workspace {
         read::load_term(&self.reader, key)
     }
 
+    pub fn next_section_id(&self) -> Result<SectionId> {
+        let last: i64 =
+            self.reader
+                .query_row("SELECT COALESCE(MAX(id), 0) FROM sections", [], |row| {
+                    row.get(0)
+                })?;
+        let next = last
+            .checked_add(1)
+            .ok_or_else(|| StoreError::Invalid("분반 ID 범위를 초과함".into()))?;
+        Ok(SectionId(next))
+    }
+
+    pub fn next_constraint_id(&self) -> Result<ConstraintId> {
+        let last: i64 =
+            self.reader
+                .query_row("SELECT COALESCE(MAX(id), 0) FROM constraints", [], |row| {
+                    row.get(0)
+                })?;
+        last.checked_add(1)
+            .map(ConstraintId)
+            .ok_or_else(|| StoreError::Invalid("편성 조건 ID 범위를 초과함".into()))
+    }
+
     /// 최근 변경부터
     pub fn history(&self, limit: usize) -> Result<Vec<ChangeRecord>> {
-        read::history(&self.reader, limit)
+        read::history(&self.reader, None, limit)
+    }
+
+    pub fn history_for_term(&self, key: TermKey, limit: usize) -> Result<Vec<ChangeRecord>> {
+        read::history(&self.reader, Some(key), limit)
     }
 
     pub fn finalized(&self, key: TermKey) -> Result<Vec<FinalizedInfo>> {
@@ -294,10 +359,26 @@ impl Workspace {
         self.writer.call(move |w| w.create_term(&setup, &meta))
     }
 
+    /// Copy a term's calendar and sections with new section IDs. Year-specific requests and placements start empty.
+    pub fn copy_term(&self, source: TermKey, target: TermKey, meta: ChangeMeta) -> Result<Applied> {
+        self.writer
+            .call(move |w| w.copy_term(source, target, &meta))
+    }
+
     /// 작업 목록을 한 변경으로 적용한다. 학기 기록(분반, 조건, 배치, 학기 설정)을 바꾸려면
     /// `term`을 지정한다
     pub fn apply(&self, term: Option<TermKey>, ops: Vec<Op>, meta: ChangeMeta) -> Result<Applied> {
         self.writer.call(move |w| w.apply(term, ops, &meta))
+    }
+
+    pub fn preview_changes(
+        &self,
+        term: Option<TermKey>,
+        ops: Vec<Op>,
+        meta: ChangeMeta,
+    ) -> Result<()> {
+        self.writer
+            .call(move |writer| writer.preview_changes(term, &ops, &meta))
     }
 
     /// 검사를 마친 학기 자료를 넣는다 (예제 학과, 표준 양식에서 바로 만든 작업공간)
@@ -330,7 +411,19 @@ impl Workspace {
         meta: ChangeMeta,
     ) -> Result<FinalizedInfo> {
         self.writer
-            .call(move |w| w.finalize(key, expected_revision, &meta))
+            .call(move |w| w.finalize(key, expected_revision, None, &meta))
+    }
+
+    /// Validate the current schedule inside the same transaction that writes its immutable snapshot.
+    pub fn finalize_checked(
+        &self,
+        key: TermKey,
+        expected_revision: u64,
+        acknowledge_warnings: bool,
+        meta: ChangeMeta,
+    ) -> Result<FinalizedInfo> {
+        self.writer
+            .call(move |w| w.finalize(key, expected_revision, Some(acknowledge_warnings), &meta))
     }
 
     /// 확정된 학기에 수정용 초안을 연다

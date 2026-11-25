@@ -1,0 +1,345 @@
+import { CheckBox, ComboBox, ListView } from "std-widgets.slint";
+import { CatalogTab } from "catalog.slint";
+import { ActionButton, KeyValue, PageHeader, StatusBanner } from "components.slint";
+import { Badge, FocusRing, Icons, Panel, Theme, Tone } from "theme.slint";
+
+export struct ReviewQueueRow {
+    index: int,
+    title: string,
+    origin: string,
+    status: string,
+    tone: int,
+    term: string,
+    base: string,
+    created: string,
+    counts: string,
+    selected: bool,
+}
+
+export struct ReviewQueueView {
+    active: int,
+    tabs: [string],
+    rows: [ReviewQueueRow],
+    selected: bool,
+    detail: ReviewQueueRow,
+    request: string,
+    unassigned: int,
+    conflicts: int,
+}
+
+export struct FinalRow {
+    name: string,
+    time: string,
+    room: string,
+    locked: bool,
+}
+
+export struct FinalView {
+    has-term: bool,
+    has-final: bool,
+    latest-version: int,
+    editing: bool,
+    term: string,
+    base: string,
+    next-version: string,
+    placed: int,
+    locked: int,
+    unassigned: int,
+    conflicts: int,
+    external-checks: int,
+    missing-locks: int,
+    pending: int,
+    preferences: int,
+    provisional: int,
+    can-finalize: bool,
+    needs-ack: bool,
+    acknowledged: bool,
+    confirming: bool,
+    hint: string,
+    error: string,
+    snapshot: bool,
+    version-title: string,
+    version-date: string,
+    version-index: int,
+    versions: [string],
+    version-ids: [int],
+    can-correct: bool,
+    snapshot-rows: [FinalRow],
+}
+
+component ReviewStatusBadge inherits Badge {
+    in property <ReviewQueueRow> record;
+    text: root.record.status;
+    tone: root.record.tone == 4 ? Tone.danger : root.record.tone == 3 ? Tone.warning : root.record.tone == 2 ? Tone.success : root.record.tone == 1 ? Tone.info : Tone.neutral;
+}
+
+component ReviewListRow inherits FocusScope {
+    in property <ReviewQueueRow> record;
+    in property <int> index;
+    property <bool> keyboard-focus;
+    callback selected();
+    height: 62px;
+    accessible-role: list-item;
+    accessible-label: root.record.title;
+    accessible-description: root.record.origin + ", " + root.record.status + ", " + root.record.term + ", " + root.record.base + ", " + root.record.created;
+    accessible-item-selectable: true;
+    accessible-item-selected: root.record.selected;
+    accessible-item-index: root.index;
+    accessible-action-default => { root.selected(); }
+    focus-gained(reason) => { root.keyboard-focus = reason == FocusReason.tab-navigation; }
+    focus-lost(reason) => { root.keyboard-focus = false; }
+    key-pressed(event) => {
+        if event.text == Key.Return || event.text == Key.Space { root.selected(); return accept; }
+        return reject;
+    }
+    Rectangle {
+        background: root.record.selected ? Theme.action-soft : mouse.has-hover ? Theme.bg : Theme.surface;
+        HorizontalLayout {
+            padding: Theme.space-medium;
+            spacing: Theme.space-medium;
+            VerticalLayout {
+                horizontal-stretch: 1;
+                alignment: center;
+                spacing: 3px;
+                Text { text: root.record.title; color: Theme.text; font-weight: 600; overflow: elide; accessible-role: none; }
+                Text { text: root.record.origin + " · " + root.record.base + " · " + root.record.created; color: Theme.text-muted; font-size: Theme.font-small; overflow: elide; accessible-role: none; }
+            }
+            VerticalLayout {
+                alignment: center;
+                ReviewStatusBadge { record: root.record; accessible-role: none; }
+            }
+        }
+        Rectangle { height: 1px; y: parent.height - self.height; background: Theme.border; }
+    }
+    mouse := TouchArea { mouse-cursor: pointer; clicked => { root.focus(); root.selected(); } }
+    if root.keyboard-focus: FocusRing {}
+}
+
+export component ReviewQueuePage inherits VerticalLayout {
+    in property <ReviewQueueView> view;
+    in property <bool> compact;
+    callback select(int);
+    callback filter(int);
+    callback open(int);
+    callback navigate(int);
+
+    padding: Theme.page-padding;
+    spacing: Theme.space-medium;
+    PageHeader {
+        title: @tr("Review");
+        subtitle: @tr("Review proposed data, conditions and timetable changes");
+        ActionButton { text: @tr("Validate timetable"); primary: true; clicked => { root.navigate(7); } }
+    }
+    HorizontalLayout {
+        accessible-role: tab-list;
+        accessible-label: @tr("Review filters");
+        for tab[index] in root.view.tabs: CatalogTab {
+            title: tab; current: root.view.active == index;
+            activated => { root.filter(index); }
+        }
+    }
+    if root.view.unassigned > 0 || root.view.conflicts > 0: HorizontalLayout {
+        spacing: Theme.space-medium;
+        alignment: start;
+        if root.view.unassigned > 0: ActionButton { text: @tr("Unassigned {0}", root.view.unassigned); clicked => { root.navigate(3); } }
+        if root.view.conflicts > 0: ActionButton { text: @tr("Hard conflicts {0}", root.view.conflicts); clicked => { root.navigate(4); } }
+    }
+    HorizontalLayout {
+        vertical-stretch: 1;
+        spacing: Theme.space-medium;
+        Panel {
+            horizontal-stretch: 1;
+            VerticalLayout {
+                padding: Theme.space-medium;
+                spacing: Theme.space-small;
+                Text { text: @tr("Review tasks"); color: Theme.text; font-weight: 700; }
+                if root.view.rows.length == 0: StatusBanner { message: @tr("No review drafts match this filter."); }
+                tasks := ListView {
+                    accessible-label: @tr("Review tasks");
+                    accessible-item-count: root.view.rows.length;
+                    for item[index] in root.view.rows: ReviewListRow {
+                        width: tasks.visible-width - 10px;
+                        record: item;
+                        index: index;
+                        selected => { root.select(item.index); }
+                    }
+                }
+            }
+        }
+        if root.view.selected: Panel {
+            min-width: 273px;
+            preferred-width: root.compact ? 294px : 374px;
+            max-width: root.compact ? 294px : 374px;
+            horizontal-stretch: 0;
+            accessible-role: complementary;
+            accessible-label: @tr("Review draft details");
+            VerticalLayout {
+                padding: Theme.space-medium;
+                spacing: Theme.space-medium;
+                Text { text: root.view.detail.title; color: Theme.text; font-weight: 700; wrap: word-wrap; }
+                HorizontalLayout {
+                    spacing: Theme.space-small;
+                    alignment: start;
+                    Badge { text: root.view.detail.origin; tone: Tone.neutral; }
+                    ReviewStatusBadge { record: root.view.detail; }
+                }
+                KeyValue { key: @tr("Academic term"); value: root.view.detail.term; }
+                KeyValue { key: @tr("Reference version"); value: root.view.detail.base; }
+                KeyValue { key: @tr("Created"); value: root.view.detail.created; }
+                if root.view.request != "": Text { text: @tr("Request {0}", root.view.request); color: Theme.text-muted; wrap: word-wrap; }
+                Text { text: root.view.detail.counts; color: Theme.text; wrap: word-wrap; }
+                Rectangle { vertical-stretch: 1; }
+                ActionButton { text: @tr("Open review draft"); primary: true; clicked => { root.open(root.view.detail.index); } }
+            }
+        }
+    }
+}
+
+component FinalMetric inherits VerticalLayout {
+    in property <string> label;
+    in property <string> value;
+    spacing: Theme.space-small;
+    horizontal-stretch: 1;
+    Text { text: root.label; color: Theme.text-muted; wrap: word-wrap; }
+    Text { text: root.value; color: Theme.text; font-size: 17px; font-weight: 700; wrap: word-wrap; }
+}
+
+component FinalCounts inherits VerticalLayout {
+    in property <FinalView> view;
+    callback navigate(int);
+    spacing: Theme.space-medium;
+    Panel {
+        VerticalLayout {
+            padding: Theme.space-medium;
+            spacing: Theme.space-small;
+            Text { text: @tr("Required checks"); color: Theme.text; font-weight: 700; }
+            HorizontalLayout {
+                spacing: Theme.space-large;
+                FinalMetric { label: @tr("Unassigned"); value: root.view.unassigned; }
+                FinalMetric { label: @tr("Hard conflicts"); value: root.view.conflicts; }
+                FinalMetric { label: @tr("External room checks"); value: root.view.external-checks; }
+            }
+            if root.view.missing-locks > 0: KeyValue { key: @tr("Missing locked placements"); value: root.view.missing-locks; }
+            if !root.view.confirming: HorizontalLayout {
+                alignment: start;
+                spacing: Theme.space-medium;
+                if root.view.unassigned > 0: ActionButton { text: @tr("Review unassigned"); clicked => { root.navigate(3); } }
+                if root.view.conflicts > 0: ActionButton { text: @tr("Review conflicts"); clicked => { root.navigate(4); } }
+                if root.view.external-checks > 0: ActionButton { text: @tr("Check room schedules"); clicked => { root.navigate(9); } }
+            }
+        }
+    }
+    Panel {
+        VerticalLayout {
+            padding: Theme.space-medium;
+            spacing: Theme.space-small;
+            Text { text: @tr("Remaining warnings"); color: Theme.text; font-weight: 700; }
+            HorizontalLayout {
+                spacing: Theme.space-large;
+                FinalMetric { label: @tr("Pending constraints"); value: root.view.pending; }
+                FinalMetric { label: @tr("Preference warnings"); value: root.view.preferences; }
+                FinalMetric { label: @tr("Provisional placements"); value: root.view.provisional; }
+            }
+            if root.view.pending > 0 && !root.view.confirming: ActionButton { text: @tr("Review constraints"); horizontal-stretch: 0; clicked => { root.navigate(2); } }
+        }
+    }
+}
+
+export component FinalizationPage inherits FocusScope {
+    in property <FinalView> view;
+    callback action(int, int);
+    callback navigate(int);
+    key-pressed(event) => {
+        if event.text == Key.Escape && root.view.confirming {
+            root.action(2, 0);
+            return accept;
+        }
+        return reject;
+    }
+
+    VerticalLayout {
+        padding: Theme.page-padding;
+        spacing: Theme.space-medium;
+        PageHeader {
+            title: root.view.snapshot ? @tr("Finalized timetable") : root.view.confirming ? @tr("Confirm timetable finalization") : @tr("Validate timetable");
+            subtitle: root.view.term + (root.view.snapshot ? " · " + root.view.version_title + " · " + root.view.version_date : root.view.base != "" ? " · " + root.view.base : "");
+            if root.view.snapshot && root.view.editing: ActionButton { text: @tr("Back to draft checks"); clicked => { root.action(7, 0); } }
+            if root.view.snapshot: ActionButton { text: @tr("Export & Handover"); clicked => { root.navigate(6); } }
+            if !root.view.snapshot && !root.view.confirming: ActionButton { text: @tr("Open timetable"); clicked => { root.navigate(3); } }
+        }
+        if root.view.error != "": StatusBanner { message: root.view.error; tone: Tone.danger; }
+        if !root.view.snapshot && !root.view.confirming: StatusBanner {
+            message: root.view.hint == "" ? @tr("Add sections before validating the timetable.") : root.view.hint;
+            tone: root.view.can-finalize ? Tone.success : Tone.warning;
+        }
+        if root.view.snapshot: HorizontalLayout {
+            spacing: Theme.space-medium;
+            ComboBox {
+                model: root.view.versions;
+                current-index: root.view.version-index;
+                horizontal-stretch: 0;
+                accessible-label: @tr("Finalized version");
+                selected(value) => { root.action(6, root.view.version-ids[self.current-index]); }
+            }
+            VerticalLayout { alignment: center; Badge { text: @tr("Read-only"); tone: Tone.info; } }
+            Rectangle { horizontal-stretch: 1; }
+            if root.view.can-correct: ActionButton { text: @tr("Create correction draft"); primary: true; clicked => { root.action(4, 0); } }
+        }
+        if root.view.snapshot: Panel {
+            vertical-stretch: 1;
+            snapshot-list := ListView {
+                accessible-label: @tr("Finalized placements");
+                accessible-item-count: root.view.snapshot-rows.length;
+                for entry[index] in root.view.snapshot-rows: VerticalLayout {
+                    width: snapshot-list.visible-width - 12px;
+                    height: max(56px, self.preferred-height);
+                    padding: Theme.space-medium;
+                    spacing: Theme.space-small;
+                    accessible-role: list-item;
+                    accessible-item-index: index;
+                    accessible-label: entry.name;
+                    accessible-description: entry.time + " · " + entry.room + (entry.locked ? " · " + @tr("Locked") : "");
+                    Text { text: entry.name; color: Theme.text; font-weight: 600; wrap: word-wrap; accessible-role: none; }
+                    Text { text: entry.time + " · " + entry.room + (entry.locked ? " · " + @tr("Locked") : ""); color: Theme.text-muted; wrap: word-wrap; accessible-role: none; }
+                    Rectangle { height: 1px; background: Theme.border; }
+                }
+            }
+        }
+        if !root.view.snapshot && root.view.has-term: FinalCounts { view: root.view; navigate(target) => { root.navigate(target); } }
+        if !root.view.snapshot && root.view.confirming: Panel {
+            VerticalLayout {
+                padding: Theme.space-medium;
+                spacing: Theme.space-small;
+                Text { text: @tr("Finalization saves a read-only version. Use a correction draft for later edits."); color: Theme.text-muted; wrap: word-wrap; }
+                HorizontalLayout {
+                    spacing: Theme.space-large;
+                    FinalMetric { label: @tr("Placements"); value: root.view.placed; }
+                    FinalMetric { label: @tr("Locked placements"); value: root.view.locked; }
+                    FinalMetric { label: @tr("Version for export"); value: root.view.next-version; }
+                }
+                if root.view.needs-ack: CheckBox {
+                    text: @tr("I reviewed the remaining warnings and pending conditions.");
+                    min-height: Theme.control-height;
+                    checked: root.view.acknowledged;
+                    toggled => { root.action(5, self.checked ? 1 : 0); }
+                }
+                if root.view.needs-ack && !root.view.acknowledged: Text { text: @tr("Acknowledge the remaining warnings before finalizing."); color: Theme.text-muted; wrap: word-wrap; }
+            }
+        }
+        if !root.view.snapshot: Rectangle { vertical-stretch: 1; }
+        if !root.view.snapshot && root.view.has-term: HorizontalLayout {
+            spacing: Theme.space-medium;
+            alignment: end;
+            if root.view.confirming: ActionButton { text: @tr("Cancel"); init => { self.focus(); } clicked => { root.action(2, 0); } }
+            if !root.view.confirming && root.view.has-final: ActionButton { text: @tr("Open last finalized version"); clicked => { root.action(6, root.view.latest-version); } }
+            ActionButton {
+                text: @tr("Finalize timetable");
+                primary: self.enabled;
+                enabled: root.view.can-finalize && (!root.view.confirming || !root.view.needs-ack || root.view.acknowledged);
+                accessible-description: self.enabled ? "" : root.view.confirming && root.view.needs-ack && !root.view.acknowledged
+                    ? @tr("Acknowledge the remaining warnings before finalizing.") : root.view.hint;
+                clicked => { root.action(root.view.confirming ? 3 : 1, 0); }
+            }
+        }
+    }
+}

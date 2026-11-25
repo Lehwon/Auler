@@ -1,0 +1,306 @@
+import { CheckBox, ListView } from "std-widgets.slint";
+import { ActionButton, PageHeader, StatusBanner } from "components.slint";
+import { Badge, FocusRing, Icon, Icons, Panel, Theme, Tone } from "theme.slint";
+import { Labels } from "labels.slint";
+
+export struct ImportRow {
+    title: string,
+    source: string,
+    state: string,
+    tone: int,
+    checked: bool,
+    enabled: bool,
+    current: bool,
+}
+
+export struct ImportView {
+    stage: int,
+    file-name: string,
+    target-term: string,
+    summary: string,
+    error: string,
+    can-review: bool,
+    can-apply: bool,
+    can-refresh: bool,
+    can-replace: bool,
+    can-select: bool,
+    can-reject: bool,
+    from-review: bool,
+    rejecting: bool,
+    complete: bool,
+    origin: string,
+    status: string,
+    status-tone: int,
+    has-remaining: bool,
+    selected-count: int,
+    current-source: string,
+    has-original: bool,
+    sheets: [string],
+    original: [string],
+    converted: [string],
+    issues: [string],
+    rows: [ImportRow],
+}
+
+component ImportLine inherits FocusScope {
+    in property <ImportRow> item;
+    in property <int> index;
+    in property <bool> show-check: true;
+    callback chosen();
+    callback checked(bool);
+    height: Theme.navigation-height;
+    accessible-role: list-item;
+    accessible-item-index: root.index;
+    accessible-item-selectable: true;
+    accessible-item-selected: root.item.current;
+    accessible-label: root.item.title + ", " + root.item.state;
+    accessible-description: root.item.source;
+    accessible-action-default => { root.chosen(); }
+    key-pressed(event) => {
+        if (event.text == Key.Return || event.text == Key.Space) {
+            root.chosen();
+            return accept;
+        }
+        return reject;
+    }
+    Rectangle {
+        background: root.item.current ? Theme.action-soft : hit.has-hover ? Theme.bg : Theme.surface;
+        HorizontalLayout {
+            spacing: Theme.space-medium;
+            padding-left: Theme.space-medium;
+            padding-right: Theme.space-medium;
+            if root.show-check: CheckBox {
+                width: 32px;
+                checked: root.item.checked;
+                enabled: root.item.enabled;
+                accessible-label: Labels.select-row(root.item.title);
+                toggled => { root.checked(self.checked); }
+            }
+            Text {
+                text: root.item.title;
+                color: Theme.text;
+                overflow: elide;
+                vertical-alignment: center;
+                horizontal-stretch: 1;
+                accessible-role: none;
+            }
+            VerticalLayout {
+                alignment: center;
+                Badge {
+                    text: root.item.state;
+                    tone: root.item.tone == 1 ? Tone.info : root.item.tone == 2 ? Tone.success
+                        : root.item.tone == 3 ? Tone.warning : root.item.tone == 4 ? Tone.danger : Tone.neutral;
+                    accessible-role: none;
+                }
+            }
+        }
+    }
+    hit := TouchArea {
+        x: root.show-check ? 40px : 0px;
+        width: root.width - self.x;
+        mouse-cursor: pointer;
+        clicked => { root.chosen(); }
+    }
+    if root.has-focus: FocusRing {}
+}
+
+component ImportTextList inherits ListView {
+    in property <[string]> lines;
+    for entry in root.lines: Text {
+        width: root.visible-width - 10px;
+        text: entry;
+        color: Theme.text-muted;
+        wrap: word-wrap;
+        min-height: 26px;
+        vertical-alignment: center;
+    }
+}
+
+export component ImportPage inherits FocusScope {
+    in property <ImportView> view;
+    in property <bool> compact;
+    callback command(int);
+    callback select-row(int);
+    callback check-row(int, bool);
+    key-pressed(event) => {
+        if event.text == Key.Escape && root.view.rejecting {
+            root.command(12);
+            return accept;
+        }
+        return reject;
+    }
+
+    VerticalLayout {
+        padding: Theme.page-padding;
+        spacing: Theme.space-medium;
+        PageHeader {
+            title: root.view.from-review ? @tr("Review draft") : @tr("Import data");
+            subtitle: root.view.target-term + (root.view.stage >= 2 && root.view.file-name != "" ? " · " + root.view.file-name : "");
+            ActionButton { text: root.view.from-review ? @tr("Back to review") : @tr("Back to data"); clicked => { root.command(0); } }
+        }
+        if root.view.from-review && root.view.origin != "": HorizontalLayout {
+            alignment: start;
+            spacing: Theme.space-small;
+            Badge { text: root.view.origin; tone: Tone.neutral; }
+            Badge {
+                text: root.view.status;
+                tone: root.view.status-tone == 4 ? Tone.danger : root.view.status-tone == 3 ? Tone.warning : root.view.status-tone == 2 ? Tone.success : root.view.status-tone == 1 ? Tone.info : Tone.neutral;
+            }
+        }
+        if !root.view.from-review: Panel {
+            HorizontalLayout {
+                padding: Theme.space-medium;
+                spacing: Theme.space-large;
+                for label[i] in [@tr("Choose method"), @tr("Select file"), @tr("Review values"), @tr("Apply selected")]: HorizontalLayout {
+                    property <bool> completed: i < root.view.stage || (i == 3 && root.view.stage == 3);
+                    spacing: Theme.space-small;
+                    accessible-role: text;
+                    accessible-label: label;
+                    accessible-description: completed ? @tr("Complete") : i == root.view.stage ? @tr("Current step") : @tr("Upcoming step");
+                    if completed: Icon { text: Icons.for-tone(Tone.success); color: Theme.tone-foreground(Tone.success); width: 16px; }
+                    Text {
+                        text: (completed ? "" : (i + 1) + ". ") + label;
+                        height: Theme.control-height;
+                        vertical-alignment: center;
+                        color: root.view.stage == i ? Theme.action : Theme.text-muted;
+                        font-weight: root.view.stage == i ? 700 : 400;
+                        accessible-role: none;
+                    }
+                }
+            }
+        }
+        if root.view.error != "": StatusBanner { message: root.view.error; tone: Tone.danger; }
+        if root.view.rejecting: StatusBanner {
+            message: root.view.selected-count > 0 ? @tr("Reject the selected rows?") : @tr("Cancel this review draft?");
+            tone: Tone.warning;
+        }
+        if root.view.stage <= 1: Panel {
+            VerticalLayout {
+                padding: Theme.space-large;
+                spacing: Theme.space-medium;
+                Text { text: @tr("Standard XLSX"); font-weight: 700; color: Theme.text; }
+                Text { text: @tr("Choose or drop an Auler workbook to validate it on this PC."); color: Theme.text-muted; wrap: word-wrap; }
+                HorizontalLayout {
+                    alignment: start;
+                    spacing: Theme.space-medium;
+                    ActionButton { text: @tr("Choose XLSX file"); primary: root.view.stage == 0; clicked => { root.command(1); } }
+                    ActionButton { text: @tr("Save standard template"); clicked => { root.command(2); } }
+                    ActionButton { text: @tr("Enter data directly"); clicked => { root.command(0); } }
+                }
+            }
+        }
+        if root.view.stage == 1: Panel {
+            vertical-stretch: 1;
+            VerticalLayout {
+                padding: Theme.space-large;
+                spacing: Theme.space-medium;
+                Text { text: root.view.file-name; color: Theme.text; font-weight: 700; overflow: elide; }
+                Text { text: root.view.summary; color: Theme.text-muted; wrap: word-wrap; }
+                ImportTextList { lines: root.view.issues.length > 0 ? root.view.issues : root.view.sheets; }
+            }
+        }
+        if root.view.stage == 0: Rectangle { vertical-stretch: 1; }
+        if root.view.stage == 1: HorizontalLayout {
+            alignment: end;
+            ActionButton { text: @tr("Review values"); primary: true; enabled: root.view.can-review; clicked => { root.command(3); } }
+        }
+        if root.view.stage >= 2: StatusBanner {
+            message: root.view.summary;
+            tone: root.view.stage == 3 ? Tone.success : Tone.info;
+        }
+        if root.view.stage == 2 && !root.view.complete: Text {
+            text: root.view.from-review ? @tr("Only selected valid changes apply.") : @tr("Only selected valid rows apply. Records missing from the workbook are kept.");
+            color: Theme.text-muted;
+            wrap: word-wrap;
+        }
+        if root.view.stage >= 2: HorizontalLayout {
+            spacing: Theme.space-large;
+            vertical-stretch: 1;
+            Panel {
+                horizontal-stretch: 1;
+                VerticalLayout {
+                    padding: Theme.space-medium;
+                    spacing: Theme.space-medium;
+                    HorizontalLayout {
+                        spacing: Theme.space-medium;
+                        Text { text: @tr("Converted draft"); color: Theme.text; font-weight: 700; vertical-alignment: center; horizontal-stretch: 1; }
+                        if root.view.stage == 2 && !root.view.complete: ActionButton {
+                            text: root.view.selected-count == 0 ? @tr("Select applicable rows") : @tr("Clear selection");
+                            enabled: root.view.can-select && !root.view.rejecting;
+                            clicked => { root.command(9); }
+                        }
+                    }
+                    list := ListView {
+                        accessible-label: @tr("Converted draft");
+                        accessible-item-count: root.view.rows.length;
+                        for item[i] in root.view.rows: ImportLine {
+                            item: { title: item.title, source: item.source, state: item.state, tone: item.tone, checked: item.checked,
+                                enabled: item.enabled && !root.view.rejecting, current: item.current };
+                            index: i;
+                            show-check: !root.view.complete;
+                            width: list.visible-width - 8px;
+                            chosen => { root.select-row(i); }
+                            checked(checked) => { root.check-row(i, checked); }
+                        }
+                    }
+                }
+            }
+            Panel {
+                preferred-width: root.compact ? 321px : 420px;
+                max-width: root.compact ? 321px : 420px;
+                min-width: 280px;
+                horizontal-stretch: 0;
+                VerticalLayout {
+                    padding: Theme.space-medium;
+                    spacing: Theme.space-small;
+                    Text { text: root.view.has-original ? @tr("Original input") : @tr("Submitted values"); color: Theme.text; font-weight: 700; }
+                    Text { text: root.view.current-source; color: Theme.text-muted; overflow: elide; }
+                    ImportTextList { lines: root.view.original; vertical-stretch: 1; }
+                    if root.view.converted.length > 0: Text { text: @tr("Values after conversion"); color: Theme.text; font-weight: 700; }
+                    if root.view.converted.length > 0: ImportTextList { lines: root.view.converted; vertical-stretch: 1; }
+                    if root.view.issues.length > 0: Text { text: @tr("Check before applying"); color: Theme.danger; font-weight: 600; }
+                    if root.view.issues.length > 0: ImportTextList { lines: root.view.issues; vertical-stretch: 1; }
+                }
+            }
+        }
+        if root.view.stage == 2 && !root.view.rejecting && !root.view.complete && root.view.from-review && root.compact && (root.view.can-refresh || root.view.can-replace): HorizontalLayout {
+            alignment: end;
+            spacing: Theme.space-medium;
+            if root.view.can-refresh: ActionButton { text: @tr("Compare with current data"); clicked => { root.command(5); } }
+            if root.view.can-replace: ActionButton { text: @tr("Load corrected workbook"); clicked => { root.command(7); } }
+        }
+        if root.view.stage == 2 && !root.view.rejecting && !root.view.complete: HorizontalLayout {
+            alignment: end;
+            spacing: Theme.space-medium;
+            if root.view.can-refresh && !(root.view.from-review && root.compact): ActionButton { text: @tr("Compare with current data"); clicked => { root.command(5); } }
+            if root.view.can-replace && !(root.view.from-review && root.compact): ActionButton { text: @tr("Load corrected workbook"); clicked => { root.command(7); } }
+            if root.view.can-reject: ActionButton {
+                text: root.view.selected-count > 0 ? @tr("Reject selected") : @tr("Cancel draft");
+                clicked => { root.command(11); }
+            }
+            if !root.view.from-review: ActionButton { text: @tr("Keep review draft"); clicked => { root.command(6); } }
+            ActionButton {
+                text: @tr("Apply selected ({0})", root.view.selected-count);
+                primary: root.view.can-apply;
+                enabled: root.view.can-apply;
+                clicked => { root.command(4); }
+            }
+        }
+        if root.view.rejecting: HorizontalLayout {
+            alignment: end;
+            spacing: Theme.space-medium;
+            ActionButton { text: @tr("Keep reviewing"); init => { self.focus(); } clicked => { root.command(12); } }
+            ActionButton { text: root.view.selected-count > 0 ? @tr("Reject selected") : @tr("Cancel draft"); primary: true; clicked => { root.command(13); } }
+        }
+        if root.view.stage == 3: HorizontalLayout {
+            alignment: end;
+            spacing: Theme.space-medium;
+            if root.view.has-remaining: ActionButton { text: @tr("Keep review draft"); clicked => { root.command(6); } }
+            ActionButton {
+                text: root.view.has-remaining ? @tr("Review remaining rows") : root.view.from-review ? @tr("Back to review") : @tr("View data");
+                primary: true;
+                clicked => { root.command(root.view.has-remaining ? 10 : 0); }
+            }
+        }
+    }
+}

@@ -1,0 +1,14 @@
+[package]
+name = "auler-solver-spike"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+
+[workspace]
+
+[dependencies]
+auler-domain = { path = "../../crates/auler-domain" }
+auler-engine = { path = "../../crates/auler-engine" }
+auler-samples = { path = "../../crates/auler-samples" }
+good_lp = { version = "1.15.3", default-features = false, features = ["highs"] }

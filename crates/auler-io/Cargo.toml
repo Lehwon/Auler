@@ -1,0 +1,29 @@
+[package]
+name = "auler-io"
+description = "Auler 표준 파일 가져오기와 내보내기"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[features]
+pdf = ["dep:typst", "dep:typst-layout", "dep:typst-pdf", "dep:typst-render"]
+
+[dependencies]
+auler-domain.workspace = true
+auler-store.workspace = true
+calamine = "0.38.0"
+csv = "1.4.0"
+encoding_rs = "0.8.44"
+rust_xlsxwriter = { version = "0.104.0", default-features = false }
+serde.workspace = true
+serde_json.workspace = true
+typst = { version = "=0.15.1", optional = true }
+typst-layout = { version = "=0.15.1", optional = true }
+typst-pdf = { version = "=0.15.1", optional = true }
+typst-render = { version = "=0.15.1", optional = true }
+
+[dev-dependencies]
+auler-engine = { path = "../auler-engine" }
+tempfile = "3.27.0"

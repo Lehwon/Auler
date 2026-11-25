@@ -1,0 +1,377 @@
+import { CheckBox, ComboBox, LineEdit, ListView, ScrollView } from "std-widgets.slint";
+import { Badge, FocusRing, Panel, Theme, Tone } from "theme.slint";
+import { ActionButton, FilterBar, PageHeader, SearchField, StatusBanner } from "components.slint";
+import { Labels } from "labels.slint";
+
+export struct CatalogRow {
+    label: string,
+    cells: [string],
+    checked: bool,
+    current: bool,
+    status-column: int,
+    status-tone: int,
+}
+
+export struct CatalogField {
+    label: string,
+    value: string,
+    error: string,
+}
+
+export component CatalogTab inherits FocusScope {
+    in property <string> title;
+    in property <bool> current;
+    callback activated();
+    height: Theme.navigation-height;
+    accessible-role: tab;
+    accessible-label: title;
+    accessible-item-selectable: true;
+    accessible-item-selected: current;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.activated(); } }
+    key-pressed(event) => {
+        if (event.text == Key.Return || event.text == Key.Space) {
+            root.activated();
+            return accept;
+        }
+        return reject;
+    }
+    Text {
+        text: root.title;
+        color: root.current ? Theme.action : Theme.text-muted;
+        font-weight: root.current ? 700 : 500;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+        accessible-role: none;
+    }
+    Rectangle {
+        height: root.current ? 2px : 1px;
+        y: root.height - self.height;
+        background: root.current ? Theme.action : Theme.border;
+    }
+    TouchArea { enabled: root.enabled; mouse-cursor: pointer; clicked => { root.activated(); } }
+    if root.has-focus: FocusRing {}
+}
+
+component CatalogLine inherits Rectangle {
+    in property <CatalogRow> item;
+    in property <int> index;
+    in property <[float]> weights;
+    in property <bool> interactive: true;
+    in property <bool> bulk-enabled;
+    callback activate();
+    callback check(bool);
+
+    height: Theme.navigation-height;
+    background: root.item.current ? Theme.action-soft : hit.has-hover ? Theme.bg : Theme.surface;
+    accessible-role: list-item;
+    accessible-label: root.item.label;
+    accessible-item-index: index;
+    accessible-item-selectable: true;
+    accessible-item-selected: root.item.current;
+    accessible-enabled: root.interactive;
+    accessible-action-default => { if root.interactive { root.activate(); } }
+
+    focus := FocusScope {
+        enabled: root.interactive;
+        key-pressed(event) => {
+            if (event.text == Key.Return || event.text == Key.Space) {
+                root.activate();
+                return accept;
+            }
+            return reject;
+        }
+        HorizontalLayout {
+            if root.bulk-enabled: VerticalLayout {
+                width: 36px;
+                alignment: center;
+                HorizontalLayout {
+                    alignment: center;
+                    CheckBox {
+                        enabled: root.interactive;
+                        checked: root.item.checked;
+                        accessible-label: Labels.select-row(root.item.label);
+                        toggled => { root.check(self.checked); }
+                    }
+                }
+            }
+            for cell[i] in root.item.cells: HorizontalLayout {
+                min-width: 0px;
+                preferred-width: 0px;
+                horizontal-stretch: root.weights[i];
+                padding-left: Theme.space-medium;
+                padding-right: Theme.space-medium;
+                if root.item.status-column != i: Text {
+                    text: cell;
+                    overflow: elide;
+                    vertical-alignment: center;
+                    color: Theme.text;
+                }
+                if root.item.status-column == i: VerticalLayout {
+                    alignment: center;
+                    Badge { text: cell; tone: root.item.status-tone == 1 ? Tone.success : Tone.warning; }
+                }
+            }
+        }
+        hit := TouchArea {
+            enabled: root.interactive;
+            x: root.bulk-enabled ? 36px : 0px;
+            width: parent.width - self.x;
+            mouse-cursor: pointer;
+            clicked => { root.activate(); }
+        }
+        if focus.has-focus: FocusRing {}
+    }
+    Rectangle { height: 1px; y: root.height - 1px; background: Theme.border; }
+}
+
+export component CatalogPage inherits VerticalLayout {
+    in property <int> tab;
+    in property <int> subtype;
+    in property <int> data-filter;
+    in property <int> grade;
+    in property <[string]> grades;
+    in property <string> query;
+    in property <[CatalogRow]> rows;
+    in property <[string]> columns;
+    in property <[float]> column-weights;
+    in property <[string]> all-columns;
+    in property <[bool]> visible-columns;
+    in property <[CatalogField]> fields;
+    in property <string> detail-title;
+    in property <string> error-message;
+    in property <[string]> preview;
+    in property <int> editor;
+    in property <int> sort-column: -1;
+    in property <bool> descending;
+    in property <bool> editing;
+    in property <bool> has-term;
+    in property <bool> import-available;
+    in property <bool> bulk-enabled: true;
+    in property <bool> compact;
+    in property <int> checked-count;
+    private property <bool> show-columns;
+    private property <bool> show-detail: root.detail-title != "";
+    callback tab-changed(int);
+    callback subtype-changed(int);
+    callback filter-changed(int);
+    callback grade-changed(int);
+    callback query-changed(string);
+    callback row-selected(int);
+    callback row-checked(int, bool);
+    callback column-toggled(int, bool);
+    callback sort-by(int);
+    callback begin(int);
+    callback field-edited(int, string);
+    callback apply();
+    callback close-detail();
+    callback import-data();
+    callback export-data();
+
+    padding: Theme.page-padding;
+    spacing: Theme.space-medium;
+    PageHeader {
+        title: @tr("Data");
+        subtitle: @tr("Sections, instructors and rooms for the term");
+        ActionButton {
+            text: @tr("Import");
+            enabled: root.editing && root.import-available;
+            clicked => { root.import-data(); }
+        }
+        ActionButton {
+            text: @tr("Export current view");
+            enabled: root.rows.length > 0;
+            clicked => { root.export-data(); }
+        }
+        ActionButton {
+            text: @tr("Add record");
+            primary: root.editor == 0;
+            enabled: root.editing && root.editor == 0;
+            clicked => { root.begin(1); }
+        }
+    }
+    if !root.has-term: StatusBanner { message: @tr("Create a term to start entering departmental data."); }
+    if root.error-message != "": StatusBanner { message: root.error-message; tone: Tone.danger; }
+    if root.has-term: HorizontalLayout {
+        accessible-role: tab-list;
+        accessible-label: @tr("Data");
+        for caption[i] in [@tr("Courses & sections"), @tr("Instructors"), @tr("Student groups"), @tr("Rooms & equipment"), @tr("Period grid")]: CatalogTab {
+            title: caption;
+            current: root.tab == i;
+            enabled: root.editor == 0;
+            activated => { root.tab-changed(i); }
+        }
+    }
+    if root.has-term: FilterBar {
+        SearchField {
+            text: root.query;
+            placeholder-text: @tr("Search");
+            min-width: 125px;
+            preferred-width: 225px;
+            horizontal-stretch: 0;
+            enabled: root.editor == 0;
+            edited(value) => { root.query-changed(value); }
+        }
+        if root.tab == 0 || root.tab == 3 || root.tab == 4: ComboBox {
+            model: root.tab == 0 ? [@tr("Sections"), @tr("Courses")]
+                 : root.tab == 3 ? [@tr("Rooms"), @tr("Equipment")]
+                 : [@tr("Periods"), @tr("Breaks")];
+            accessible-label: @tr("Data type");
+            horizontal-stretch: 0;
+            enabled: root.editor == 0;
+            current-index: root.subtype;
+            selected(value) => { root.subtype-changed(self.current-index); }
+        }
+        if root.tab == 0 && root.subtype == 0: ComboBox {
+            model: root.grades;
+            accessible-label: @tr("Year");
+            horizontal-stretch: 0;
+            enabled: root.editor == 0;
+            current-index: root.grade;
+            selected(value) => { root.grade-changed(self.current-index); }
+        }
+        if root.tab == 0 && root.subtype == 0: ComboBox {
+            model: [@tr("All statuses"), @tr("Assigned"), @tr("Unassigned"), @tr("Provisional")];
+            accessible-label: @tr("Status");
+            horizontal-stretch: 0;
+            enabled: root.editor == 0;
+            current-index: root.data-filter;
+            selected(value) => { root.filter-changed(self.current-index); }
+        }
+        Rectangle { horizontal-stretch: 1; }
+        ActionButton {
+            text: @tr("Columns");
+            checkable: true;
+            checked <=> root.show-columns;
+        }
+        if root.bulk-enabled && root.checked-count > 0: ActionButton {
+            text: @tr("Edit selected");
+            enabled: root.editing && root.editor == 0;
+            clicked => { root.begin(3); }
+        }
+    }
+    if root.has-term && root.show-columns: Panel {
+        chooser := ListView {
+            height: min(root.all-columns.length * 32px, 128px);
+            accessible-label: @tr("Columns");
+            for label[i] in root.all-columns: CheckBox {
+                height: Theme.control-height;
+                width: chooser.visible-width;
+                text: label;
+                checked: root.visible-columns[i];
+                toggled => { root.column-toggled(i, self.checked); }
+            }
+        }
+    }
+    if root.has-term: HorizontalLayout {
+        spacing: Theme.space-large;
+        vertical-stretch: 1;
+        if !root.compact || !root.show-detail: Panel {
+            horizontal-stretch: 1;
+            VerticalLayout {
+                if root.rows.length > 0: HorizontalLayout {
+                    padding-right: 8px;
+                    if root.bulk-enabled: Rectangle { width: 36px; }
+                    for name[i] in root.columns: ActionButton {
+                        text: name + (root.sort-column == i ? root.descending ? " ↓" : " ↑" : "");
+                        min-width: 0px;
+                        preferred-width: 0px;
+                        horizontal-stretch: root.column-weights[i];
+                        clicked => { root.sort-by(i); }
+                    }
+                }
+                if root.rows.length > 0: tb := ListView {
+                    accessible-role: table;
+                    accessible-label: @tr("Data");
+                    accessible-item-count: root.rows.length;
+                    for item[i] in root.rows: CatalogLine {
+                        width: tb.visible-width - 8px;
+                        item: item;
+                        index: i;
+                        weights: root.column-weights;
+                        interactive: root.editor == 0;
+                        bulk-enabled: root.bulk-enabled;
+                        activate => { root.row-selected(i); }
+                        check(value) => { root.row-checked(i, value); }
+                    }
+                }
+                if root.rows.length == 0: VerticalLayout {
+                    padding: Theme.space-large;
+                    Text {
+                        text: root.query == "" ? @tr("No records yet. Add a record or import a file.") : @tr("No records match this search.");
+                        color: Theme.text-muted;
+                        wrap: word-wrap;
+                    }
+                    Rectangle { vertical-stretch: 1; }
+                }
+                Text {
+                    height: Theme.control-height;
+                    text: @tr("{0} shown · {1} selected", root.rows.length, root.checked-count);
+                    color: Theme.text-muted;
+                    vertical-alignment: center;
+                    horizontal-alignment: center;
+                }
+            }
+        }
+        if root.show-detail: Panel {
+            preferred-width: 310px;
+            max-width: root.compact ? 100000px : 310px;
+            horizontal-stretch: root.compact ? 1 : 0;
+            accessible-role: complementary;
+            accessible-label: root.detail-title;
+            VerticalLayout {
+                padding: Theme.space-medium;
+                spacing: Theme.space-medium;
+                HorizontalLayout {
+                    spacing: Theme.space-small;
+                    Text { text: root.detail-title; color: Theme.text; font-weight: 700; font-size: 15px; vertical-alignment: center; overflow: elide; horizontal-stretch: 1; }
+                    if root.editor == 0: ActionButton { text: @tr("Close"); clicked => { root.close-detail(); } }
+                }
+                details := ScrollView {
+                    vertical-stretch: 1;
+                    content-width: self.visible-width;
+                    content-height: form.preferred-height;
+                    form := VerticalLayout {
+                        width: details.visible-width;
+                        height: self.preferred-height;
+                        padding: Theme.space-medium;
+                        spacing: Theme.space-medium;
+                        for field[i] in root.fields: VerticalLayout {
+                            spacing: Theme.space-small;
+                            Text { text: field.label; color: Theme.text-muted; wrap: word-wrap; }
+                            if root.editor == 1 || root.editor == 2 || root.editor == 3: LineEdit {
+                                text: field.value;
+                                accessible-label: field.label;
+                                accessible-description: field.error;
+                                edited(value) => { root.field-edited(i, value); }
+                            }
+                            if root.editor == 0: Text { text: field.value; color: Theme.text; wrap: word-wrap; }
+                            if field.error != "": Text { text: field.error; color: Theme.danger; wrap: word-wrap; }
+                        }
+                        for line in root.preview: StatusBanner { message: line; tone: root.editor == 5 ? Tone.warning : Tone.info; }
+                    }
+                }
+                if root.editor == 0 && root.editing: HorizontalLayout {
+                    spacing: Theme.space-medium;
+                    ActionButton { text: @tr("Edit"); clicked => { root.begin(2); } }
+                    ActionButton { text: @tr("Delete"); clicked => { root.begin(5); } }
+                }
+                if root.editor != 0: HorizontalLayout {
+                    spacing: Theme.space-medium;
+                    ActionButton {
+                        primary: true;
+                        text: root.editor == 3 ? @tr("Preview changes") : root.editor == 4 ? @tr("Apply selected")
+                            : root.editor == 5 ? @tr("Confirm delete") : @tr("Save");
+                        enabled: root.editing && !(root.editor == 5 && root.error-message != "");
+                        clicked => { root.apply(); }
+                    }
+                    ActionButton {
+                        text: @tr("Cancel");
+                        clicked => { root.close-detail(); }
+                    }
+                }
+            }
+        }
+    }
+    if !root.has-term: Rectangle { vertical-stretch: 1; }
+}

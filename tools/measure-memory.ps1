@@ -55,7 +55,7 @@ try {
         $launched = Start-MeasuredProcess -Exe $Exe -ArgumentList $ArgumentList -Env $Env
         $rootId = $launched.Id
         $processName = [System.IO.Path]::GetFileNameWithoutExtension($Exe)
-        Write-Host "실행: $Exe (PID $rootId). $WarmupSeconds초 뒤 측정합니다."
+        Write-Host "실행: $Exe (PID $rootId). $($WarmupSeconds)초 뒤 측정합니다."
         Start-Sleep -Seconds $WarmupSeconds
     }
     else {

@@ -8,7 +8,11 @@
 //! 추측하지 않는다: 건물 없는 호실, 이름만 있는데 같은 이름이 여럿인 교원, 숫자로 들어온
 //! 코드는 "확인 필요"로 남긴다.
 
-use std::collections::{BTreeMap, HashMap};
+use std::collections::{BTreeMap, HashSet};
+
+use serde::{Deserialize, Serialize};
+
+use crate::review::{Disposition, ReviewBase, ReviewItem, ReviewPreview, ReviewValue};
 
 use crate::code::{
     CodeError, CourseCode, EquipmentCode, GroupCode, InstructorCode, RoomKey, RoomKeyError,
@@ -39,7 +43,7 @@ pub enum Severity {
     Error,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum IssueKind {
     /// `schema`가 이 규격이 아니다
     UnsupportedSchema {
@@ -62,6 +66,11 @@ pub enum IssueKind {
     Duplicate {
         key: String,
     },
+    DuplicateRow {
+        key: String,
+        other_path: String,
+        other_source: Option<SourceRef>,
+    },
     /// 가리키는 기록이 문서에 없다
     UnknownReference {
         key: String,
@@ -80,6 +89,9 @@ pub enum IssueKind {
     InstructorNameMismatch {
         code: String,
         name: String,
+    },
+    AmbiguousConstraint {
+        candidates: Vec<ConstraintId>,
     },
     /// 분할 교시 수의 합이 주당 시수와 다르다
     SplitMismatch {
@@ -103,6 +115,13 @@ pub enum IssueKind {
     TargetNotSingle,
     /// 확인된 조건인데 내용이나 강도가 없다
     ConfirmedIncomplete,
+    /// A change would invalidate an existing row or change a locked meeting.
+    ExistingScheduleConflict,
+    InvalidReviewTarget,
+    MissingSetup,
+    UnverifiedDependency {
+        row: String,
+    },
     /// 배치 단위가 분반의 분할 범위를 넘는다
     PartOutOfRange {
         parts: usize,
@@ -130,6 +149,8 @@ impl IssueKind {
             Self::NumericCode { .. }
             | Self::AmbiguousRoom { .. }
             | Self::AmbiguousInstructor { .. }
+            | Self::AmbiguousConstraint { .. }
+            | Self::UnverifiedDependency { .. }
             | Self::InstructorNameMismatch { .. }
             | Self::Unresolved { .. } => Severity::NeedsReview,
             _ => Severity::Error,
@@ -146,11 +167,12 @@ impl IssueKind {
             Self::InvalidValue { .. } => "invalid_value",
             Self::InvalidRoom(_) => "invalid_room",
             Self::InvalidPeriodTable(_) => "invalid_period_table",
-            Self::Duplicate { .. } => "duplicate",
+            Self::Duplicate { .. } | Self::DuplicateRow { .. } => "duplicate",
             Self::UnknownReference { .. } => "unknown_reference",
             Self::AmbiguousRoom { .. } => "ambiguous_room",
             Self::AmbiguousInstructor { .. } => "ambiguous_instructor",
             Self::InstructorNameMismatch { .. } => "instructor_name_mismatch",
+            Self::AmbiguousConstraint { .. } => "ambiguous_constraint",
             Self::SplitMismatch { .. } => "split_mismatch",
             Self::InvalidSplitPart { .. } => "invalid_split_part",
             Self::AvailableExceedsTotal { .. } => "available_exceeds_total",
@@ -158,6 +180,10 @@ impl IssueKind {
             Self::AmbiguousWindow => "ambiguous_window",
             Self::TargetNotSingle => "target_not_single",
             Self::ConfirmedIncomplete => "confirmed_incomplete",
+            Self::ExistingScheduleConflict => "existing_schedule_conflict",
+            Self::InvalidReviewTarget => "invalid_review_target",
+            Self::MissingSetup => "missing_setup",
+            Self::UnverifiedDependency { .. } => "unverified_dependency",
             Self::PartOutOfRange { .. } => "part_out_of_range",
             Self::SpanPastLastPeriod => "span_past_last_period",
             Self::DayNotInTerm => "day_not_in_term",
@@ -169,7 +195,7 @@ impl IssueKind {
 }
 
 /// 검사에서 찾은 문제 하나
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Issue {
     /// 문서 안의 위치 (`sections[3].section`)
     pub path: String,
@@ -193,7 +219,10 @@ impl std::fmt::Display for Issue {
 /// 문서를 검사해 내부 모델로 바꾼다. 문제가 하나라도 있으면 전체 목록을 돌려준다.
 /// 내부 ID는 종류마다 1부터 차례로 붙인다.
 pub fn resolve(doc: &InputDocument) -> Result<TermData, Vec<Issue>> {
-    let mut r = Resolver::default();
+    let mut r = Resolver {
+        locations: Some(&doc.locations),
+        ..Resolver::default()
+    };
     if doc.schema != SCHEMA_V1 {
         r.push(
             "schema",
@@ -256,10 +285,512 @@ pub fn resolve(doc: &InputDocument) -> Result<TermData, Vec<Issue>> {
             rooms,
             sections,
             constraints,
-            placements,
+            placements: placements.into_iter().map(|(_, p)| p).collect(),
         }),
         _ => Err(r.issues),
     }
+}
+
+/// Inspect an import against the current workspace. Selection uses original input paths so
+/// a second validation can use exactly the rows the user chose, with the same temporary IDs.
+pub fn inspect(
+    doc: &InputDocument,
+    base: &ReviewBase,
+    id_base: i64,
+    selection: Option<&HashSet<String>>,
+) -> Result<ReviewPreview, serde_json::Error> {
+    let mut resolver = Resolver {
+        id_base,
+        selection,
+        locations: Some(&doc.locations),
+        ..Resolver::default()
+    };
+    let term = TermSeason::parse(&doc.term.season).map(|season| TermKey {
+        year: doc.term.year,
+        season,
+    });
+    let mut issues = Vec::new();
+    if doc.schema != SCHEMA_V1 {
+        resolver.push(
+            "schema",
+            IssueKind::UnsupportedSchema {
+                found: doc.schema.clone(),
+            },
+            None,
+        );
+    }
+    if term.is_none()
+        || base
+            .setup
+            .as_ref()
+            .is_some_and(|setup| Some(setup.key) != term)
+    {
+        resolver.push("term", IssueKind::InvalidReviewTarget, None);
+    }
+    issues.append(&mut resolver.issues);
+
+    let mut converted = BTreeMap::new();
+    let proposed_setup = if resolver.includes("setup") {
+        match &doc.setup {
+            Some(input) => resolver.setup(input, term),
+            None if base.setup.is_none() => {
+                resolver.push("setup", IssueKind::Missing, None);
+                None
+            }
+            None => None,
+        }
+    } else {
+        None
+    };
+    if let Some(setup) = &proposed_setup {
+        if setup_conflicts(base, setup) {
+            resolver.push("setup", IssueKind::ExistingScheduleConflict, None);
+        }
+        converted.insert(
+            "setup".into(),
+            (
+                base.setup.clone().map(ReviewValue::Setup),
+                Some(ReviewValue::Setup(setup.clone())),
+            ),
+        );
+    }
+    let setup = proposed_setup
+        .as_ref()
+        .filter(|_| !resolver.has_errors("setup"))
+        .or(base.setup.as_ref());
+
+    let mut equipment = base.equipment.clone();
+    let mut rooms = base.rooms.clone();
+    let mut instructors = base.instructors.clone();
+    let mut groups = base.groups.clone();
+    let mut courses = base.courses.clone();
+    let mut sections = base.sections.clone();
+    for item in resolver.equipment(doc) {
+        let index = item.id.0 - id_base - 1;
+        let path = format!("equipment[{index}]");
+        let old = equipment
+            .iter()
+            .position(|current| current.code == item.code);
+        merge_row(
+            &resolver,
+            &mut converted,
+            &mut equipment,
+            (path, item),
+            old,
+            |item, old| item.id = old.id,
+            ReviewValue::Equipment,
+        );
+    }
+    for item in resolver.rooms(doc, &equipment) {
+        let index = item.id.0 - id_base - 1;
+        let path = format!("rooms[{index}]");
+        let old = rooms.iter().position(|current| current.key == item.key);
+        merge_row(
+            &resolver,
+            &mut converted,
+            &mut rooms,
+            (path, item),
+            old,
+            |item, old| item.id = old.id,
+            ReviewValue::Room,
+        );
+    }
+    for item in resolver.instructors(doc) {
+        let index = item.id.0 - id_base - 1;
+        let path = format!("instructors[{index}]");
+        let old = instructors
+            .iter()
+            .position(|current| current.code == item.code);
+        merge_row(
+            &resolver,
+            &mut converted,
+            &mut instructors,
+            (path, item),
+            old,
+            |item, old| item.id = old.id,
+            ReviewValue::Instructor,
+        );
+    }
+    for item in resolver.groups(doc) {
+        let index = item.id.0 - id_base - 1;
+        let path = format!("groups[{index}]");
+        let old = groups.iter().position(|current| current.code == item.code);
+        merge_row(
+            &resolver,
+            &mut converted,
+            &mut groups,
+            (path, item),
+            old,
+            |item, old| item.id = old.id,
+            ReviewValue::Group,
+        );
+    }
+    for item in resolver.courses(doc) {
+        let index = item.id.0 - id_base - 1;
+        let path = format!("courses[{index}]");
+        let old = courses.iter().position(|current| current.code == item.code);
+        merge_row(
+            &resolver,
+            &mut converted,
+            &mut courses,
+            (path, item),
+            old,
+            |item, old| item.id = old.id,
+            ReviewValue::Course,
+        );
+    }
+    let ctx = Context {
+        setup,
+        equipment: &equipment,
+        rooms: &rooms,
+        instructors: &instructors,
+        groups: &groups,
+        courses: &courses,
+    };
+    for item in resolver.sections(doc, &ctx) {
+        let index = item.id.0 - id_base - 1;
+        let path = format!("sections[{index}]");
+        let old = sections
+            .iter()
+            .position(|current| (current.course, &current.code) == (item.course, &item.code));
+        if let Some(current) = old.map(|idx| &sections[idx])
+            && base
+                .placements
+                .iter()
+                .filter(|p| p.meeting.section == current.id)
+                .any(|p| {
+                    let part = p.meeting.part as usize;
+                    item.split.get(part).is_none_or(|&span| {
+                        setup.is_some_and(|s| {
+                            !s.periods.contains_span(p.start as usize, span as usize)
+                        }) || (p.locked && item.split.get(part) != current.split.get(part))
+                    })
+                })
+        {
+            resolver.push(
+                &path,
+                IssueKind::ExistingScheduleConflict,
+                doc.sections[index as usize].source.as_ref(),
+            );
+        }
+        merge_row(
+            &resolver,
+            &mut converted,
+            &mut sections,
+            (path, item),
+            old,
+            |item, old| item.id = old.id,
+            ReviewValue::Section,
+        );
+    }
+    let mut constraint_keys = BTreeMap::new();
+    let mut proposed_constraints: Vec<Constraint> = Vec::new();
+    for mut item in resolver.constraints(doc, &ctx, &sections) {
+        let index = item.id.0 - id_base - 1;
+        let path = format!("constraints[{index}]");
+        let key = proposed_constraints
+            .iter()
+            .position(|existing| same_constraint_request(existing, &item))
+            .unwrap_or_else(|| {
+                proposed_constraints.push(item.clone());
+                proposed_constraints.len() - 1
+            });
+        resolver.duplicate(
+            &mut constraint_keys,
+            &key,
+            || "constraint".into(),
+            &path,
+            doc.constraints[index as usize].source.as_ref(),
+        );
+        let candidates: Vec<_> = base
+            .constraints
+            .iter()
+            .filter(|existing| same_constraint_request(existing, &item))
+            .collect();
+        item.confirmed_by = None;
+        let before = match candidates.as_slice() {
+            [previous] => {
+                item.id = previous.id;
+                item.confirmed_by = previous.confirmed_by.clone();
+                // 원본 위치만 달라졌다면 적용할 변경이 없다.
+                if (&item.status, &item.strength, item.weight, &item.note)
+                    == (
+                        &previous.status,
+                        &previous.strength,
+                        previous.weight,
+                        &previous.note,
+                    )
+                {
+                    item.source = previous.source.clone();
+                }
+                Some(ReviewValue::Constraint((*previous).clone()))
+            }
+            [] => None,
+            many => {
+                resolver.push(
+                    &path,
+                    IssueKind::AmbiguousConstraint {
+                        candidates: many.iter().map(|c| c.id).collect(),
+                    },
+                    doc.constraints[index as usize].source.as_ref(),
+                );
+                None
+            }
+        };
+        converted.insert(path, (before, Some(ReviewValue::Constraint(item))));
+    }
+    for (index, item) in resolver.placements(doc, &ctx, &sections) {
+        let path = format!("placements[{index}]");
+        let before = base.placements.iter().find(|p| p.meeting == item.meeting);
+        if before.is_some_and(|p| p.locked && *p != item) {
+            resolver.push(
+                &path,
+                IssueKind::ExistingScheduleConflict,
+                doc.placements[index].source.as_ref(),
+            );
+        }
+        converted.insert(
+            path,
+            (
+                before.cloned().map(ReviewValue::Placement),
+                Some(ReviewValue::Placement(item)),
+            ),
+        );
+    }
+    for (i, row) in doc.unresolved.iter().enumerate() {
+        let path = format!("unresolved[{i}]");
+        if resolver.includes(&path) {
+            resolver.push(
+                path,
+                IssueKind::Unresolved {
+                    what: row.what.clone(),
+                    reason: row.reason.clone(),
+                },
+                row.source.as_ref(),
+            );
+        }
+    }
+
+    let raw = serde_json::to_value(doc)?;
+    let mut items = Vec::new();
+    let mut add = |path: String, value: serde_json::Value| {
+        if resolver.includes(&path) {
+            let (before, after) = converted.remove(&path).unwrap_or_default();
+            let source = doc.locations.get(&path).cloned().or_else(|| {
+                value
+                    .get("source")
+                    .cloned()
+                    .and_then(|v| serde_json::from_value(v).ok())
+            });
+            items.push(ReviewItem {
+                issues: resolver
+                    .issues
+                    .iter()
+                    .filter(|issue| belongs_to(&issue.path, &path))
+                    .cloned()
+                    .collect(),
+                path,
+                source,
+                input: value,
+                before,
+                after,
+                prerequisites: Vec::new(),
+            });
+        }
+    };
+    if doc.setup.is_some() || base.setup.is_none() {
+        add("setup".into(), raw["setup"].clone());
+    }
+    for name in [
+        "equipment",
+        "rooms",
+        "instructors",
+        "groups",
+        "courses",
+        "sections",
+        "constraints",
+        "placements",
+        "unresolved",
+    ] {
+        if let Some(rows) = raw[name].as_array() {
+            for (idx, row) in rows.iter().enumerate() {
+                add(format!("{name}[{idx}]"), row.clone());
+            }
+        }
+    }
+    // A new term's imports are applied together with its setup.
+    if setup.is_none() {
+        for item in &mut items {
+            if item.path != "setup" && !item.path.starts_with("unresolved[") {
+                item.prerequisites.push("setup".into());
+                item.issues.push(Issue {
+                    path: item.path.clone(),
+                    kind: IssueKind::MissingSetup,
+                    source: item.source.clone(),
+                });
+            }
+        }
+    }
+    for index in 0..items.len() {
+        let (previous, current) = items.split_at_mut(index);
+        let item = &mut current[0];
+        let Some(after) = &item.after else {
+            continue;
+        };
+        for row in previous {
+            let disposition = row.disposition();
+            if let Some(target) = &row.after
+                && depends_on(after, target)
+                && (row.before.is_none()
+                    || disposition == Disposition::NeedsReview
+                    || (matches!(target, ReviewValue::Setup(_))
+                        && matches!(
+                            after,
+                            ReviewValue::Placement(_) | ReviewValue::Constraint(_)
+                        )
+                        && disposition == Disposition::Update))
+            {
+                item.prerequisites.push(row.path.clone());
+                if matches!(disposition, Disposition::NeedsReview | Disposition::Error) {
+                    item.issues.push(Issue {
+                        path: item.path.clone(),
+                        kind: IssueKind::UnverifiedDependency {
+                            row: row.path.clone(),
+                        },
+                        source: item.source.clone(),
+                    });
+                }
+            }
+        }
+    }
+    Ok(ReviewPreview {
+        term,
+        issues,
+        items,
+    })
+}
+
+fn same_constraint_request(a: &Constraint, b: &Constraint) -> bool {
+    a.target == b.target && a.rule == b.rule && a.period == b.period && a.text == b.text
+}
+
+fn depends_on(item: &ReviewValue, target: &ReviewValue) -> bool {
+    match (item, target) {
+        (ReviewValue::Room(room), ReviewValue::Equipment(kind)) => {
+            room.equipment.iter().any(|e| e.equipment == kind.id)
+        }
+        (ReviewValue::Section(section), ReviewValue::Equipment(kind)) => {
+            section.equipment.iter().any(|e| e.equipment == kind.id)
+        }
+        (ReviewValue::Section(section), ReviewValue::Course(course)) => section.course == course.id,
+        (ReviewValue::Section(section), ReviewValue::Instructor(instructor)) => {
+            section.instructors.contains(&instructor.id)
+        }
+        (ReviewValue::Section(section), ReviewValue::Group(group)) => {
+            section.groups.iter().any(|g| g.group == group.id)
+        }
+        (ReviewValue::Constraint(constraint), ReviewValue::Section(section)) => {
+            constraint.target == Target::Section(section.id)
+        }
+        (ReviewValue::Constraint(constraint), ReviewValue::Group(group)) => {
+            constraint.target == Target::Group(group.id)
+        }
+        (ReviewValue::Constraint(constraint), ReviewValue::Room(room)) => {
+            constraint.target == Target::Room(room.id)
+        }
+        (ReviewValue::Constraint(constraint), ReviewValue::Instructor(instructor)) => {
+            constraint.target == Target::Instructor(instructor.id)
+        }
+        (ReviewValue::Placement(placement), ReviewValue::Section(section)) => {
+            placement.meeting.section == section.id
+        }
+        (ReviewValue::Placement(placement), ReviewValue::Room(room)) => {
+            placement.room == Some(room.id)
+        }
+        (_, ReviewValue::Setup(_)) => true,
+        _ => false,
+    }
+}
+
+fn belongs_to(field: &str, row: &str) -> bool {
+    field == row
+        || field
+            .strip_prefix(row)
+            .is_some_and(|suffix| suffix.starts_with('.'))
+}
+
+type ConvertedRows = BTreeMap<String, (Option<ReviewValue>, Option<ReviewValue>)>;
+
+fn merge_row<T: Clone>(
+    resolver: &Resolver<'_>,
+    converted: &mut ConvertedRows,
+    effective: &mut Vec<T>,
+    (path, mut item): (String, T),
+    old: Option<usize>,
+    use_existing_id: impl FnOnce(&mut T, &T),
+    wrap: fn(T) -> ReviewValue,
+) {
+    let before = old.map(|idx| {
+        use_existing_id(&mut item, &effective[idx]);
+        wrap(effective[idx].clone())
+    });
+    if !resolver.has_errors(&path) {
+        if let Some(idx) = old {
+            effective[idx] = item.clone();
+        } else {
+            effective.push(item.clone());
+        }
+    }
+    converted.insert(path, (before, Some(wrap(item))));
+}
+
+fn setup_conflicts(base: &ReviewBase, proposed: &TermSetup) -> bool {
+    let Some(previous) = &base.setup else {
+        return false;
+    };
+    if previous == proposed {
+        return false;
+    }
+    let keeps_periods = |first, span| {
+        previous
+            .periods
+            .periods()
+            .get(first..first + span)
+            .zip(proposed.periods.periods().get(first..first + span))
+            .is_some_and(|(old, new)| old.iter().zip(new).all(|(a, b)| a.label == b.label))
+    };
+    base.sections.iter().any(|s| {
+        s.split
+            .iter()
+            .any(|&span| span as usize > proposed.periods.len())
+    }) || base.placements.iter().any(|p| {
+        let span = base
+            .sections
+            .iter()
+            .find(|s| s.id == p.meeting.section)
+            .and_then(|s| s.split.get(p.meeting.part as usize))
+            .copied()
+            .unwrap_or(0);
+        !proposed.days.contains(&p.day)
+            || !keeps_periods(p.start as usize, span as usize)
+            || (p.locked
+                && previous.periods.span_time(p.start as usize, span as usize)
+                    != proposed.periods.span_time(p.start as usize, span as usize))
+    }) || base.constraints.iter().any(|c| {
+        let Some(Rule::AvoidTimes { windows }) = &c.rule else {
+            return false;
+        };
+        windows.iter().any(|window| {
+            !proposed.days.contains(&window.day())
+                || match *window {
+                    TimeWindow::Periods { first, last, .. } => {
+                        last < first
+                            || !keeps_periods(first as usize, last as usize + 1 - first as usize)
+                    }
+                    TimeWindow::Clock { .. } => false,
+                }
+        })
+    })
 }
 
 /// 이미 풀어 둔 기록들
@@ -273,16 +804,35 @@ struct Context<'a> {
 }
 
 #[derive(Default)]
-struct Resolver {
+struct Resolver<'a> {
     issues: Vec<Issue>,
+    id_base: i64,
+    selection: Option<&'a HashSet<String>>,
+    locations: Option<&'a BTreeMap<String, SourceRef>>,
 }
 
-impl Resolver {
+impl Resolver<'_> {
+    fn includes(&self, path: &str) -> bool {
+        self.selection
+            .is_none_or(|selected| selected.contains(path))
+    }
+
+    fn has_errors(&self, path: &str) -> bool {
+        self.issues
+            .iter()
+            .any(|issue| issue.severity() == Severity::Error && belongs_to(&issue.path, path))
+    }
+
     fn push(&mut self, path: impl Into<String>, kind: IssueKind, source: Option<&SourceRef>) {
+        let path = path.into();
         self.issues.push(Issue {
-            path: path.into(),
+            source: self
+                .locations
+                .and_then(|locations| locations.get(&path))
+                .or(source)
+                .cloned(),
+            path,
             kind,
-            source: source.cloned(),
         });
     }
 
@@ -321,6 +871,18 @@ impl Resolver {
                 self.push(path, IssueKind::InvalidCode(e), source);
                 None
             }
+        }
+    }
+
+    fn numeric(&mut self, path: &str, value: &CodeValue, source: Option<&SourceRef>) {
+        if value.from_number {
+            self.push(
+                path,
+                IssueKind::NumericCode {
+                    text: value.text.clone(),
+                },
+                source,
+            );
         }
     }
 
@@ -402,16 +964,39 @@ impl Resolver {
 
     fn duplicate<K: Ord + Clone>(
         &mut self,
-        seen: &mut BTreeMap<K, ()>,
+        seen: &mut BTreeMap<K, (String, Option<SourceRef>)>,
         key: &K,
         label: impl FnOnce() -> String,
         path: &str,
         source: Option<&SourceRef>,
     ) -> bool {
-        if seen.insert(key.clone(), ()).is_some() {
-            self.push(path, IssueKind::Duplicate { key: label() }, source);
+        if let Some((first, first_source)) = seen.get(key) {
+            let key = label();
+            if !self.issues.iter().any(|issue| {
+                issue.path == *first && matches!(issue.kind, IssueKind::DuplicateRow { .. })
+            }) {
+                self.push(
+                    first,
+                    IssueKind::DuplicateRow {
+                        key: key.clone(),
+                        other_path: path.into(),
+                        other_source: source.cloned(),
+                    },
+                    first_source.as_ref(),
+                );
+            }
+            self.push(
+                path,
+                IssueKind::DuplicateRow {
+                    key,
+                    other_path: first.clone(),
+                    other_source: first_source.clone(),
+                },
+                source,
+            );
             true
         } else {
+            seen.insert(key.clone(), (path.to_owned(), source.cloned()));
             false
         }
     }
@@ -506,6 +1091,7 @@ impl Resolver {
             .iter()
             .enumerate()
             .filter_map(|(i, p)| {
+                self.numeric(&format!("{path}[{i}].label"), &p.label, None);
                 let label = p.label.text.trim().to_owned();
                 if label.is_empty() {
                     self.push(format!("{path}[{i}].label"), IssueKind::Missing, None);
@@ -515,7 +1101,10 @@ impl Resolver {
                 Some(make(label, start?, end?))
             })
             .collect();
-        (self.issues.len() == before).then_some(out)
+        (!self.issues[before..]
+            .iter()
+            .any(|issue| issue.severity() == Severity::Error))
+        .then_some(out)
     }
 
     fn equipment(&mut self, doc: &InputDocument) -> Vec<EquipmentKind> {
@@ -524,7 +1113,19 @@ impl Resolver {
         for (i, e) in doc.equipment.iter().enumerate() {
             let src = e.source.as_ref();
             let path = format!("equipment[{i}]");
+            if !self.includes(&path) {
+                continue;
+            }
             let code = self.code(&format!("{path}.code"), &e.code, src, EquipmentCode::new);
+            let duplicate = code.as_ref().is_some_and(|code| {
+                self.duplicate(
+                    &mut seen,
+                    code,
+                    || code.to_string(),
+                    &format!("{path}.code"),
+                    src,
+                )
+            });
             let name = self.name(&format!("{path}.name"), &e.name, src);
             let scope = match e.scope.trim() {
                 "per_person" => Some(EquipmentScope::PerPerson),
@@ -537,17 +1138,11 @@ impl Resolver {
             let (Some(code), Some(name), Some(scope)) = (code, name, scope) else {
                 continue;
             };
-            if self.duplicate(
-                &mut seen,
-                &code,
-                || code.to_string(),
-                &format!("{path}.code"),
-                src,
-            ) {
+            if duplicate {
                 continue;
             }
             out.push(EquipmentKind {
-                id: EquipmentId(out.len() as i64 + 1),
+                id: EquipmentId(self.id_base + i as i64 + 1),
                 code,
                 name,
                 scope,
@@ -562,13 +1157,31 @@ impl Resolver {
         for (i, r) in doc.rooms.iter().enumerate() {
             let src = r.source.as_ref();
             let path = format!("rooms[{i}]");
+            if !self.includes(&path) {
+                continue;
+            }
+            self.numeric(&format!("{path}.number"), &r.number, src);
             let key = match RoomKey::new(&r.building, &r.number.text) {
                 Ok(k) => Some(k),
                 Err(e) => {
-                    self.push(format!("{path}.number"), IssueKind::InvalidRoom(e), src);
+                    let field = if e == RoomKeyError::MissingBuilding {
+                        "building"
+                    } else {
+                        "number"
+                    };
+                    self.push(format!("{path}.{field}"), IssueKind::InvalidRoom(e), src);
                     None
                 }
             };
+            let duplicate = key.as_ref().is_some_and(|key| {
+                self.duplicate(
+                    &mut seen,
+                    key,
+                    || key.to_string(),
+                    &format!("{path}.number"),
+                    src,
+                )
+            });
             let kind = self.room_kind(&format!("{path}.kind"), &r.kind, src);
             let available_seats = r.available_seats.unwrap_or(r.total_seats);
             if available_seats > r.total_seats {
@@ -657,17 +1270,11 @@ impl Resolver {
             let (Some(key), Some(kind)) = (key, kind) else {
                 continue;
             };
-            if self.duplicate(
-                &mut seen,
-                &key,
-                || key.to_string(),
-                &format!("{path}.number"),
-                src,
-            ) {
+            if duplicate {
                 continue;
             }
             out.push(Room {
-                id: RoomId(out.len() as i64 + 1),
+                id: RoomId(self.id_base + i as i64 + 1),
                 key,
                 kind,
                 department: Self::opt_text(&r.department),
@@ -688,22 +1295,28 @@ impl Resolver {
         for (i, t) in doc.instructors.iter().enumerate() {
             let src = t.source.as_ref();
             let path = format!("instructors[{i}]");
+            if !self.includes(&path) {
+                continue;
+            }
             let code = self.code(&format!("{path}.code"), &t.code, src, InstructorCode::new);
+            let duplicate = code.as_ref().is_some_and(|code| {
+                self.duplicate(
+                    &mut seen,
+                    code,
+                    || code.to_string(),
+                    &format!("{path}.code"),
+                    src,
+                )
+            });
             let name = self.name(&format!("{path}.name"), &t.name, src);
             let (Some(code), Some(name)) = (code, name) else {
                 continue;
             };
-            if self.duplicate(
-                &mut seen,
-                &code,
-                || code.to_string(),
-                &format!("{path}.code"),
-                src,
-            ) {
+            if duplicate {
                 continue;
             }
             out.push(Instructor {
-                id: InstructorId(out.len() as i64 + 1),
+                id: InstructorId(self.id_base + i as i64 + 1),
                 code,
                 name,
                 department: Self::opt_text(&t.department),
@@ -718,22 +1331,28 @@ impl Resolver {
         for (i, g) in doc.groups.iter().enumerate() {
             let src = g.source.as_ref();
             let path = format!("groups[{i}]");
+            if !self.includes(&path) {
+                continue;
+            }
             let code = self.code(&format!("{path}.code"), &g.code, src, GroupCode::new);
+            let duplicate = code.as_ref().is_some_and(|code| {
+                self.duplicate(
+                    &mut seen,
+                    code,
+                    || code.to_string(),
+                    &format!("{path}.code"),
+                    src,
+                )
+            });
             let name = self.name(&format!("{path}.name"), &g.name, src);
             let (Some(code), Some(name)) = (code, name) else {
                 continue;
             };
-            if self.duplicate(
-                &mut seen,
-                &code,
-                || code.to_string(),
-                &format!("{path}.code"),
-                src,
-            ) {
+            if duplicate {
                 continue;
             }
             out.push(StudentGroup {
-                id: GroupId(out.len() as i64 + 1),
+                id: GroupId(self.id_base + i as i64 + 1),
                 code,
                 name,
                 grade: g.grade,
@@ -749,22 +1368,28 @@ impl Resolver {
         for (i, c) in doc.courses.iter().enumerate() {
             let src = c.source.as_ref();
             let path = format!("courses[{i}]");
+            if !self.includes(&path) {
+                continue;
+            }
             let code = self.code(&format!("{path}.code"), &c.code, src, CourseCode::new);
+            let duplicate = code.as_ref().is_some_and(|code| {
+                self.duplicate(
+                    &mut seen,
+                    code,
+                    || code.to_string(),
+                    &format!("{path}.code"),
+                    src,
+                )
+            });
             let name = self.name(&format!("{path}.name"), &c.name, src);
             let (Some(code), Some(name)) = (code, name) else {
                 continue;
             };
-            if self.duplicate(
-                &mut seen,
-                &code,
-                || code.to_string(),
-                &format!("{path}.code"),
-                src,
-            ) {
+            if duplicate {
                 continue;
             }
             out.push(Course {
-                id: CourseId(out.len() as i64 + 1),
+                id: CourseId(self.id_base + i as i64 + 1),
                 code,
                 name,
             });
@@ -849,6 +1474,9 @@ impl Resolver {
             .as_deref()
             .map(str::trim)
             .filter(|b| !b.is_empty());
+        if let Some(number) = &r.number {
+            self.numeric(&format!("{path}.number"), number, src);
+        }
         if let (Some(building), Some(number)) = (building, &r.number) {
             return match RoomKey::new(building, &number.text) {
                 Ok(key) => match rooms.iter().find(|room| room.key == key) {
@@ -880,8 +1508,24 @@ impl Resolver {
             }
         };
         let compact = compact_room_text(&text);
-        if let Some(room) = rooms.iter().find(|room| room.key.compact() == compact) {
-            return Some(room.id);
+        let exact: Vec<_> = rooms
+            .iter()
+            .filter(|room| room.key.compact() == compact)
+            .collect();
+        match exact.as_slice() {
+            [room] => return Some(room.id),
+            [] => {}
+            many => {
+                self.push(
+                    path,
+                    IssueKind::AmbiguousRoom {
+                        text,
+                        candidates: many.iter().map(|room| room.key.clone()).collect(),
+                    },
+                    src,
+                );
+                return None;
+            }
         }
         // 후보: 호실 번호가 같은 강의실. 표기 앞부분이 알 수 없는 건물 이름이어도 후보로 보인다
         // (`IT관201` → 201호들). `B101`처럼 번호의 일부인 글자는 건물로 보지 않는다.
@@ -910,6 +1554,9 @@ impl Resolver {
         for (i, s) in doc.sections.iter().enumerate() {
             let src = s.source.as_ref();
             let path = format!("sections[{i}]");
+            if !self.includes(&path) {
+                continue;
+            }
             let course_code = self.code(&format!("{path}.course"), &s.course, src, CourseCode::new);
             let code = self.code(
                 &format!("{path}.section"),
@@ -917,6 +1564,20 @@ impl Resolver {
                 src,
                 SectionCode::new,
             );
+            let duplicate =
+                course_code
+                    .as_ref()
+                    .zip(code.as_ref())
+                    .is_some_and(|(course, code)| {
+                        let key = (course.clone(), code.clone());
+                        self.duplicate(
+                            &mut seen,
+                            &key,
+                            || format!("{course}-{code}"),
+                            &format!("{path}.section"),
+                            src,
+                        )
+                    });
             let course = course_code.as_ref().and_then(|cc| {
                 let found = ctx.courses.iter().find(|c| &c.code == cc);
                 if found.is_none() {
@@ -943,7 +1604,12 @@ impl Resolver {
                         self.push(
                             format!("{path}.instructors[{j}]"),
                             IssueKind::Duplicate {
-                                key: format!("{id:?}"),
+                                key: ctx
+                                    .instructors
+                                    .iter()
+                                    .find(|instructor| instructor.id == id)
+                                    .map(|instructor| instructor.code.to_string())
+                                    .unwrap_or_default(),
                             },
                             src,
                         );
@@ -1028,7 +1694,7 @@ impl Resolver {
                 self.push(format!("{path}.enrollment"), IssueKind::Zero, src);
             }
 
-            let mut needs = Vec::new();
+            let mut needs: Vec<EquipmentNeed> = Vec::new();
             for (j, e) in s.equipment.iter().enumerate() {
                 let epath = format!("{path}.equipment[{j}]");
                 let Some(code) =
@@ -1050,6 +1716,16 @@ impl Resolver {
                     self.push(format!("{epath}.quantity"), IssueKind::Zero, src);
                     continue;
                 }
+                if needs.iter().any(|need| need.equipment == kind.id) {
+                    self.push(
+                        format!("{epath}.code"),
+                        IssueKind::Duplicate {
+                            key: code.to_string(),
+                        },
+                        src,
+                    );
+                    continue;
+                }
                 needs.push(EquipmentNeed {
                     equipment: kind.id,
                     quantity: e.quantity,
@@ -1059,19 +1735,11 @@ impl Resolver {
             let (Some(course), Some(code), Some(kind)) = (course, code, kind) else {
                 continue;
             };
-            let key = (course.code.clone(), code.clone());
-            if self.duplicate(
-                &mut seen,
-                &key,
-                || format!("{}-{}", key.0, key.1),
-                &format!("{path}.section"),
-                src,
-            ) || !split_ok
-            {
+            if duplicate || !split_ok {
                 continue;
             }
             out.push(Section {
-                id: SectionId(out.len() as i64 + 1),
+                id: SectionId(self.id_base + i as i64 + 1),
                 course: course.id,
                 code,
                 instructors,
@@ -1198,6 +1866,9 @@ impl Resolver {
             let start = self.clock(&format!("{path}.start"), start, src);
             let end = self.clock(&format!("{path}.end"), end, src);
             let (day, start, end) = (day?, start?, end?);
+            if setup.is_some_and(|setup| !setup.days.contains(&day)) {
+                self.push(format!("{path}.day"), IssueKind::DayNotInTerm, src);
+            }
             if start >= end {
                 self.push(format!("{path}.end"), IssueKind::ReversedRange, src);
                 return None;
@@ -1208,6 +1879,10 @@ impl Resolver {
             self.push(format!("{path}.first_period"), IssueKind::Missing, src);
             return None;
         };
+        self.numeric(&format!("{path}.first_period"), first, src);
+        if let Some(last) = &w.last_period {
+            self.numeric(&format!("{path}.last_period"), last, src);
+        }
         let last = w.last_period.as_ref().unwrap_or(first);
         let table = &setup?.periods;
         let mut index = |field: &str, label: &CodeValue| {
@@ -1226,14 +1901,21 @@ impl Resolver {
         let first = index("first_period", first);
         let last = index("last_period", last);
         let (day, first, last) = (day?, first?, last?);
+        if setup.is_some_and(|setup| !setup.days.contains(&day)) {
+            self.push(format!("{path}.day"), IssueKind::DayNotInTerm, src);
+        }
         if first > last {
             self.push(format!("{path}.last_period"), IssueKind::ReversedRange, src);
             return None;
         }
+        let Ok(last) = u8::try_from(last) else {
+            self.invalid(format!("{path}.last_period"), &last.to_string(), src);
+            return None;
+        };
         Some(TimeWindow::Periods {
             day,
             first: first as u8,
-            last: last as u8,
+            last,
         })
     }
 
@@ -1246,7 +1928,9 @@ impl Resolver {
         let mut keys = BTreeMap::new();
         let mut out = Vec::new();
         for (i, c) in doc.constraints.iter().enumerate() {
-            out.extend(self.constraint(i, c, ctx, sections, &mut keys, out.len()));
+            if self.includes(&format!("constraints[{i}]")) {
+                out.extend(self.constraint(i, c, ctx, sections, &mut keys));
+            }
         }
         out
     }
@@ -1257,13 +1941,17 @@ impl Resolver {
         c: &ConstraintInput,
         ctx: &Context<'_>,
         sections: &[Section],
-        keys: &mut BTreeMap<String, ()>,
-        count: usize,
+        keys: &mut BTreeMap<String, (String, Option<SourceRef>)>,
     ) -> Option<Constraint> {
         let src = c.source.as_ref();
         let path = format!("constraints[{i}]");
-        if let Some(key) = Self::opt_text(&c.key) {
-            self.duplicate(keys, &key, || key.clone(), &format!("{path}.key"), src);
+        if let Some(code) = &c.key {
+            let field = format!("{path}.key");
+            self.numeric(&field, code, src);
+            let key = code.text.trim().to_owned();
+            if !key.is_empty() {
+                self.duplicate(keys, &key, || key.clone(), &field, src);
+            }
         }
         let target = self.target(&format!("{path}.target"), &c.target, src, ctx, sections);
         let status = match c.status.trim() {
@@ -1292,7 +1980,6 @@ impl Resolver {
                 if rule.windows.is_empty() {
                     self.push(format!("{path}.rule.windows"), IssueKind::Missing, src);
                 }
-                let before = self.issues.len();
                 let windows: Vec<TimeWindow> = rule
                     .windows
                     .iter()
@@ -1301,7 +1988,7 @@ impl Resolver {
                         self.window(&format!("{path}.rule.windows[{j}]"), w, src, ctx.setup)
                     })
                     .collect();
-                (self.issues.len() == before).then_some(Rule::AvoidTimes { windows })
+                (windows.len() == rule.windows.len()).then_some(Rule::AvoidTimes { windows })
             }
             Some(rule) => {
                 self.invalid(format!("{path}.rule.kind"), &rule.kind, src);
@@ -1328,7 +2015,8 @@ impl Resolver {
                     }
                     // 한쪽 끝만 적었는데 학기 기간이 없어 채울 수 없다
                     _ => {
-                        self.push(format!("{path}.from"), IssueKind::Missing, src);
+                        let missing = if from.is_none() { "from" } else { "until" };
+                        self.push(format!("{path}.{missing}"), IssueKind::Missing, src);
                         None
                     }
                 }
@@ -1336,7 +2024,7 @@ impl Resolver {
         };
 
         Some(Constraint {
-            id: ConstraintId(count as i64 + 1),
+            id: ConstraintId(self.id_base + i as i64 + 1),
             target: target?,
             rule,
             strength,
@@ -1355,12 +2043,29 @@ impl Resolver {
         doc: &InputDocument,
         ctx: &Context<'_>,
         sections: &[Section],
-    ) -> Vec<Placement> {
-        let mut seen: HashMap<MeetingRef, ()> = HashMap::new();
+    ) -> Vec<(usize, Placement)> {
+        let mut seen = BTreeMap::new();
         let mut out = Vec::new();
         for (i, p) in doc.placements.iter().enumerate() {
             let src = p.source.as_ref();
             let path = format!("placements[{i}]");
+            if !self.includes(&path) {
+                continue;
+            }
+            let part = p.part.unwrap_or(1);
+            let duplicate = CourseCode::new(&p.course.text)
+                .ok()
+                .zip(SectionCode::new(&p.section.text).ok())
+                .is_some_and(|(course, section)| {
+                    let key = (course, section, part);
+                    self.duplicate(
+                        &mut seen,
+                        &key,
+                        || format!("{}-{}#{}", key.0, key.1, part),
+                        &format!("{path}.part"),
+                        src,
+                    )
+                });
             let section = self
                 .section_ref(&path, &p.course, &p.section, src, ctx, sections)
                 .and_then(|id| sections.iter().find(|s| s.id == id));
@@ -1370,6 +2075,7 @@ impl Resolver {
             {
                 self.push(format!("{path}.day"), IssueKind::DayNotInTerm, src);
             }
+            self.numeric(&format!("{path}.start_period"), &p.start_period, src);
             let start = ctx.setup.and_then(|setup| {
                 let found = setup.periods.index_of(&p.start_period.text);
                 if found.is_none() {
@@ -1393,7 +2099,6 @@ impl Resolver {
             let (Some(section), Some(day), Some(start)) = (section, day, start) else {
                 continue;
             };
-            let part = p.part.unwrap_or(1);
             let Some(&span) = (part as usize)
                 .checked_sub(1)
                 .and_then(|k| section.split.get(k))
@@ -1416,27 +2121,27 @@ impl Resolver {
                 );
                 continue;
             }
+            let Ok(start) = u8::try_from(start) else {
+                self.invalid(format!("{path}.start_period"), &p.start_period.text, src);
+                continue;
+            };
             let meeting = MeetingRef {
                 section: section.id,
                 part: part - 1,
             };
-            if seen.insert(meeting, ()).is_some() {
-                self.push(
-                    format!("{path}.part"),
-                    IssueKind::Duplicate {
-                        key: format!("{}-{}", p.course, p.section),
-                    },
-                    src,
-                );
+            if duplicate {
                 continue;
             }
-            out.push(Placement {
-                meeting,
-                day,
-                start: start as u8,
-                room,
-                locked: p.locked,
-            });
+            out.push((
+                i,
+                Placement {
+                    meeting,
+                    day,
+                    start,
+                    room,
+                    locked: p.locked,
+                },
+            ));
         }
         out
     }
@@ -1564,6 +2269,49 @@ mod tests {
         let issues = resolve(&doc).unwrap_err();
         assert_eq!(kinds(&issues), [("sections[0].section", "numeric_code")]);
         assert_eq!(issues[0].severity(), Severity::NeedsReview);
+    }
+
+    #[test]
+    fn review_keeps_numeric_setup_and_homonyms_visible() {
+        let mut doc = base();
+        doc.setup.as_mut().unwrap().periods[0].label = CodeValue::number(1);
+        let source = SourceRef {
+            sheet: Some("Periods".into()),
+            row: Some(2),
+            column: Some("A".into()),
+            ..SourceRef::default()
+        };
+        doc.locations
+            .insert("setup.periods[0].label".into(), source.clone());
+        let mut homonym = doc.instructors[0].clone();
+        homonym.code = CodeValue::number(2);
+        doc.sections[0].instructors[0] = InstructorRefInput {
+            code: None,
+            name: Some(homonym.name.clone()),
+        };
+        doc.instructors.push(homonym);
+        let review = inspect(&doc, &ReviewBase::default(), 0, None).unwrap();
+        let setup = review.items.iter().find(|row| row.path == "setup").unwrap();
+        assert_eq!(setup.disposition(), Disposition::NeedsReview);
+        assert_eq!(setup.issues[0].source.as_ref(), Some(&source));
+        let section = review
+            .items
+            .iter()
+            .find(|row| row.path == "sections[0]")
+            .unwrap();
+        assert!(
+            section
+                .issues
+                .iter()
+                .any(|issue| matches!(issue.kind, IssueKind::AmbiguousInstructor { .. }))
+        );
+        assert!(
+            !section
+                .issues
+                .iter()
+                .any(|issue| issue.kind == IssueKind::MissingSetup)
+        );
+        assert_eq!(section.disposition(), Disposition::NeedsReview);
     }
 
     #[test]
@@ -1714,6 +2462,7 @@ mod tests {
                 ("schema", "unsupported_schema"),
                 ("term.season", "invalid_value"),
                 ("rooms[0].equipment[0].available", "available_exceeds_total"),
+                ("courses[0].code", "duplicate"),
                 ("courses[1].code", "duplicate"),
                 ("sections[0].groups[0].group", "unknown_reference"),
                 ("sections[0].split", "split_mismatch"),
@@ -1745,6 +2494,8 @@ mod tests {
             [
                 ("placements[0].start_period", "span_past_last_period"),
                 ("placements[1].part", "part_out_of_range"),
+                ("placements[0].part", "duplicate"),
+                ("placements[2].part", "duplicate"),
                 ("placements[2].day", "day_not_in_term"),
             ]
         );

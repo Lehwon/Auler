@@ -23,6 +23,7 @@ pub fn periods() -> Vec<PeriodRow> {
         .map(|i| PeriodRow {
             label: SharedString::from(format!("{}", i + 1)),
             time: SharedString::from(format!("{:02}:00", 9 + i)),
+            gap: SharedString::default(),
         })
         .collect()
 }
@@ -69,6 +70,9 @@ pub fn cards() -> Vec<CardData> {
                 locked,
                 students,
                 capacity,
+                lane: 0,
+                lanes: 1,
+                slot_label: SharedString::default(),
             },
         )
         .collect()

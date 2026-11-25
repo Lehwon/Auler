@@ -2,10 +2,19 @@
 //!
 //! 화면(Slint)과 상태를 연결한다. 실행 파일(`main.rs`)과 UI 테스트가 같은 `init`을 쓴다.
 
+mod backup;
 pub mod bench;
+mod catalog;
+mod constraints;
+mod export;
+mod file_dialog;
+mod import;
 pub mod placement;
+mod review_screen;
 pub mod sample;
 pub mod schedule;
+mod workbench;
+pub mod workspace;
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -80,10 +89,7 @@ pub fn init(ui: &AppWindow, language: usize) {
         history: RefCell::new(History::default()),
     });
 
-    ui.set_app_version(env!("CARGO_PKG_VERSION").into());
-    ui.on_open_url(|url| {
-        open_url(&url);
-    });
+    init_shell(ui, language);
     ui.set_department(sample::DEPARTMENT.into());
     ui.set_year(sample::YEAR);
     ui.set_term(sample::TERM);
@@ -183,10 +189,7 @@ fn refresh(ui: &AppWindow, state: &State) {
 
 /// 화면 언어를 바꾼다. Rust가 만드는 문구(표의 상태 열)도 새 언어로 다시 만든다.
 pub fn set_language(ui: &AppWindow, index: usize) {
-    let index = index.min(LANGUAGES.len() - 1);
-    // "en"은 원문(영어)을 고른다. 번역이 빠진 문구는 원문으로 남는다.
-    let _ = slint::select_bundled_translation(LANGUAGES[index]);
-    ui.set_language_index(index as i32);
+    set_shell_language(ui, index);
     let labels = ui.global::<Labels>();
     let status = [
         labels.get_status_assigned(),
@@ -194,6 +197,21 @@ pub fn set_language(ui: &AppWindow, index: usize) {
         labels.get_status_needs_review(),
     ];
     ui.set_rows(sample::section_rows(SAMPLE_ROWS, &status));
+}
+
+pub(crate) fn init_shell(ui: &AppWindow, language: usize) {
+    ui.set_app_version(env!("CARGO_PKG_VERSION").into());
+    ui.on_open_url(|url| {
+        open_url(&url);
+    });
+    set_shell_language(ui, language);
+}
+
+pub(crate) fn set_shell_language(ui: &AppWindow, index: usize) {
+    let index = index.min(LANGUAGES.len() - 1);
+    // "en"은 원문(영어)을 고른다. 번역이 빠진 문구는 원문으로 남는다.
+    let _ = slint::select_bundled_translation(LANGUAGES[index]);
+    ui.set_language_index(index as i32);
 }
 
 /// 시작 언어: `AULER_LANG`(ko|en)이 있으면 그것, 없으면 시스템 언어가 한국어일 때 한국어.
@@ -220,16 +238,17 @@ pub fn is_allowed_url(url: &str) -> bool {
 
 /// 정보 화면의 링크를 기본 브라우저로 연다. 허용한 주소가 아니면 아무것도 하지 않는다.
 pub fn open_url(url: &str) -> bool {
-    is_allowed_url(url) && shell_open(url)
+    is_allowed_url(url) && shell_open(std::ffi::OsStr::new(url))
 }
 
 #[cfg(windows)]
-fn shell_open(url: &str) -> bool {
+fn shell_open(target: &std::ffi::OsStr) -> bool {
+    use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::UI::Shell::ShellExecuteW;
     use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
 
-    let wide = |s: &str| s.encode_utf16().chain(Some(0)).collect::<Vec<u16>>();
-    let (verb, file) = (wide("open"), wide(url));
+    let verb = "open".encode_utf16().chain(Some(0)).collect::<Vec<_>>();
+    let file = target.encode_wide().chain(Some(0)).collect::<Vec<_>>();
     // SAFETY: 두 문자열은 NUL로 끝나고 호출 동안 살아 있다. 나머지 포인터는 null이 허용된다.
     let result = unsafe {
         ShellExecuteW(
@@ -246,7 +265,7 @@ fn shell_open(url: &str) -> bool {
 }
 
 #[cfg(not(windows))]
-fn shell_open(_url: &str) -> bool {
+fn shell_open(_target: &std::ffi::OsStr) -> bool {
     false
 }
 

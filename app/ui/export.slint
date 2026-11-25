@@ -1,0 +1,290 @@
+import { CheckBox, ComboBox, ListView, ScrollView, StandardTableView } from "std-widgets.slint";
+import { ActionButton, PageHeader, StatusBanner } from "components.slint";
+import { CatalogTab } from "catalog.slint";
+import { Badge, Panel, Theme, Tone } from "theme.slint";
+import { BackupPane, BackupView } from "backup.slint";
+
+export enum ExportCommand {
+    tab, version, format, grouping, target, language, layout, orientation,
+    course-name, instructor, room, constraint, preview, previous, next, zoom-out,
+    zoom-in, save, confirm, cancel, print, load-profile, example-profile, save-example-profile,
+}
+
+export struct ExportConstraint { title: string, detail: string, checked: bool }
+
+export struct ExportView {
+    tab: int,
+    versions: [string],
+    version: int,
+    source-version: string,
+    version-detail: string,
+    format: int,
+    grouping: int,
+    targets: [string],
+    target: int,
+    language: int,
+    layout: int,
+    orientation: int,
+    course-name: bool,
+    instructor: bool,
+    room: bool,
+    ready: bool,
+    busy: bool,
+    empty: bool,
+    preview: image,
+    page-index: int,
+    pages: int,
+    zoom: int,
+    columns: [TableColumn],
+    rows: [[StandardListViewItem]],
+    constraints: [ExportConstraint],
+    overwrite: string,
+    error: string,
+    saved: string,
+    can-print: bool,
+    profile-name: string,
+    profile-file: string,
+    profile-encoding: string,
+    profile-headers: bool,
+}
+
+component ExportSelect inherits VerticalLayout {
+    in property <string> label;
+    in property <[string]> choices;
+    in property <int> current;
+    in property <bool> enabled: true;
+    callback picked(int);
+    spacing: 4px;
+    Text { text: root.label; color: Theme.text; font-weight: 600; }
+    ComboBox {
+        min-width: 0px;
+        accessible-label: root.label;
+        enabled: root.enabled;
+        model: root.choices;
+        current-index: root.current;
+        selected => { root.picked(self.current-index); }
+    }
+}
+
+export component ExportPage inherits Rectangle {
+    in property <ExportView> view;
+    in property <bool> compact;
+    in-out property <bool> backup-active;
+    in property <BackupView> backup-view;
+    callback action(ExportCommand, int);
+    callback finalize();
+    callback viewport(float);
+    callback save-backup();
+    callback restore-backup();
+    property <bool> pdf: root.view.format == 0;
+    property <bool> handover: root.view.tab == 1;
+    property <bool> timetable: root.view.tab == 0;
+    property <bool> school: root.view.tab == 2;
+    property <bool> editable: !root.view.busy && root.view.overwrite == "" && !root.backup-view.busy && !root.backup-view.pending;
+
+    VerticalLayout {
+        padding: Theme.page-padding;
+        spacing: Theme.space-medium;
+        PageHeader {
+            title: @tr("Export & Handover");
+            subtitle: root.backup-active ? @tr("Create or restore a full workspace copy.") : @tr("Create files from a saved final version of the timetable.");
+            if root.view.source-version != "" && !root.backup-active: VerticalLayout {
+                alignment: center;
+                Badge { text: root.view.source-version; tone: Tone.info; }
+            }
+        }
+        HorizontalLayout {
+            spacing: Theme.space-small;
+            accessible-role: tab-list;
+            accessible-label: @tr("Export & Handover");
+            CatalogTab { title: @tr("Timetable export"); current: (root.timetable || root.view.versions.length == 0) && !root.backup-active; enabled: root.editable; activated => { root.backup-active = false; root.action(ExportCommand.tab, 0); } }
+            if root.view.versions.length > 0: CatalogTab { title: @tr("School submission"); current: root.school && !root.backup-active; enabled: root.editable; activated => { root.backup-active = false; root.action(ExportCommand.tab, 2); } }
+            if root.view.versions.length > 0: CatalogTab { title: @tr("Handover"); current: root.handover && !root.backup-active; enabled: root.editable; activated => { root.backup-active = false; root.action(ExportCommand.tab, 1); } }
+            CatalogTab { title: @tr("Backup & Restore"); current: root.backup-active; enabled: root.editable; activated => { root.backup-active = true; root.action(ExportCommand.tab, root.view.tab); } }
+            Rectangle { horizontal-stretch: 1; }
+        }
+        if root.backup-active: BackupPane {
+            vertical-stretch: 1;
+            view: root.backup-view;
+            save-backup => { root.save-backup(); }
+            restore-backup => { root.restore-backup(); }
+        }
+        if root.view.error != "" && !root.backup-active: StatusBanner { message: root.view.error; tone: Tone.danger; }
+        if root.view.saved != "" && !root.backup-active: StatusBanner { message: @tr("Saved to {0}", root.view.saved); tone: Tone.success; }
+        if root.view.versions.length == 0 && !root.backup-active: Panel {
+            VerticalLayout {
+                padding: Theme.space-large;
+                spacing: Theme.space-medium;
+                Text { text: @tr("No finalized version yet"); color: Theme.text; font-weight: 700; }
+                Text { text: @tr("Validate and finalize the timetable before exporting it."); color: Theme.text-muted; wrap: word-wrap; }
+                HorizontalLayout {
+                    ActionButton { text: @tr("Validate timetable"); primary: true; clicked => { root.finalize(); } }
+                    Rectangle { horizontal-stretch: 1; }
+                }
+            }
+        }
+        if root.view.versions.length == 0 && !root.backup-active: Rectangle { vertical-stretch: 1; }
+        if root.view.versions.length > 0 && !root.backup-active: HorizontalLayout {
+            spacing: Theme.space-medium;
+            vertical-stretch: 1;
+            Panel {
+                width: root.compact || root.school ? 250px : 294px;
+                VerticalLayout {
+                    padding: Theme.space-medium;
+                    spacing: Theme.space-small;
+                    Text { text: root.handover ? @tr("Handover settings") : root.school ? @tr("Submission settings") : @tr("Export settings"); font-weight: 700; color: Theme.text; }
+                    settings := ScrollView {
+                        vertical-stretch: 1;
+                        content-width: settings.visible-width;
+                        content-height: form.preferred-height;
+                        form := VerticalLayout {
+                            width: settings.visible-width - 12px;
+                            height: self.preferred-height;
+                            spacing: Theme.space-small;
+                            ExportSelect { label: @tr("Final version"); choices: root.view.versions; current: root.view.version; enabled: root.editable; picked(i) => { root.action(ExportCommand.version, i); } }
+                            Text { text: root.view.version-detail; color: Theme.text-muted; wrap: word-wrap; }
+                            if root.timetable: ExportSelect { label: @tr("File format"); choices: [@tr("PDF (A4)"), @tr("Excel (XLSX)")]; current: root.view.format; enabled: root.editable; picked(i) => { root.action(ExportCommand.format, i); } }
+                            if root.timetable: ExportSelect { label: @tr("View"); choices: [@tr("All sections"), @tr("By year"), @tr("By instructor"), @tr("By room")]; current: root.view.grouping; enabled: root.editable; picked(i) => { root.action(ExportCommand.grouping, i); } }
+                            if root.timetable && root.view.grouping != 0: ExportSelect { label: @tr("View target"); choices: root.view.targets; current: root.view.target; enabled: root.editable; picked(i) => { root.action(ExportCommand.target, i); } }
+                            if root.timetable: ExportSelect { label: @tr("Output language"); choices: [@tr("Korean"), @tr("English")]; current: root.view.language; enabled: root.editable; picked(i) => { root.action(ExportCommand.language, i); } }
+                            if root.timetable: ExportSelect { label: @tr("Layout"); choices: [@tr("Grid"), @tr("List")]; current: root.view.layout; enabled: root.editable; picked(i) => { root.action(ExportCommand.layout, i); } }
+                            if root.timetable && root.pdf: ExportSelect { label: @tr("Page orientation"); choices: [@tr("Landscape"), @tr("Portrait")]; current: root.view.orientation; enabled: root.editable; picked(i) => { root.action(ExportCommand.orientation, i); } }
+                            if root.timetable: Text { text: @tr("Display fields"); font-weight: 600; color: Theme.text; }
+                            if root.timetable: CheckBox { text: @tr("Course name"); enabled: root.editable; checked: root.view.course-name; toggled => { root.action(ExportCommand.course-name, self.checked ? 1 : 0); } }
+                            if root.timetable: CheckBox { text: @tr("Instructor"); enabled: root.editable; checked: root.view.instructor; toggled => { root.action(ExportCommand.instructor, self.checked ? 1 : 0); } }
+                            if root.timetable: CheckBox { text: @tr("Room"); enabled: root.editable; checked: root.view.room; toggled => { root.action(ExportCommand.room, self.checked ? 1 : 0); } }
+                            if root.handover: Text { text: @tr("The JSON file contains the timetable and reference data, including instructor names, departments, class sizes, and the conditions you select."); color: Theme.text; wrap: word-wrap; }
+                            if root.school: VerticalLayout {
+                                spacing: Theme.space-small;
+                                Text { text: @tr("Active school profile"); font-weight: 600; color: Theme.text; }
+                                Text { text: root.view.profile-name; color: Theme.text; wrap: word-wrap; }
+                                if root.view.profile-file != "": Text { text: root.view.profile-file; color: Theme.text-muted; wrap: word-wrap; }
+                                ActionButton { text: @tr("Open profile JSON"); enabled: root.editable; clicked => { root.action(ExportCommand.load-profile, 0); } }
+                                ActionButton { text: @tr("Save example JSON"); enabled: root.editable && root.view.source-version != ""; clicked => { root.action(ExportCommand.save-example-profile, 0); } }
+                                if root.view.profile-file != "": ActionButton { text: @tr("Use example profile"); enabled: root.editable; clicked => { root.action(ExportCommand.example-profile, 0); } }
+                                Text { text: @tr("File encoding"); font-weight: 600; color: Theme.text; }
+                                Text { text: root.view.profile-encoding + " · " + (root.view.profile-headers ? @tr("Header row included") : @tr("No header row")); color: Theme.text; wrap: word-wrap; }
+                                Text { text: @tr("The CSV includes all scheduled classes in this final version."); color: Theme.text-muted; wrap: word-wrap; }
+                            }
+                        }
+                    }
+                    if root.view.can-print && root.timetable && root.pdf: ActionButton { text: @tr("Open saved PDF for printing"); enabled: root.editable; clicked => { root.action(ExportCommand.print, 0); } }
+                    ActionButton {
+                        text: root.view.busy ? @tr("Preparing output…") : root.handover ? @tr("Save handover file") : root.school ? @tr("Save submission CSV") : @tr("Save file");
+                        primary: true;
+                        enabled: root.editable && root.view.ready && (root.handover || !root.view.empty);
+                        clicked => { root.action(ExportCommand.save, 0); }
+                    }
+                }
+            }
+            Panel {
+                horizontal-stretch: 1;
+                VerticalLayout {
+                    padding: Theme.space-medium;
+                    spacing: Theme.space-small;
+                    HorizontalLayout {
+                        spacing: Theme.space-small;
+                        Text { text: root.handover ? @tr("Conditions to include") : root.school ? @tr("Submission preview") : root.pdf ? @tr("Print preview") : @tr("Workbook preview"); color: Theme.text; font-weight: 700; vertical-alignment: center; horizontal-stretch: 1; }
+                        if root.school && root.view.ready: Text { text: @tr("{0} submission rows", root.view.rows.length); color: Theme.text-muted; vertical-alignment: center; }
+                        if root.timetable && root.pdf && root.view.pages == 0 && !root.view.empty: ActionButton { text: @tr("Generate preview"); enabled: root.editable && root.view.ready; clicked => { root.action(ExportCommand.preview, 0); } }
+                        if root.timetable && root.pdf && root.view.pages > 0: ActionButton { width: 32px; text: "‹"; accessible-label: @tr("Previous page"); enabled: root.editable && root.view.page-index > 0; clicked => { root.action(ExportCommand.previous, 0); } }
+                        if root.timetable && root.pdf && root.view.pages > 0: Text { text: @tr("{0} / {1}", root.view.page-index + 1, root.view.pages); color: Theme.text; vertical-alignment: center; }
+                        if root.timetable && root.pdf && root.view.pages > 0: ActionButton { width: 32px; text: "›"; accessible-label: @tr("Next page"); enabled: root.editable && root.view.page-index + 1 < root.view.pages; clicked => { root.action(ExportCommand.next, 0); } }
+                        if root.timetable && root.pdf && root.view.pages > 0: Rectangle { width: 8px; }
+                        if root.timetable && root.pdf && root.view.pages > 0: ActionButton { width: 32px; text: "−"; accessible-label: @tr("Zoom out"); enabled: root.editable && root.view.zoom > 60; clicked => { root.action(ExportCommand.zoom-out, 0); } }
+                        if root.timetable && root.pdf && root.view.pages > 0: Text { text: root.view.zoom + "%"; vertical-alignment: center; color: Theme.text; }
+                        if root.timetable && root.pdf && root.view.pages > 0: ActionButton { width: 32px; text: "+"; accessible-label: @tr("Zoom in"); enabled: root.editable && root.view.zoom < 160; clicked => { root.action(ExportCommand.zoom-in, 0); } }
+                    }
+                    if root.handover: StatusBanner { message: @tr("Private notes, request reasons, and access tokens are excluded."); tone: Tone.info; }
+                    if root.handover && root.view.constraints.length == 0: Text { text: @tr("There are no confirmed conditions in this version."); color: Theme.text; wrap: word-wrap; }
+                    if root.handover: c := ListView {
+                        accessible-role: list;
+                        accessible-label: @tr("Conditions to include");
+                        accessible-item-count: root.view.constraints.length;
+                        for item[i] in root.view.constraints: VerticalLayout {
+                            width: c.visible-width - 12px;
+                            spacing: 3px;
+                            padding-bottom: 8px;
+                            CheckBox { text: item.title; accessible-label: item.title + ", " + item.detail; checked: item.checked; enabled: root.editable; toggled => { root.action(ExportCommand.constraint, i); } }
+                            Text { text: item.detail; color: Theme.text-muted; wrap: word-wrap; }
+                        }
+                    }
+                    if root.timetable && root.view.empty: Text { text: @tr("There are no scheduled classes in this view."); color: Theme.text-muted; wrap: word-wrap; }
+                    if root.timetable && root.pdf: Rectangle {
+                        background: Theme.neutral-soft;
+                        vertical-stretch: 1;
+                        border-radius: 6px;
+                        canvas := ScrollView {
+                            property <float> aspect: root.view.orientation == 0 ? 1.414 : 0.707;
+                            property <length> paper-width: round(max(100px, min(self.width - 28px, (self.height - 28px) * self.aspect)) / 1px * root.view.zoom / 100) * 1px;
+                            property <length> paper-height: self.paper-width / self.aspect;
+                            changed paper-width => { root.viewport(self.paper-width / 1px); }
+                            init => { root.viewport(self.paper-width / 1px); }
+                            content-width: max(self.visible-width, self.paper-width + 24px);
+                            content-height: max(self.visible-height, self.paper-height + 24px);
+                            if root.view.pages > 0: Image {
+                                x: max(12px, (canvas.visible-width - self.width) / 2);
+                                y: 12px;
+                                width: canvas.paper-width;
+                                height: canvas.paper-height;
+                                source: root.view.preview;
+                                image-fit: contain;
+                                accessible-role: image;
+                                accessible-label: @tr("Timetable page preview");
+                            }
+                        }
+                        if root.view.pages == 0 && !root.view.empty: Text {
+                            x: 16px;
+                            width: parent.width - 32px;
+                            height: parent.height;
+                            text: root.view.busy ? @tr("Preparing preview…") : @tr("Generate a preview to check the page layout before saving.");
+                            color: Theme.text-muted;
+                            wrap: word-wrap;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                            accessible-live-region: polite;
+                        }
+                    }
+                    if (root.timetable && !root.pdf) || (root.school && root.view.ready): StandardTableView {
+                        columns: root.view.columns;
+                        rows: root.view.rows;
+                        accessible-label: root.school ? @tr("Submission preview") : @tr("Workbook preview");
+                    }
+                    if root.school && !root.view.ready: Rectangle { vertical-stretch: 1; }
+                }
+            }
+        }
+    }
+
+    if root.view.overwrite != "": FocusScope {
+        width: parent.width;
+        height: parent.height;
+        init => { cancel.focus(); }
+        key-pressed(event) => {
+            if event.text == Key.Escape { root.action(ExportCommand.cancel, 0); return accept; }
+            reject
+        }
+        Rectangle { width: parent.width; height: parent.height; background: #17263d70; }
+        TouchArea { width: parent.width; height: parent.height; }
+        Panel {
+            width: min(parent.width - 40px, 480px);
+            height: prompt.preferred-height;
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            accessible-role: groupbox;
+            accessible-label: @tr("Replace existing file?");
+            prompt := VerticalLayout {
+                padding: Theme.space-large;
+                spacing: Theme.space-medium;
+                Text { text: @tr("Replace existing file?"); font-size: 18px; font-weight: 700; color: Theme.text; }
+                Text { text: root.view.overwrite; color: Theme.text; wrap: word-wrap; }
+                HorizontalLayout {
+                    alignment: end;
+                    spacing: Theme.space-small;
+                    cancel := ActionButton { text: @tr("Cancel"); clicked => { root.action(ExportCommand.cancel, 0); } }
+                    ActionButton { text: @tr("Replace file"); primary: true; clicked => { root.action(ExportCommand.confirm, 0); } }
+                }
+            }
+        }
+    }
+}

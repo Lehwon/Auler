@@ -1,0 +1,303 @@
+import { ScrollView, StandardTableView } from "std-widgets.slint";
+import { Theme, Tone, Panel, Badge, FocusRing, Icon, Icons } from "theme.slint";
+import { ActionButton, PageHeader, StatusBanner } from "components.slint";
+
+export struct HomeStats {
+    sections: int,
+    rooms: int,
+    instructors: int,
+    pending: int,
+    unassigned: int,
+    conflicts: int,
+    external-checks: int,
+    can-finalize: bool,
+    finalized: string,
+    editing: bool,
+}
+
+export component HomeTargetList inherits VerticalLayout {
+    in property <string> title;
+    in property <string> empty-message;
+    in property <[string]> entries;
+    padding: Theme.page-padding;
+    spacing: Theme.space-large;
+    PageHeader { title: root.title; }
+    if root.entries.length == 0: StatusBanner { message: root.empty-message; }
+    if root.entries.length > 0: sw := ScrollView {
+        vertical-stretch: 1;
+        content-width: self.visible-width;
+        content-height: rows.preferred-height;
+        rows := VerticalLayout {
+            width: sw.visible-width;
+            spacing: Theme.space-medium;
+            for entry in root.entries: Panel {
+                min-height: Theme.control-height;
+                VerticalLayout {
+                    padding: Theme.space-medium;
+                    Text { text: entry; color: Theme.text; wrap: word-wrap; }
+                }
+            }
+        }
+    }
+    if root.entries.length == 0: Rectangle { vertical-stretch: 1; }
+}
+
+component HomeMetric inherits FocusScope {
+    in property <string> title;
+    in property <int> value;
+    in property <string> detail;
+    in property <string> action;
+    in property <Tone> tone;
+    callback activated();
+    preferred-width: 160px;
+    preferred-height: 132px;
+    horizontal-stretch: 1;
+    vertical-stretch: 0;
+
+    accessible-role: button;
+    accessible-label: title + " " + value + ", " + action;
+    accessible-description: detail;
+    accessible-action-default => { root.activated(); }
+    key-pressed(event) => {
+        if (event.text == Key.Return || event.text == Key.Space) {
+            root.activated();
+            return accept;
+        }
+        return reject;
+    }
+
+    Panel {
+        border-color: hit.has-hover ? Theme.action : Theme.border;
+        VerticalLayout {
+            padding: Theme.space-large;
+            spacing: Theme.space-medium;
+            Text { text: root.title; font-weight: 700; color: Theme.text; wrap: word-wrap; accessible-role: none; }
+            Text { text: root.value; font-size: 28px; font-weight: 700; color: Theme.tone-foreground(root.tone); accessible-role: none; }
+            Text { text: root.detail; color: Theme.text-muted; wrap: word-wrap; accessible-role: none; }
+            Rectangle { vertical-stretch: 1; }
+            Text { text: root.action; color: Theme.action; font-weight: 600; wrap: word-wrap; accessible-role: none; }
+        }
+    }
+    hit := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.activated(); }
+    }
+    if root.has-focus: FocusRing {
+        x: -2px;
+        y: -2px;
+        width: root.width + 4px;
+        height: root.height + 4px;
+    }
+}
+
+component TermProgress inherits Panel {
+    in property <int> active-step;
+    callback navigate(int);
+    HorizontalLayout {
+        padding: Theme.space-medium;
+        spacing: Theme.space-medium;
+        for name[i] in [@tr("Prepare data"), @tr("Review constraints"), @tr("Schedule"), @tr("Finalize and export")]: step := FocusScope {
+            height: Theme.control-height;
+            accessible-role: button;
+            accessible-label: name;
+            accessible-description: i < root.active-step ? @tr("Complete") : i == root.active-step ? @tr("Current step") : "";
+            accessible-action-default => { root.navigate(i); }
+            key-pressed(event) => {
+                if (event.text == Key.Return || event.text == Key.Space) {
+                    root.navigate(i);
+                    return accept;
+                }
+                return reject;
+            }
+            HorizontalLayout {
+                padding-left: Theme.space-medium;
+                padding-right: Theme.space-medium;
+                spacing: Theme.space-medium;
+                VerticalLayout {
+                    alignment: center;
+                    Rectangle {
+                        width: 24px;
+                        height: 24px;
+                        border-radius: 12px;
+                        background: i < root.active-step ? Theme.success-soft : i == root.active-step ? Theme.action : Theme.neutral-soft;
+                        if i < root.active-step: Icon { text: Icons.success; color: Theme.success; font-size: 13px; }
+                        if i >= root.active-step: Text {
+                            text: i + 1;
+                            color: i == root.active-step ? white : Theme.text-muted;
+                            font-weight: 600;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                            accessible-role: none;
+                        }
+                    }
+                }
+                Text {
+                    text: name;
+                    color: i == root.active-step ? Theme.action : Theme.text-muted;
+                    font-weight: i == root.active-step ? 700 : 400;
+                    vertical-alignment: center;
+                    accessible-role: none;
+                }
+            }
+            TouchArea {
+                mouse-cursor: pointer;
+                clicked => { root.navigate(i); }
+            }
+            if step.has-focus: FocusRing {}
+        }
+    }
+}
+
+export component SemesterHome inherits Rectangle {
+    in property <HomeStats> stats;
+    in property <string> term-label;
+    in property <string> department;
+    in property <string> version;
+    in property <string> error-message;
+    in property <[[StandardListViewItem]]> tasks;
+    in property <bool> has-term;
+    in property <bool> compact;
+    private property <int> selected-task: -1;
+    callback new-term();
+    callback copy-term();
+    callback navigate(int);
+    callback open-task(int);
+
+    property <int> active-step: root.stats.sections == 0 ? 0 : root.stats.pending > 0 ? 1
+        : root.stats.unassigned > 0 || root.stats.conflicts > 0 ? 2 : 3;
+    property <string> next-action: !root.has-term ? @tr("Create a term")
+        : root.active-step == 0 ? @tr("Prepare data")
+        : root.active-step == 1 ? @tr("Review constraints")
+        : root.stats.unassigned > 0 ? @tr("Review unassigned")
+        : root.stats.conflicts > 0 ? @tr("Review conflicts")
+        : root.stats.editing ? @tr("Validate timetable") : @tr("Export & Handover");
+    accessible-role: main;
+
+    sw := ScrollView {
+        content-width: sw.visible-width;
+        content-height: max(sw.visible-height, body.preferred-height);
+        body := VerticalLayout {
+            width: sw.visible-width;
+            height: self.preferred-height;
+            padding: Theme.page-padding;
+            spacing: Theme.space-large;
+
+            PageHeader {
+                title: root.has-term ? root.term-label : @tr("Home");
+                subtitle: root.department + (root.has-term ? " · " + root.version : "");
+                if root.has-term: ActionButton {
+                    text: @tr("Copy previous term");
+                    clicked => { root.copy-term(); }
+                }
+                ActionButton {
+                    primary: true;
+                    text: root.next-action;
+                    clicked => {
+                        if (!root.has-term) { root.new-term(); }
+                        else { root.navigate(root.active-step == 0 ? 1 : root.active-step == 1 ? 2
+                            : root.active-step == 2 ? (root.stats.unassigned > 0 ? 3 : 4) : root.stats.editing ? 7 : 6); }
+                    }
+                }
+            }
+            if root.error-message != "": StatusBanner { message: root.error-message; tone: Tone.danger; }
+            if !root.has-term: StatusBanner { message: @tr("Create a term to start entering departmental data."); }
+            if root.has-term: TermProgress {
+                active-step: root.active-step;
+                navigate(step) => { root.navigate(step < 3 ? step + 1 : root.stats.editing ? 7 : 6); }
+            }
+            if root.has-term: HorizontalLayout {
+                spacing: Theme.space-medium;
+                vertical-stretch: 0;
+                HomeMetric {
+                    title: @tr("Registered sections");
+                    value: root.stats.sections;
+                    detail: @tr("{0} rooms · {1} instructors", root.stats.rooms, root.stats.instructors);
+                    action: @tr("View data");
+                    activated => { root.navigate(1); }
+                }
+                HomeMetric {
+                    title: @tr("Pending constraints");
+                    value: root.stats.pending;
+                    detail: @tr("Review before finalizing");
+                    action: @tr("Review constraints");
+                    tone: root.stats.pending > 0 ? Tone.warning : Tone.neutral;
+                    activated => { root.navigate(2); }
+                }
+                HomeMetric {
+                    title: @tr("Unassigned");
+                    value: root.stats.unassigned;
+                    detail: @tr("Meetings missing a time or room");
+                    action: @tr("Open timetable");
+                    tone: root.stats.unassigned > 0 ? Tone.warning : Tone.success;
+                    activated => { root.navigate(3); }
+                }
+                HomeMetric {
+                    title: @tr("Hard conflicts");
+                    value: root.stats.conflicts;
+                    detail: @tr("In the current version");
+                    action: @tr("Review conflicts");
+                    tone: root.stats.conflicts > 0 ? Tone.danger : Tone.success;
+                    activated => { root.navigate(4); }
+                }
+            }
+            if root.has-term: HorizontalLayout {
+                spacing: Theme.space-large;
+                Panel {
+                    horizontal-stretch: 1;
+                    VerticalLayout {
+                        padding: Theme.space-large;
+                        spacing: Theme.space-medium;
+                        HorizontalLayout {
+                            Text { text: @tr("Recent work"); color: Theme.text; font-size: 16px; font-weight: 700; vertical-alignment: center; horizontal-stretch: 1; }
+                            ActionButton {
+                                text: @tr("Open selected task");
+                                enabled: root.selected-task >= 0 && root.selected-task < root.tasks.length;
+                                clicked => { root.open-task(root.selected-task); }
+                            }
+                        }
+                        if root.tasks.length > 0: StandardTableView {
+                            height: 212px;
+                            current-row <=> root.selected-task;
+                            accessible-label: @tr("Recent work");
+                            columns: [
+                                { title: @tr("Task"), horizontal-stretch: 3 },
+                                { title: @tr("Source"), width: 88px },
+                                { title: @tr("Status"), min-width: 104px },
+                                { title: @tr("Time"), width: 136px },
+                            ];
+                            rows: root.tasks;
+                        }
+                        if root.tasks.length == 0: Text {
+                            text: @tr("No saved work for this term yet.");
+                            color: Theme.text-muted;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+                if !root.compact: VerticalLayout {
+                    width: 242px;
+                    alignment: start;
+                    Panel {
+                        VerticalLayout {
+                            padding: Theme.space-large;
+                            spacing: Theme.space-medium;
+                            Text { text: @tr("Finalization"); color: Theme.text; font-size: 16px; font-weight: 700; }
+                            Text {
+                                text: root.stats.finalized == "" ? @tr("No finalized version yet") : root.stats.finalized;
+                                color: Theme.text-muted;
+                                wrap: word-wrap;
+                            }
+                            if !root.stats.editing: Badge { text: @tr("Read-only"); tone: Tone.info; }
+                        }
+                    }
+                }
+            }
+            if root.has-term && root.compact: Text {
+                text: root.stats.finalized == "" ? @tr("No finalized version yet") : root.stats.finalized;
+                color: Theme.text-muted;
+                wrap: word-wrap;
+            }
+            Rectangle { vertical-stretch: 1; }
+        }
+    }
+}

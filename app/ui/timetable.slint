@@ -12,11 +12,15 @@ export struct CardData {
     locked: bool,
     students: int,
     capacity: int,
+    lane: int,
+    lanes: int,
+    slot-label: string,
 }
 
 export struct PeriodRow {
     label: string,
     time: string,
+    gap: string,
 }
 
 export struct UnassignedData {
@@ -80,13 +84,14 @@ component CourseCard inherits FocusScope {
     property <color> fill: data.hue == 0 ? #E3ECFA : data.hue == 1 ? #E3F1E7 : data.hue == 2 ? #EEE6F8 : #FCEFD9;
 
     accessible-role: AccessibleRole.list-item;
-    accessible-label: data.title + ", " + data.detail + ", " + Labels.slot(root.day-label, data.start, data.span) + (data.locked ? ", " + @tr("Locked") : "");
+    accessible-label: data.title + ", " + data.detail + ", " + (data.slot-label == "" ? Labels.slot(root.day-label, data.start, data.span) : data.slot-label) + (data.locked ? ", " + @tr("Locked") : "");
     accessible-item-selectable: true;
     accessible-item-selected: root.selected;
     accessible-item-index: root.index;
     accessible-item-count: root.count;
+    accessible-enabled: root.enabled;
     accessible-action-default => {
-        root.activated();
+        if root.enabled { root.activated(); }
     }
 
     focus-gained(reason) => {
@@ -170,6 +175,7 @@ component CourseCard inherits FocusScope {
     }
 
     touch := TouchArea {
+        enabled: root.enabled;
         pointer-event(event) => {
             if (event.button == PointerEventButton.left) {
                 if (event.kind == PointerEventKind.down) {
@@ -221,9 +227,14 @@ export component TimetableGrid inherits Panel {
     callback activated(int);
     callback move-card(int, int, int) -> bool;
     pure callback can-move(int, int, int) -> bool;
+    callback pick-slot(int, int);
+    in property <bool> picking;
+    in property <bool> range-labels;
+    in property <bool> interactive: true;
+    in property <length> header-offset;
 
     property <length> header-h: 36px;
-    property <length> period-w: 64px;
+    property <length> period-w: root.range-labels ? 94px : 64px;
     property <length> row-h: 60px;
     property <length> col-w: (root.width - root.period-w) / max(1, root.days.length);
     // 요일 열이 이보다 좁아지면 스크롤한다
@@ -243,23 +254,12 @@ export component TimetableGrid inherits Panel {
     accessible-label: @tr("Weekly timetable");
     accessible-item-count: root.cards.length;
 
-    // 머리글 배경: 테두리 안쪽에 두고 위쪽 모서리만 둥글게
-    Rectangle {
-        x: 1px;
-        y: 1px;
-        width: root.width - 2px;
-        height: root.header-h - 1px;
-        background: #F3F5F8;
-        border-top-left-radius: Theme.radius - 1px;
-        border-top-right-radius: Theme.radius - 1px;
-    }
-
     for p[i] in root.periods: Rectangle {
         x: 1px;
         y: root.header-h + i * root.row-h;
         width: root.width - 2px;
-        height: 1px;
-        background: Theme.border;
+        height: p.gap == "" ? 1px : 3px;
+        background: p.gap == "" ? Theme.border : Theme.neutral-soft;
     }
     for d[i] in root.days: Rectangle {
         x: root.period-w + i * root.col-w;
@@ -269,28 +269,6 @@ export component TimetableGrid inherits Panel {
         background: Theme.border;
     }
 
-    Text {
-        x: 0;
-        y: 0;
-        width: root.period-w;
-        height: root.header-h;
-        text: @tr("Period");
-        font-weight: 600;
-        color: Theme.text-muted;
-        horizontal-alignment: center;
-        vertical-alignment: center;
-    }
-    for d[i] in root.days: Text {
-        x: root.period-w + i * root.col-w;
-        y: 0;
-        width: root.col-w;
-        height: root.header-h;
-        text: Labels.weekday(d);
-        font-weight: 600;
-        color: Theme.text;
-        horizontal-alignment: center;
-        vertical-alignment: center;
-    }
     for p[i] in root.periods: VerticalLayout {
         x: 0;
         y: root.header-h + i * root.row-h;
@@ -309,16 +287,33 @@ export component TimetableGrid inherits Panel {
             color: Theme.text-subtle;
             horizontal-alignment: center;
         }
+        if p.gap != "": Text {
+            text: p.gap;
+            font-size: Theme.font-small;
+            color: Theme.text-muted;
+            overflow: elide;
+            horizontal-alignment: center;
+        }
+    }
+
+    if root.picking: TouchArea {
+        x: root.period-w;
+        y: root.header-h;
+        width: root.width - root.period-w;
+        height: root.height - root.header-h;
+        mouse-cursor: pointer;
+        clicked => { root.pick-slot(floor(self.mouse-x / root.col-w), floor(self.mouse-y / root.row-h)); }
     }
 
     for c[i] in root.cards: CourseCard {
-        x: root.period-w + c.day * root.col-w + 3px;
+        x: root.period-w + c.day * root.col-w + c.lane * (root.col-w / max(1, c.lanes)) + 3px;
         y: root.header-h + c.start * root.row-h + 3px;
-        width: root.col-w - 6px;
+        width: max(1px, root.col-w / max(1, c.lanes) - 6px);
         height: c.span * root.row-h - 6px;
         data: c;
         index: i;
         count: root.cards.length;
+        enabled: root.interactive;
         day-label: Labels.weekday(root.days[c.day]);
         selected: i == root.selected;
         dragging: i == root.drag-index;
@@ -357,6 +352,41 @@ export component TimetableGrid inherits Panel {
         border-color: root.drag-valid ? Theme.action : Theme.danger;
         background: root.drag-valid ? #2456A61A : #B423181A;
     }
+
+    // 머리글 배경: 테두리 안쪽에 두고 위쪽 모서리만 둥글게
+    Rectangle {
+        x: 1px;
+        y: root.header-offset + 1px;
+        width: root.width - 2px;
+        height: root.header-h - 1px;
+        background: #F3F5F8;
+        border-top-left-radius: Theme.radius - 1px;
+        border-top-right-radius: Theme.radius - 1px;
+    }
+
+    Text {
+        x: 0;
+        y: root.header-offset;
+        width: root.period-w;
+        height: root.header-h;
+        text: @tr("Period");
+        font-weight: 600;
+        color: Theme.text-muted;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    for d[i] in root.days: Text {
+        x: root.period-w + i * root.col-w;
+        y: root.header-offset;
+        width: root.col-w;
+        height: root.header-h;
+        text: Labels.weekday(d);
+        font-weight: 600;
+        color: Theme.text;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+    if root.header-offset > 0px: TouchArea { y: root.header-offset; width: root.width; height: root.header-h; }
 }
 
 // 미배정 분반 카드

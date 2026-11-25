@@ -1,0 +1,454 @@
+import { CheckBox, ComboBox, LineEdit, ListView, ScrollView, TextEdit } from "std-widgets.slint";
+import { CatalogTab } from "catalog.slint";
+import { ActionButton, FilterBar, PageHeader, SearchField, StatusBanner } from "components.slint";
+import { Badge, FocusRing, Panel, Theme, Tone } from "theme.slint";
+
+export struct ConstraintRow {
+    title: string,
+    target: string,
+    range: string,
+    time: string,
+    kind: int,
+    strength: int,
+    selected: bool,
+}
+
+export struct ConstraintCell {
+    first: int,
+    count: int,
+    last-seen: int,
+    clock: bool,
+    label: string,
+}
+
+export struct ConstraintGridRow {
+    title: string,
+    time: string,
+    cells: [ConstraintCell],
+}
+
+export struct ConstraintEditor {
+    target-kind: int,
+    targets: [string],
+    target-index: int,
+    strength: int,
+    confirmed: bool,
+    request: string,
+    source: string,
+    note: string,
+    from: string,
+    until: string,
+    weight: string,
+    windows: [string],
+    window-index: int,
+    window-dirty: bool,
+    day: int,
+    time-mode: int,
+    first: int,
+    last: int,
+    start: string,
+    end: string,
+    period-labels: [string],
+    affected: [string],
+    affected-locked: bool,
+    can-save: bool,
+    reason: string,
+}
+
+export struct ConstraintView {
+    has-term: bool,
+    can-edit: bool,
+    grid: bool,
+    tab: int,
+    target-filter: int,
+    period-filter: int,
+    query: string,
+    tabs: [string],
+    rows: [ConstraintRow],
+    days: [string],
+    calendar: [ConstraintGridRow],
+    detail: ConstraintRow,
+    show-detail: bool,
+    details: [string],
+    affected: [string],
+    editor: ConstraintEditor,
+    editing: bool,
+    deleting: bool,
+    error: string,
+}
+
+component ConstraintBadges inherits HorizontalLayout {
+    in property <int> kind;
+    in property <int> strength;
+    spacing: Theme.space-small;
+    alignment: start;
+    if root.strength > 0: Badge {
+        text: root.strength == 1 ? @tr("Hard constraint") : @tr("Soft constraint");
+        tone: root.strength == 1 ? Tone.danger : Tone.info;
+    }
+    if root.kind == 3: Badge { text: @tr("Pending confirmation"); tone: Tone.warning; }
+    if root.kind == 1 || root.kind == 2: Badge { text: @tr("Confirmed"); tone: Tone.success; }
+}
+
+component ConstraintLine inherits FocusScope {
+    in property <ConstraintRow> item;
+    in property <int> index;
+    callback select();
+    height: 54px;
+    accessible-role: list-item;
+    accessible-label: root.item.title + ", " + root.item.target + ", " + root.item.range;
+    accessible-description: root.item.time + (root.item.kind == 3 ? ", " + @tr("Pending confirmation") : root.item.kind == 1 ? ", " + @tr("Hard constraint") : ", " + @tr("Soft constraint"));
+    accessible-item-index: root.index;
+    accessible-item-selectable: true;
+    accessible-item-selected: root.item.selected;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.select(); } }
+    key-pressed(event) => {
+        if (event.text == Key.Return || event.text == Key.Space) { root.select(); return accept; }
+        return reject;
+    }
+    Rectangle {
+        background: root.item.selected ? Theme.action-soft : hit.has-hover ? Theme.bg : Theme.surface;
+        HorizontalLayout {
+            padding-left: Theme.space-medium;
+            padding-right: Theme.space-medium;
+            spacing: Theme.space-medium;
+            VerticalLayout {
+                horizontal-stretch: 1.25;
+                alignment: center;
+                spacing: 2px;
+                Text { text: root.item.title; color: Theme.text; overflow: elide; accessible-role: none; }
+                Text { text: root.item.target; color: Theme.text-muted; overflow: elide; font-size: Theme.font-small; accessible-role: none; }
+            }
+            VerticalLayout {
+                horizontal-stretch: 1;
+                alignment: center;
+                spacing: 2px;
+                Text { text: root.item.time; color: Theme.text; overflow: elide; accessible-role: none; }
+                Text { text: root.item.range; color: Theme.text-muted; overflow: elide; font-size: Theme.font-small; accessible-role: none; }
+            }
+            VerticalLayout {
+                alignment: center;
+                spacing: 2px;
+                horizontal-stretch: 0;
+                Badge {
+                    text: root.item.kind == 3 ? @tr("Pending confirmation") : root.item.kind == 1 ? @tr("Hard constraint") : @tr("Soft constraint");
+                    tone: root.item.kind == 3 ? Tone.warning : root.item.kind == 1 ? Tone.danger : Tone.info;
+                    accessible-role: none;
+                }
+            }
+        }
+        Rectangle { height: 1px; y: parent.height - self.height; background: Theme.border; }
+    }
+    hit := TouchArea { enabled: root.enabled; mouse-cursor: pointer; clicked => { root.focus(); root.select(); } }
+    if root.has-focus: FocusRing {}
+}
+
+component Field inherits VerticalLayout {
+    in property <string> label;
+    spacing: Theme.space-small;
+    Text { text: root.label; color: Theme.text-muted; font-weight: 600; font-size: Theme.font-small; wrap: word-wrap; }
+    @children
+}
+
+component ConstraintImpact inherits VerticalLayout {
+    in property <[string]> affected;
+    in property <bool> active;
+    spacing: Theme.space-small;
+    if root.active: Text { text: @tr("Effect on current placements"); color: Theme.text; font-weight: 700; }
+    if root.active && root.affected.length == 0: Text { text: @tr("No current placements are affected."); color: Theme.text-muted; wrap: word-wrap; }
+    if root.affected.length > 0: StatusBanner {
+        message: @tr("{n} current placement affected" | "{n} current placements affected" % root.affected.length);
+        tone: Tone.warning;
+    }
+    for entry in root.affected: Text { text: entry; color: Theme.text-muted; wrap: word-wrap; }
+}
+
+component ConstraintGrid inherits VerticalLayout {
+    in property <[string]> days;
+    in property <[ConstraintGridRow]> calendar;
+    in property <bool> editing;
+    in property <bool> window-dirty;
+    callback cell(int, int, int);
+    HorizontalLayout {
+        height: Theme.control-height;
+        padding-left: Theme.space-medium;
+        padding-right: Theme.space-medium;
+        spacing: Theme.space-small;
+        Text { text: @tr("Period"); min-width: 72px; max-width: 72px; color: Theme.text-muted; vertical-alignment: center; }
+        for day in root.days: Text { text: day; min-width: 40px; horizontal-stretch: 1; color: Theme.text-muted; horizontal-alignment: center; vertical-alignment: center; }
+    }
+    grid-list := ListView {
+        accessible-label: @tr("Weekly constraint grid");
+        for row[index] in root.calendar: HorizontalLayout {
+            width: grid-list.visible-width;
+            height: 52px;
+            spacing: Theme.space-small;
+            padding-left: Theme.space-medium;
+            padding-right: Theme.space-medium;
+            VerticalLayout {
+                min-width: 72px;
+                max-width: 72px;
+                alignment: center;
+                Text { text: row.title; color: Theme.text; font-weight: 600; overflow: elide; }
+                Text { text: row.time; color: Theme.text-muted; overflow: elide; font-size: Theme.font-small; }
+            }
+            for cell[day] in row.cells: VerticalLayout {
+                min-width: 40px;
+                horizontal-stretch: 1;
+                alignment: center;
+                ActionButton {
+                    min-width: 38px;
+                    text: cell.count == 0 ? (root.editing ? "+" : "–") : root.editing ? (cell.clock ? @tr("Time") : "×") : "" + cell.count;
+                    enabled: root.editing ? !cell.clock && !root.window-dirty : cell.count > 0;
+                    primary: self.enabled && cell.count > 0;
+                    accessible-label: cell.label;
+                    clicked => { root.cell(day, index, cell.first); }
+                }
+            }
+        }
+    }
+}
+
+component ConstraintDetails inherits FocusScope {
+    in property <ConstraintView> view;
+    callback action(int, int);
+    callback option(int, int);
+    callback text(int, string);
+    accessible-role: complementary;
+    accessible-label: @tr("Constraint details");
+    key-pressed(event) => {
+        if (event.text == Key.Escape) {
+            root.action(root.view.editing || root.view.deleting ? 4 : 11, 0);
+            return accept;
+        }
+        return reject;
+    }
+    Panel {
+        VerticalLayout {
+            padding: Theme.space-medium;
+            spacing: Theme.space-medium;
+            HorizontalLayout {
+                spacing: Theme.space-small;
+                Text { text: root.view.editing ? @tr("Edit constraint") : @tr("Constraint details"); color: Theme.text; font-weight: 700; vertical-alignment: center; horizontal-stretch: 1; }
+                ActionButton { text: root.view.editing ? @tr("Cancel") : @tr("Close"); clicked => { root.action(root.view.editing ? 4 : 11, 0); } }
+            }
+            body := ScrollView {
+                vertical-stretch: 1;
+                content-width: self.visible-width;
+                content-height: form.preferred-height;
+                form := VerticalLayout {
+                    width: body.visible-width;
+                    height: self.preferred-height;
+                    padding-right: Theme.space-small;
+                    alignment: start;
+                    spacing: Theme.space-medium;
+                    if !root.view.editing: VerticalLayout {
+                        spacing: Theme.space-medium;
+                        Text { text: root.view.detail.title; color: Theme.text; font-weight: 700; wrap: word-wrap; }
+                        ConstraintBadges { kind: root.view.detail.kind; strength: root.view.detail.strength; }
+                        if root.view.detail.kind == 3: StatusBanner { message: @tr("Pending requests take effect after confirmation."); tone: Tone.warning; }
+                        Text { text: root.view.detail.target; color: Theme.text; wrap: word-wrap; }
+                        Text { text: root.view.detail.range; color: Theme.text-muted; wrap: word-wrap; }
+                        if root.view.detail.time != "": Text { text: root.view.detail.time; color: Theme.text-muted; wrap: word-wrap; }
+                        for entry in root.view.details: Text { text: entry; color: Theme.text-muted; wrap: word-wrap; }
+                        ConstraintImpact { affected: root.view.affected; active: root.view.detail.kind != 3; }
+                    }
+                    if root.view.editing: VerticalLayout {
+                        spacing: Theme.space-medium;
+                        Field {
+                            label: @tr("Original request");
+                            TextEdit { text: root.view.editor.request; height: 60px; wrap: word-wrap; accessible-label: @tr("Original request"); edited(value) => { root.text(1, value); } }
+                        }
+                        Text { text: @tr("Source") + " · " + root.view.editor.source; color: Theme.text-muted; wrap: word-wrap; }
+                        Field {
+                            label: @tr("Target");
+                            ComboBox {
+                                model: [@tr("Instructor"), @tr("Section"), @tr("Student group"), @tr("Room")];
+                                current-index: root.view.editor.target-kind;
+                                accessible-label: @tr("Target type");
+                                selected(value) => { root.option(4, self.current-index); }
+                            }
+                            ComboBox {
+                                model: root.view.editor.targets;
+                                current-index: root.view.editor.target-index;
+                                accessible-label: @tr("Target");
+                                enabled: root.view.editor.targets.length > 0;
+                                selected(value) => { root.option(5, self.current-index); }
+                            }
+                        }
+                        Field {
+                            label: @tr("Priority");
+                            ComboBox {
+                                model: [@tr("Unspecified"), @tr("Hard constraint"), @tr("Soft constraint")];
+                                current-index: root.view.editor.strength;
+                                accessible-label: @tr("Priority");
+                                selected(value) => { root.option(6, self.current-index); }
+                            }
+                            CheckBox { text: @tr("Confirmed and used for scheduling"); checked: root.view.editor.confirmed; toggled => { root.option(7, self.checked ? 1 : 0); } }
+                        }
+                        if root.view.editor.strength == 2: Field {
+                            label: @tr("Weight (1 to 10)");
+                            LineEdit { text: root.view.editor.weight; accessible-label: @tr("Weight (1 to 10)"); edited(value) => { root.text(4, value); } }
+                        }
+                        Field {
+                            label: @tr("Date range");
+                            Text { text: @tr("Leave both dates blank for the whole term."); color: Theme.text-muted; wrap: word-wrap; }
+                            HorizontalLayout {
+                                spacing: Theme.space-small;
+                                LineEdit { min-width: 96px; text: root.view.editor.from; placeholder-text: "YYYY-MM-DD"; accessible-label: @tr("First date"); edited(value) => { root.text(2, value); } }
+                                LineEdit { min-width: 96px; text: root.view.editor.until; placeholder-text: "YYYY-MM-DD"; accessible-label: @tr("Last date"); edited(value) => { root.text(3, value); } }
+                            }
+                        }
+                        Field {
+                            label: @tr("Times to avoid");
+                            for time[index] in root.view.editor.windows: HorizontalLayout {
+                                spacing: Theme.space-small;
+                                ActionButton { text: time; primary: root.view.editor.window-index == index; horizontal-stretch: 1; clicked => { root.action(7, index); } }
+                                ActionButton { text: @tr("Remove"); accessible-label: @tr("Remove {0}", time); clicked => { root.action(9, index); } }
+                            }
+                            HorizontalLayout {
+                                spacing: Theme.space-small;
+                                ComboBox { min-width: 80px; model: root.view.days; current-index: root.view.editor.day; accessible-label: @tr("Day"); selected(value) => { root.option(8, self.current-index); } }
+                                ComboBox { min-width: 100px; model: [@tr("Periods"), @tr("Clock times")]; current-index: root.view.editor.time-mode; accessible-label: @tr("Time format"); selected(value) => { root.option(9, self.current-index); } }
+                            }
+                            if root.view.editor.time-mode == 0: HorizontalLayout {
+                                spacing: Theme.space-small;
+                                Field {
+                                    label: @tr("First period");
+                                    ComboBox { min-width: 80px; model: root.view.editor.period-labels; current-index: root.view.editor.first; accessible-label: @tr("First period"); selected(value) => { root.option(10, self.current-index); } }
+                                }
+                                Field {
+                                    label: @tr("Last period");
+                                    ComboBox { min-width: 80px; model: root.view.editor.period-labels; current-index: root.view.editor.last; accessible-label: @tr("Last period"); selected(value) => { root.option(11, self.current-index); } }
+                                }
+                            }
+                            if root.view.editor.time-mode == 1: HorizontalLayout {
+                                spacing: Theme.space-small;
+                                LineEdit { min-width: 80px; text: root.view.editor.start; placeholder-text: "HH:MM"; accessible-label: @tr("Start time"); edited(value) => { root.text(6, value); } }
+                                LineEdit { min-width: 80px; text: root.view.editor.end; placeholder-text: "HH:MM"; accessible-label: @tr("End time"); edited(value) => { root.text(7, value); } }
+                            }
+                            HorizontalLayout {
+                                alignment: start;
+                                spacing: Theme.space-small;
+                                ActionButton { text: root.view.editor.window-index >= 0 ? @tr("Update time") : @tr("Add time"); clicked => { root.action(8, 0); } }
+                                if root.view.editor.window-index >= 0 || root.view.editor.window-dirty: ActionButton { text: @tr("Cancel time edit"); clicked => { root.action(10, 0); } }
+                            }
+                        }
+                        Field {
+                            label: @tr("Private note");
+                            TextEdit { text: root.view.editor.note; height: 52px; wrap: word-wrap; accessible-label: @tr("Private note"); edited(value) => { root.text(5, value); } }
+                        }
+                        for entry in root.view.editor.affected: Text { text: entry; color: Theme.text-muted; wrap: word-wrap; }
+                    }
+                }
+            }
+            if root.view.editing && root.view.editor.reason != "" && root.view.error == "": Text {
+                text: root.view.editor.reason;
+                color: Theme.text-muted;
+                wrap: word-wrap;
+                accessible-live-region: polite;
+            }
+            if root.view.editing && root.view.editor.affected.length > 0: StatusBanner {
+                message: root.view.editor.affected-locked ? @tr("A locked placement is affected. It stays in place when you save.") : @tr("{n} current placement affected" | "{n} current placements affected" % root.view.editor.affected.length);
+                tone: Tone.warning;
+            }
+            if root.view.deleting: StatusBanner { message: @tr("Remove this condition from the current draft?"); tone: Tone.warning; }
+            if root.view.can-edit: HorizontalLayout {
+                spacing: Theme.space-small;
+                alignment: end;
+                if root.view.editing: ActionButton { text: @tr("Save constraint"); primary: root.view.editor.can-save; enabled: root.view.editor.can-save; clicked => { root.action(3, 0); } }
+                if !root.view.editing && !root.view.deleting: ActionButton { text: @tr("Remove"); clicked => { root.action(5, 0); } }
+                if !root.view.editing && !root.view.deleting: ActionButton { text: @tr("Edit constraint"); primary: true; clicked => { root.action(2, 0); } }
+                if root.view.deleting: ActionButton { text: @tr("Cancel"); clicked => { root.action(4, 0); } }
+                if root.view.deleting: ActionButton { text: @tr("Remove constraint"); primary: true; clicked => { root.action(6, 0); } }
+            }
+        }
+    }
+}
+
+export component ConstraintPage inherits VerticalLayout {
+    in property <ConstraintView> view;
+    in property <bool> compact;
+    callback action(int, int);
+    callback option(int, int);
+    callback text(int, string);
+    callback grid-cell(int, int, int);
+
+    padding: Theme.page-padding;
+    spacing: Theme.space-medium;
+    PageHeader {
+        title: @tr("Constraints");
+        subtitle: @tr("Hard and soft constraints and pending requests");
+        if !root.view.editing: ActionButton { text: @tr("Add constraint"); primary: self.enabled; enabled: root.view.can-edit; clicked => { root.action(1, 0); } }
+    }
+    if !root.view.has-term: StatusBanner { message: @tr("Create a term to enter constraints."); }
+    if root.view.error != "": StatusBanner { message: root.view.error; tone: Tone.danger; }
+    if root.view.has-term: HorizontalLayout {
+        accessible-role: tab-list;
+        accessible-label: @tr("Constraints");
+        for title[index] in root.view.tabs: CatalogTab {
+            title: title;
+            current: root.view.tab == index;
+            enabled: !root.view.editing;
+            activated => { root.option(0, index); }
+        }
+    }
+    if root.view.has-term: FilterBar {
+        SearchField { text: root.view.query; placeholder-text: @tr("Search targets and requests"); enabled: !root.view.editing; edited(value) => { root.text(0, value); } }
+        ComboBox {
+            model: [@tr("All targets"), @tr("Instructor"), @tr("Section"), @tr("Student group"), @tr("Room")];
+            current-index: root.view.target-filter; accessible-label: @tr("Target type"); enabled: !root.view.editing;
+            selected(value) => { root.option(1, self.current-index); }
+        }
+        ComboBox {
+            model: [@tr("Any date range"), @tr("Whole term"), @tr("Specific dates")];
+            current-index: root.view.period-filter; accessible-label: @tr("Date range"); enabled: !root.view.editing;
+            selected(value) => { root.option(2, self.current-index); }
+        }
+        ActionButton { text: root.view.grid ? @tr("List view") : @tr("Period grid"); clicked => { root.option(3, root.view.grid ? 0 : 1); } }
+    }
+    if root.view.grid: Text {
+        text: root.view.editor.window-dirty ? @tr("Add, update or cancel the time edit to use the grid.")
+            : root.view.editing ? @tr("Use the grid to toggle periods. Edit exact clock times in the time list.")
+            : @tr("Select a cell to inspect a condition. Select again to cycle through matches.");
+        color: Theme.text-muted;
+        wrap: word-wrap;
+    }
+    if root.view.has-term: HorizontalLayout {
+        vertical-stretch: 1;
+        spacing: Theme.space-medium;
+        Panel {
+            horizontal-stretch: 1;
+            if root.view.grid: ConstraintGrid {
+                days: root.view.days; calendar: root.view.calendar; editing: root.view.editing; window-dirty: root.view.editor.window-dirty;
+                cell(day, period, first) => { root.grid-cell(day, period, first); }
+            }
+            if !root.view.grid: VerticalLayout {
+                if root.view.rows.length == 0: Text { text: @tr("No constraints match this view."); color: Theme.text-muted; horizontal-alignment: center; vertical-alignment: center; }
+                constraint-list := ListView {
+                    accessible-label: @tr("Constraints");
+                    accessible-item-count: root.view.rows.length;
+                    for item[index] in root.view.rows: ConstraintLine {
+                        width: constraint-list.visible-width - 8px;
+                        item: item;
+                        index: index;
+                        enabled: !root.view.editing;
+                        select => { root.action(0, index); }
+                    }
+                }
+            }
+        }
+        if root.view.show-detail: ConstraintDetails {
+            preferred-width: root.compact ? 303px : 385px;
+            min-width: 286px;
+            max-width: root.compact ? 303px : 385px;
+            horizontal-stretch: 0;
+            view: root.view;
+            action(kind, index) => { root.action(kind, index); }
+            option(field, value) => { root.option(field, value); }
+            text(field, value) => { root.text(field, value); }
+        }
+    }
+    if !root.view.has-term: Rectangle { vertical-stretch: 1; }
+}

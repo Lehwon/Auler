@@ -1,0 +1,14 @@
+[package]
+name = "auler-engine"
+description = "Auler 배치 평가와 시간표 편성"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+auler-domain.workspace = true
+
+[dev-dependencies]
+auler-samples.workspace = true

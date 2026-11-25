@@ -1,0 +1,20 @@
+{
+  "format_version": 1,
+  "name": "학교 제출 CSV 예시",
+  "encoding": "cp949",
+  "include_headers": true,
+  "day_codes": {"mon": "01", "tue": "02", "wed": "03", "thu": "04", "fri": "05", "sat": "06", "sun": "07"},
+  "period_codes": {"1": "01", "2": "02", "3": "03", "4": "04", "5": "05", "6": "06", "7": "07", "8": "08", "9": "09"},
+  "columns": [
+    {"field": "course_code", "header": "학수번호"},
+    {"field": "section_code", "header": "분반"},
+    {"field": "meeting_number", "header": "수업차수"},
+    {"field": "day_code", "header": "요일코드"},
+    {"field": "first_period_code", "header": "시작교시"},
+    {"field": "last_period_code", "header": "종료교시"},
+    {"field": "start_time", "header": "시작시각"},
+    {"field": "end_time", "header": "종료시각"},
+    {"field": "building", "header": "건물"},
+    {"field": "room_number", "header": "호실"}
+  ]
+}

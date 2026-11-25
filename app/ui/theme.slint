@@ -1,12 +1,15 @@
-// 디자인 토큰 후보값. 대비 시험 후 확정한다.
+export enum Tone { neutral, info, success, warning, danger }
+
+// 밝은 업무 화면의 색상과 기본 밀도.
 export global Theme {
     out property <color> bg: #F7F8FA;
     out property <color> surface: #FFFFFF;
     out property <color> text: #182230;
     out property <color> text-muted: #475569;
-    out property <color> text-subtle: #64748B;
+    out property <color> text-subtle: #5F6F85;
     out property <color> border: #E3E7EE;
     out property <color> action: #2456A6;
+    out property <color> action-hover: #1B4280;
     out property <color> action-soft: #E7EEF9;
     out property <color> neutral-soft: #EEF1F5;
     out property <color> success: #1E7A46;
@@ -19,13 +22,34 @@ export global Theme {
     out property <color> focus: #182230;
 
     out property <length> radius: 6px;
+    out property <length> space-small: 4px;
+    out property <length> space-medium: 8px;
+    out property <length> space-large: 16px;
+    out property <length> page-padding: 20px;
+    out property <length> control-height: 32px;
+    out property <length> min-target: 24px;
+    out property <length> navigation-height: 40px;
     out property <length> font-body: 13px;
     out property <length> font-small: 12px;
     out property <length> font-title: 20px;
     out property <string> font-family: "Segoe UI";
-}
 
-export enum Tone { neutral, info, success, warning, danger }
+    public pure function tone-background(tone: Tone) -> color {
+        return tone == Tone.success ? root.success-soft
+            : tone == Tone.warning ? root.warning-soft
+            : tone == Tone.danger ? root.danger-soft
+            : tone == Tone.info ? root.action-soft
+            : root.neutral-soft;
+    }
+
+    public pure function tone-foreground(tone: Tone) -> color {
+        return tone == Tone.success ? root.success
+            : tone == Tone.warning ? root.warning
+            : tone == Tone.danger ? root.danger
+            : tone == Tone.info ? root.action
+            : root.text-muted;
+    }
+}
 
 // Windows 11 기본 글꼴 Segoe Fluent Icons의 글리프. 글꼴을 동봉하지 않는다.
 export global Icons {
@@ -43,7 +67,20 @@ export global Icons {
     out property <string> search: "\u{E721}";
     out property <string> close: "\u{E711}";
     out property <string> info: "\u{E946}";
+    out property <string> success: "\u{E930}";
+    out property <string> warning: "\u{E7BA}";
+    out property <string> error: "\u{EA39}";
     out property <string> external: "\u{E8A7}";
+    out property <string> add: "\u{E710}";
+    out property <string> folder: "\u{E8B7}";
+    out property <string> restore: "\u{E777}";
+
+    public pure function for-tone(tone: Tone) -> string {
+        return tone == Tone.success ? root.success
+            : tone == Tone.warning ? root.warning
+            : tone == Tone.danger ? root.error
+            : tone == Tone.info ? root.info : "";
+    }
 }
 
 // 장식용 아이콘. 화면 읽기 프로그램에는 노출하지 않고, 의미는 옆의 텍스트나 accessible-label이 전달한다.
@@ -73,32 +110,33 @@ export component FocusRing inherits Rectangle {
 export component Badge inherits Rectangle {
     in property <string> text;
     in property <Tone> tone: Tone.neutral;
+    in property <string> icon: tone == Tone.info ? "" : Icons.for-tone(tone);
+    private property <color> ink: Theme.tone-foreground(tone);
 
     horizontal-stretch: 0;
     vertical-stretch: 0;
     border-radius: 4px;
-    background: tone == Tone.success ? Theme.success-soft
-        : tone == Tone.warning ? Theme.warning-soft
-        : tone == Tone.danger ? Theme.danger-soft
-        : tone == Tone.info ? Theme.action-soft
-        : Theme.neutral-soft;
+    background: Theme.tone-background(tone);
     accessible-role: AccessibleRole.text;
     accessible-label: root.text;
 
     HorizontalLayout {
-        padding-left: 8px;
-        padding-right: 8px;
+        padding-left: Theme.space-medium;
+        padding-right: Theme.space-medium;
         padding-top: 3px;
         padding-bottom: 3px;
+        spacing: Theme.space-small;
+        if root.icon != "": Icon {
+            width: 12px;
+            font-size: 11px;
+            text: root.icon;
+            color: root.ink;
+        }
         Text {
             text: root.text;
             font-size: Theme.font-small;
             font-weight: 600;
-            color: tone == Tone.success ? Theme.success
-                : tone == Tone.warning ? Theme.warning
-                : tone == Tone.danger ? Theme.danger
-                : tone == Tone.info ? Theme.action
-                : Theme.text-muted;
+            color: root.ink;
             vertical-alignment: center;
             accessible-role: AccessibleRole.none;
         }
@@ -122,7 +160,7 @@ export component IconButton inherits FocusScope {
     property <bool> keyboard-focus;
 
     width: 36px;
-    height: 32px;
+    height: Theme.control-height;
     accessible-role: AccessibleRole.button;
     accessible-label: root.label;
     accessible-enabled: root.enabled;
@@ -158,6 +196,7 @@ export component IconButton inherits FocusScope {
     }
     touch := TouchArea {
         enabled: root.enabled;
+        mouse-cursor: pointer;
         clicked => {
             root.clicked();
         }
@@ -179,7 +218,7 @@ export component LockSwitch inherits FocusScope {
     property <bool> keyboard-focus;
 
     width: 40px;
-    height: 22px;
+    height: Theme.min-target;
     accessible-role: AccessibleRole.switch;
     accessible-label: root.label;
     accessible-checkable: true;
@@ -205,6 +244,8 @@ export component LockSwitch inherits FocusScope {
     }
 
     Rectangle {
+        height: 22px;
+        y: (root.height - self.height) / 2;
         border-radius: self.height / 2;
         background: root.checked ? Theme.action : Theme.surface;
         border-width: root.checked ? 0px : 1px;
@@ -220,6 +261,7 @@ export component LockSwitch inherits FocusScope {
     }
     TouchArea {
         enabled: root.enabled;
+        mouse-cursor: pointer;
         clicked => {
             root.focus();
             root.toggled();

@@ -1,0 +1,303 @@
+import { CheckBox, ComboBox, LineEdit, ScrollView, SpinBox } from "std-widgets.slint";
+import { Theme, Tone, Panel, Icon, Icons } from "theme.slint";
+import { PageHeader, ActionButton, StatusBanner } from "components.slint";
+import { Labels } from "labels.slint";
+
+export struct SetupFields {
+    department: string,
+    year: int,
+    season: int,
+    days: int,
+    first-start: string,
+    periods: int,
+    minutes: int,
+    gap: int,
+}
+
+component WorkspaceAction inherits Panel {
+    in property <string> icon;
+    in property <string> title;
+    in property <string> description;
+    in property <string> action;
+    in property <bool> primary;
+    in property <bool> enabled: true;
+    callback selected();
+    min-height: 72px;
+    vertical-stretch: 0;
+
+    HorizontalLayout {
+        padding: Theme.space-large;
+        spacing: Theme.space-large;
+        VerticalLayout {
+            alignment: center;
+            Rectangle {
+                width: 40px;
+                height: 40px;
+                border-radius: Theme.radius;
+                background: Theme.action-soft;
+                Icon { text: root.icon; color: Theme.action; }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            spacing: Theme.space-small;
+            horizontal-stretch: 1;
+            Text { text: root.title; font-weight: 700; font-size: 15px; color: Theme.text; }
+            Text { text: root.description; color: Theme.text-muted; wrap: word-wrap; }
+        }
+        VerticalLayout {
+            alignment: center;
+            ActionButton {
+                text: root.action;
+                primary: root.primary;
+                enabled: root.enabled;
+                accessible-label: root.title;
+                clicked => { root.selected(); }
+            }
+        }
+    }
+}
+
+export component WorkspaceStart inherits Rectangle {
+    in property <string> error-message;
+    in property <string> saved-path;
+    in property <bool> busy;
+    in property <bool> can-return;
+    private property <bool> offline-selected;
+    callback new-workspace();
+    callback open-workspace();
+    callback open-example();
+    callback restore-backup();
+    callback return-to-workspace();
+
+    accessible-role: main;
+    sw := ScrollView {
+        content-width: sw.visible-width;
+        content-height: max(sw.visible-height, body.preferred-height + 64px);
+        body := VerticalLayout {
+            width: min(sw.visible-width - 48px, 1060px);
+            height: self.preferred-height;
+            x: (sw.visible-width - self.width) / 2;
+            y: max(32px, (sw.visible-height - self.height) / 2);
+            spacing: Theme.space-large;
+
+            PageHeader {
+                title: @tr("Start your semester timetable");
+                subtitle: @tr("Choose a workspace for your department.");
+                if root.can-return: ActionButton {
+                    text: @tr("Back to workspace");
+                    enabled: !root.busy;
+                    clicked => { root.return-to-workspace(); }
+                }
+            }
+            if root.error-message != "": StatusBanner { message: root.error-message; tone: Tone.danger; }
+            if root.saved-path != "": StatusBanner { message: @tr("Verified copy saved to {0}", root.saved-path); tone: Tone.success; }
+            HorizontalLayout {
+                spacing: 24px;
+                VerticalLayout {
+                    horizontal-stretch: 2;
+                    spacing: Theme.space-medium;
+                    WorkspaceAction {
+                        icon: Icons.add;
+                        title: @tr("New workspace");
+                        description: @tr("Set the department, term and save location.");
+                        action: @tr("Create");
+                        primary: true;
+                        enabled: !root.busy;
+                        selected => { root.new-workspace(); }
+                    }
+                    WorkspaceAction {
+                        icon: Icons.folder;
+                        title: @tr("Open existing workspace");
+                        description: @tr("Choose a workspace file saved on this PC.");
+                        action: @tr("Open");
+                        enabled: !root.busy;
+                        selected => { root.open-workspace(); }
+                    }
+                    WorkspaceAction {
+                        icon: Icons.timetable;
+                        title: @tr("Open sample department");
+                        description: @tr("Try Auler with fictional courses, people and rooms.");
+                        action: @tr("Open sample");
+                        enabled: !root.busy;
+                        selected => { root.open-example(); }
+                    }
+                    WorkspaceAction {
+                        icon: Icons.restore;
+                        title: @tr("Restore backup");
+                        description: @tr("Restore to a new workspace file.");
+                        action: @tr("Restore");
+                        enabled: !root.busy;
+                        selected => { root.restore-backup(); }
+                    }
+                }
+                if !root.offline-selected: VerticalLayout {
+                    width: clamp(sw.visible-width * 0.28, 256px, 340px);
+                    alignment: start;
+                    Panel {
+                        VerticalLayout {
+                            padding: Theme.space-large;
+                            spacing: Theme.space-medium;
+                            Text { text: @tr("AI connections (optional)"); font-size: 16px; font-weight: 700; color: Theme.text; }
+                            Text {
+                                text: @tr("You can prepare and schedule a term offline.");
+                                color: Theme.text-muted;
+                                wrap: word-wrap;
+                            }
+                            ActionButton { text: @tr("Continue with ChatGPT"); enabled: false; }
+                            ActionButton { text: @tr("MCP settings"); enabled: false; }
+                            Text { text: @tr("Connections are unavailable in this build."); color: Theme.text-muted; wrap: word-wrap; }
+                            ActionButton {
+                                text: @tr("Start without AI");
+                                clicked => { root.offline-selected = true; }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component WorkspaceSetup inherits Rectangle {
+    in property <int> mode;
+    in property <string> department;
+    in property <int> initial-year;
+    in property <int> initial-season;
+    in property <string> copy-source;
+    in property <string> error-message;
+    callback cancelled();
+    callback submitted(SetupFields);
+    property <int> days: 31;
+    accessible-role: form;
+
+    sw := ScrollView {
+        content-width: sw.visible-width;
+        content-height: max(sw.visible-height, body.preferred-height + 48px);
+        body := VerticalLayout {
+            width: min(sw.visible-width - 48px, 660px);
+            height: self.preferred-height;
+            x: (sw.visible-width - self.width) / 2;
+            y: 24px;
+            spacing: Theme.space-large;
+            PageHeader {
+                title: root.mode == 2 ? @tr("Copy previous term") : root.mode == 1 ? @tr("Create a term") : @tr("New workspace");
+                subtitle: root.mode == 2 ? @tr("Copy sections and the weekly calendar from {0}.", root.copy-source) : @tr("Define the academic term and teaching hours.");
+            }
+            if root.error-message != "": StatusBanner { message: root.error-message; tone: Tone.danger; }
+            Panel {
+                VerticalLayout {
+                    padding: Theme.space-large;
+                    spacing: Theme.space-medium;
+                    Text { text: @tr("Department"); color: Theme.text; font-weight: 600; }
+                    name := LineEdit {
+                        text: root.department;
+                        read-only: root.mode != 0;
+                        accessible-label: @tr("Department");
+                    }
+                    HorizontalLayout {
+                        spacing: Theme.space-large;
+                        VerticalLayout {
+                            spacing: Theme.space-small;
+                            Text { text: @tr("Academic year"); color: Theme.text; font-weight: 600; }
+                            year := SpinBox {
+                                minimum: 1900;
+                                maximum: 9999;
+                                value: root.initial-year;
+                                accessible-label: @tr("Academic year");
+                            }
+                        }
+                        VerticalLayout {
+                            spacing: Theme.space-small;
+                            Text { text: @tr("Academic term"); color: Theme.text; font-weight: 600; }
+                            season := ComboBox {
+                                model: Labels.seasons;
+                                current-index: root.initial-season;
+                                accessible-label: @tr("Academic term");
+                            }
+                        }
+                    }
+                    if root.mode == 2: StatusBanner {
+                        message: @tr("Review the copied sections and add conditions for the new term. Placements and conditions start empty.");
+                    }
+                    if root.mode != 2: Text { text: @tr("Teaching days"); color: Theme.text; font-weight: 600; }
+                    if root.mode != 2: HorizontalLayout {
+                        spacing: Theme.space-small;
+                        for weight[i] in [1, 2, 4, 8, 16, 32, 64]: CheckBox {
+                            text: Labels.weekday(i);
+                            checked: i < 5;
+                            toggled => { root.days += self.checked ? weight : -weight; }
+                        }
+                    }
+                    if root.mode != 2: Text {
+                        text: @tr("Daily period grid");
+                        color: Theme.text;
+                        font-weight: 600;
+                    }
+                    period-fields := HorizontalLayout {
+                        visible: root.mode != 2;
+                        height: root.mode == 2 ? 0px : period-fields.preferred-height;
+                        spacing: Theme.space-medium;
+                        VerticalLayout {
+                            spacing: Theme.space-small;
+                            Text { text: @tr("First start"); color: Theme.text-muted; }
+                            first := LineEdit {
+                                text: "09:00";
+                                enabled: root.mode != 2;
+                                accessible-label: @tr("First start");
+                            }
+                        }
+                        VerticalLayout {
+                            spacing: Theme.space-small;
+                            Text { text: @tr("Periods"); color: Theme.text-muted; }
+                            periods := SpinBox {
+                                minimum: 1;
+                                maximum: 32;
+                                value: 8;
+                                enabled: root.mode != 2;
+                                accessible-label: @tr("Periods");
+                            }
+                        }
+                        VerticalLayout {
+                            spacing: Theme.space-small;
+                            Text { text: @tr("Minutes per period"); color: Theme.text-muted; }
+                            minutes := SpinBox {
+                                minimum: 1;
+                                maximum: 240;
+                                value: 50;
+                                enabled: root.mode != 2;
+                                accessible-label: @tr("Minutes per period");
+                            }
+                        }
+                        VerticalLayout {
+                            spacing: Theme.space-small;
+                            Text { text: @tr("Minutes between"); color: Theme.text-muted; }
+                            gap := SpinBox {
+                                minimum: 0;
+                                maximum: 240;
+                                value: 10;
+                                enabled: root.mode != 2;
+                                accessible-label: @tr("Minutes between");
+                            }
+                        }
+                    }
+                }
+            }
+            HorizontalLayout {
+                alignment: end;
+                spacing: Theme.space-medium;
+                ActionButton { text: @tr("Cancel"); clicked => { root.cancelled(); } }
+                ActionButton {
+                    text: root.mode == 0 ? @tr("Choose save location") : root.mode == 2 ? @tr("Copy term") : @tr("Create");
+                    primary: true;
+                    clicked => {
+                        root.submitted({
+                            department: name.text, year: year.value, season: season.current-index, days: root.days,
+                            first-start: first.text, periods: periods.value, minutes: minutes.value, gap: gap.value,
+                        });
+                    }
+                }
+            }
+        }
+    }
+}

@@ -19,6 +19,7 @@ Auler에 자료가 들어오는 세 경로, 즉 표준 XLSX 가져오기, 내장
 {
   "schema": "auler.input.v1",
   "term": { "year": 2027, "season": "1" },
+  "locations": { "setup.periods[0].label": { "sheet": "Periods", "row": 2, "column": "A" } },
   "setup": { ... },
   "equipment": [ ... ],
   "rooms": [ ... ],
@@ -32,7 +33,7 @@ Auler에 자료가 들어오는 세 경로, 즉 표준 XLSX 가져오기, 내장
 }
 ```
 
-`schema`와 `term`만 반드시 있어야 한다. 나머지는 필요한 것만 쓴다. `season`은 `1`, `summer`, `2`, `winter`.
+`schema`와 `term`만 반드시 있어야 한다. 나머지는 필요한 것만 쓴다. `season`은 `1`, `summer`, `2`, `winter`. 여러 시트의 행을 합쳐 만든 기록은 선택 필드인 `locations`에 필드별 원본 셀을 남길 수 있다.
 
 ### setup: 학기 설정
 
@@ -97,19 +98,24 @@ Auler에 자료가 들어오는 세 경로, 즉 표준 XLSX 가져오기, 내장
 
 | 무게 | 종류 |
 |---|---|
-| 확인 필요 | `numeric_code`(숫자로 온 코드), `ambiguous_room`(건물 없는 호실 등), `ambiguous_instructor`(동명이인), `instructor_name_mismatch`(코드와 이름 불일치), `unresolved` |
-| 오류 | `unsupported_schema`, `missing`, `invalid_code`, `invalid_value`, `invalid_room`, `invalid_period_table`, `duplicate`, `unknown_reference`, `split_mismatch`, `invalid_split_part`, `available_exceeds_total`, `reversed_range`, `ambiguous_window`, `target_not_single`, `confirmed_incomplete`, `part_out_of_range`, `span_past_last_period`, `day_not_in_term`, `zero`, `weight_out_of_range` |
+| 확인 필요 | `numeric_code`(숫자로 온 코드), `ambiguous_room`(건물 없는 호실 등), `ambiguous_instructor`(동명이인), `ambiguous_constraint`(같은 요청으로 보이는 조건이 여러 건), `instructor_name_mismatch`(코드와 이름 불일치), `unverified_dependency`(참조한 행을 먼저 확인해야 함), `unresolved` |
+| 오류 | `unsupported_schema`, `missing`, `invalid_code`, `invalid_value`, `invalid_room`, `invalid_period_table`, `duplicate`, `unknown_reference`, `split_mismatch`, `invalid_split_part`, `available_exceeds_total`, `reversed_range`, `ambiguous_window`, `target_not_single`, `confirmed_incomplete`, `part_out_of_range`, `span_past_last_period`, `day_not_in_term`, `zero`, `weight_out_of_range`, `existing_schedule_conflict`, `invalid_review_target`, `missing_setup` |
+
+검토 초안은 현재 작업공간과 대조해 신규, 갱신, 동일, 확인 필요, 오류를 행별로 표시한다. 기존 분반은 원본에서 빠져도 유지된다. 조건 번호는 한 문서의 행을 묶는 데 쓰인다. 검토에서 대상·시간 범위·적용 기간·요청 원문이 같은 기존 조건 하나를 찾으면 강도, 가중치, 확인 상태 등을 갱신할 수 있다. 선택한 행과 그 참조 관계는 적용 직전에 다시 검사한다.
 
 ## 표준 XLSX 양식 v1
 
 [`templates/auler-standard-v1.ko.xlsx`](../templates/auler-standard-v1.ko.xlsx) (영어판 [`en`](../templates/auler-standard-v1.en.xlsx)). 시트·열 정의는 [`template.rs`](../crates/auler-domain/src/template.rs) 하나를 양식 생성과 가져오기가 함께 쓴다.
+[`auler_io::xlsx::import`](../crates/auler-io/src/xlsx.rs)는 읽은 셀을 공통 입력 문서로 변환한다. 작업공간에 반영하기 전에 검토 초안으로 저장해 판정을 확인한다.
 
 - 안내 시트 B2에 양식 버전 `auler.xlsx.v1`이 있어야 한다.
 - 시트: 학기, 교시표, 휴게시간, 장비, 강의실, 강의실 장비, 교원, 수강 집단, 과목, 분반, 분반 수강 집단, 분반 장비, 편성 조건, 배치. 휴게시간·장비·강의실 장비·수강 집단·분반 수강 집단·분반 장비·편성 조건·배치는 없어도 된다.
 - 첫 행이 머리글이다. 한국어나 영어 머리글 모두 받고 열 순서는 상관없다. 모르는 머리글이 있으면 가져오지 않는다(열을 임의로 잇지 않는다).
+- 안내 시트와 필수 데이터 시트는 각각 한 개씩 있어야 한다. 학기 시트에는 학기 한 개를 입력한다. 수식 셀은 계산 결과를 값으로 붙여넣은 뒤 가져온다.
 - 코드 열은 텍스트 서식이다. 숫자 칸으로 바뀐 코드는 "확인 필요"로 표시한다.
 - 여러 값은 `;`로(`월;화;수`), 분할은 `+`로(`2+1`) 적는다. 예/아니오 열과 정해진 값 열에는 목록 선택이 있다.
 - 편성 조건 시트는 한 행이 시간 범위 하나다. 조건 번호가 같은 행은 한 조건으로 묶는다.
+- 강의실 장비, 분반 수강 집단, 분반 장비는 각각 같은 파일의 강의실·분반 키로 연결한다. 연결 기준이 숫자 셀이면 코드를 텍스트로 확인한다(`numeric_child_key`, `numeric_parent_key`). 대상 행이 없거나 중복되면 해당 시트의 키를 확인한다(`missing_parent`, `duplicate_parent`). 코드 형식이 잘못된 행은 `invalid_parent_key`로 표시한다. 확인 항목에 원본 키 셀을 남긴다.
 
 ## 가상 데이터
 

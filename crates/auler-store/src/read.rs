@@ -167,23 +167,33 @@ pub(crate) fn terms(conn: &Connection) -> Result<Vec<TermSummary>> {
 }
 
 /// 최근 변경부터 `limit`개
-pub(crate) fn history(conn: &Connection, limit: usize) -> Result<Vec<ChangeRecord>> {
+pub(crate) fn history(
+    conn: &Connection,
+    term: Option<TermKey>,
+    limit: usize,
+) -> Result<Vec<ChangeRecord>> {
+    let term_id = term
+        .map(|key| term_row(conn, key).map(|term| term.id))
+        .transpose()?;
     let mut stmt = conn.prepare_cached(
         "SELECT revision, term_id, at, actor, origin, request_id, base_revision, summary
-         FROM changes ORDER BY revision DESC LIMIT ?1",
+         FROM changes WHERE ?1 IS NULL OR term_id = ?1 ORDER BY revision DESC LIMIT ?2",
     )?;
-    let rows = stmt.query_map([limit as i64], |r| {
-        Ok((
-            r.get::<_, i64>(0)?,
-            r.get::<_, Option<i64>>(1)?,
-            r.get::<_, i64>(2)?,
-            r.get::<_, String>(3)?,
-            r.get::<_, String>(4)?,
-            r.get::<_, Option<String>>(5)?,
-            r.get::<_, Option<i64>>(6)?,
-            r.get::<_, String>(7)?,
-        ))
-    })?;
+    let rows = stmt.query_map(
+        params![term_id, i64::try_from(limit).unwrap_or(i64::MAX)],
+        |r| {
+            Ok((
+                r.get::<_, i64>(0)?,
+                r.get::<_, Option<i64>>(1)?,
+                r.get::<_, i64>(2)?,
+                r.get::<_, String>(3)?,
+                r.get::<_, String>(4)?,
+                r.get::<_, Option<String>>(5)?,
+                r.get::<_, Option<i64>>(6)?,
+                r.get::<_, String>(7)?,
+            ))
+        },
+    )?;
     let mut out = Vec::new();
     for row in rows {
         let (revision, term_id, at_ms, actor, origin, request_id, base, summary) = row?;

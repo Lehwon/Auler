@@ -184,7 +184,7 @@ fn messy_conversion_leaves_only_the_planned_review_items() {
         .expected
         .constraints
         .iter()
-        .position(|c| c.key.as_deref() == Some("R04"))
+        .position(|c| c.key.as_ref().is_some_and(|value| value.text == "R04"))
         .unwrap();
     let want = vec![
         (

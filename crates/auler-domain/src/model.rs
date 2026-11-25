@@ -298,7 +298,7 @@ pub struct Placement {
 }
 
 /// 편성 조건의 대상
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Target {
     Instructor(InstructorId),

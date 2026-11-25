@@ -1,0 +1,479 @@
+import { ComboBox, ListView, ScrollView } from "std-widgets.slint";
+import { ActionButton, FilterBar, PageHeader, SearchField, StatusBanner } from "components.slint";
+import { Badge, FocusRing, IconButton, Icons, LockSwitch, Panel, Theme, Tone } from "theme.slint";
+import { Labels } from "labels.slint";
+import { CardData, PeriodRow, TimetableGrid } from "timetable.slint";
+
+export struct WorkItem {
+    title: string,
+    detail: string,
+    code: string,
+    note: string,
+    locked: bool,
+    tone: int,
+    selected: bool,
+}
+
+export struct WorkChoice {
+    title: string,
+    room-facts: string,
+    summary: string,
+    tone: int,
+}
+
+export struct WorkChange {
+    title: string,
+    detail: string,
+    kind: int,
+}
+
+export struct WorkView {
+    loaded: bool,
+    filter-kind: int,
+    filter: int,
+    filters: [string],
+    query: string,
+    pending-query: string,
+    list: bool,
+    rows: [WorkItem],
+    pending: [WorkItem],
+    selected: int,
+    has-selection: bool,
+    title: string,
+    detail: string,
+    current: string,
+    metrics: string,
+    requirements: string,
+    placed: bool,
+    locked: bool,
+    verdict: int,
+    findings: [string],
+    choosing: bool,
+    day: int,
+    day-labels: [string],
+    period: int,
+    periods: [string],
+    locations: [WorkChoice],
+    move-open: bool,
+    move-to: string,
+    move-verdict: int,
+    move-findings: [string],
+    move-hint: string,
+    move-allowed: bool,
+    solver-stage: int,
+    solver-scope: int,
+    solver-message: string,
+    solver-cancelling: bool,
+    solver-summary: string,
+    solver-changes: [WorkChange],
+    solver-hint: string,
+    solver-allowed: bool,
+    error: string,
+}
+
+component WorkVerdict inherits Badge {
+    in property <int> value;
+    text: Labels.work-verdict(root.value);
+    tone: root.value == 3 ? Tone.danger : root.value > 0 ? Tone.warning : Tone.success;
+}
+
+component WorkRow inherits FocusScope {
+    in property <WorkItem> item;
+    in property <bool> pending;
+    in property <int> index;
+    callback picked();
+    property <bool> keyboard-focus;
+    height: root.pending ? (root.item.locked ? 145px : 115px) : 74px;
+    accessible-role: list-item;
+    accessible-label: root.item.title;
+    accessible-description: (root.item.code != "" ? root.item.code + ", " : "") + root.item.detail + ", " + root.item.note + (root.item.locked ? ", " + @tr("Locked") : "") + (!root.pending ? ", " + Labels.work-verdict(root.item.tone) : "");
+    accessible-item-index: root.index;
+    accessible-item-selectable: true;
+    accessible-item-selected: root.item.selected;
+    accessible-enabled: root.enabled;
+    accessible-action-default => { if root.enabled { root.picked(); } }
+    focus-gained(reason) => { root.keyboard-focus = reason == FocusReason.tab-navigation; }
+    focus-lost(reason) => { root.keyboard-focus = false; }
+    key-pressed(event) => {
+        if (root.enabled && (event.text == Key.Return || event.text == Key.Space)) { root.picked(); return accept; }
+        return reject;
+    }
+    Rectangle {
+        background: root.item.selected ? Theme.action-soft : hit.has-hover ? Theme.neutral-soft : Theme.surface;
+        HorizontalLayout {
+            padding: Theme.space-medium;
+            spacing: Theme.space-small;
+            VerticalLayout {
+                spacing: 3px;
+                alignment: center;
+                Text { text: root.item.title; color: Theme.text; font-weight: 700; wrap: root.pending ? word-wrap : no-wrap; max-height: root.pending ? 34px : 20px; overflow: elide; accessible-role: none; }
+                if root.pending: Text { text: root.item.code; color: Theme.text-muted; font-size: Theme.font-small; overflow: elide; accessible-role: none; }
+                Text { text: root.item.detail; color: Theme.text; font-size: Theme.font-small; wrap: root.pending ? word-wrap : no-wrap; overflow: elide; accessible-role: none; }
+                Text { text: root.item.note; color: Theme.text-muted; font-size: Theme.font-small; wrap: root.pending ? word-wrap : no-wrap; max-height: root.pending ? 30px : 16px; overflow: elide; accessible-role: none; }
+                if root.pending && root.item.locked: HorizontalLayout {
+                    alignment: start;
+                    Badge { text: @tr("Locked"); icon: Icons.lock; accessible-role: none; }
+                }
+            }
+            if !root.pending && root.item.locked: VerticalLayout {
+                alignment: center;
+                Badge { text: @tr("Locked"); icon: Icons.lock; accessible-role: none; }
+            }
+            if !root.pending && root.item.tone > 0: VerticalLayout {
+                alignment: center;
+                WorkVerdict { value: root.item.tone; accessible-role: none; }
+            }
+        }
+        Rectangle { height: 1px; y: parent.height - 1px; background: Theme.border; }
+    }
+    hit := TouchArea { enabled: root.enabled; mouse-cursor: pointer; clicked => { root.focus(); root.picked(); } }
+    if root.keyboard-focus: FocusRing {}
+}
+
+component WorkDetails inherits FocusScope {
+    in property <WorkView> view;
+    in property <bool> editable;
+    in property <bool> compact;
+    private property <bool> suspended: root.view.solver-stage > 0;
+    callback action(int, int);
+    callback option(int, int);
+    callback close();
+    accessible-role: complementary;
+    accessible-label: @tr("Details");
+    key-pressed(event) => {
+        if event.text == Key.Escape && !root.suspended {
+            if root.view.move-open { root.action(6, 0); } else { root.close(); }
+            return accept;
+        }
+        return reject;
+    }
+    Panel {
+        drop-shadow-blur: root.compact ? 15px : 0px;
+        drop-shadow-color: #0000003a;
+        VerticalLayout {
+            padding: Theme.space-medium;
+            spacing: Theme.space-medium;
+            HorizontalLayout {
+                Text { text: @tr("Details"); font-weight: 700; color: Theme.text; horizontal-stretch: 1; vertical-alignment: center; }
+                if root.compact: ActionButton { text: @tr("Close"); enabled: !root.suspended; clicked => { root.close(); } }
+            }
+            if !root.view.has-selection: Text {
+                text: @tr("Select a class or an unassigned meeting.");
+                color: Theme.text-muted;
+                wrap: word-wrap;
+            }
+            if !root.view.has-selection: Rectangle { vertical-stretch: 1; }
+            if root.view.has-selection: body := ScrollView {
+                vertical-stretch: 1;
+                content-width: self.visible-width;
+                content-height: form.preferred-height;
+                form := VerticalLayout {
+                    width: body.visible-width;
+                    height: self.preferred-height;
+                    padding-right: Theme.space-small;
+                    spacing: Theme.space-medium;
+                    Text { text: root.view.title; color: Theme.text; font-weight: 700; font-size: 16px; wrap: word-wrap; }
+                    Text { text: root.view.metrics; color: Theme.text; wrap: word-wrap; }
+                    if root.view.detail != "": Text { text: root.view.detail; color: Theme.text-muted; wrap: word-wrap; }
+                    if root.view.requirements != "": Text { text: root.view.requirements; color: Theme.text-muted; wrap: word-wrap; }
+                    Text { text: root.view.current; color: Theme.text; wrap: word-wrap; }
+                    if root.view.placed: HorizontalLayout {
+                        spacing: Theme.space-small;
+                        Text { text: @tr("Lock"); color: Theme.text-muted; vertical-alignment: center; horizontal-stretch: 1; accessible-role: none; }
+                        LockSwitch { checked: root.view.locked; enabled: root.editable; label: @tr("Lock"); toggled => { root.action(7, 0); } }
+                    }
+                    if root.view.placed: HorizontalLayout { alignment: start; WorkVerdict { value: root.view.verdict; } }
+                    for line in root.view.findings: Text { text: line; color: Theme.text-muted; wrap: word-wrap; }
+                    if root.view.locked: StatusBanner { message: @tr("Unlock this placement to change its time or room."); tone: Tone.info; }
+                    if root.editable && !root.view.locked && !root.view.move-open: ActionButton {
+                        text: root.view.choosing ? @tr("Hide alternatives") : @tr("Choose location");
+                        clicked => { root.action(3, 0); }
+                    }
+                    if root.view.choosing && !root.view.locked && root.editable: VerticalLayout {
+                        spacing: Theme.space-small;
+                        ComboBox {
+                            model: root.view.day-labels;
+                            current-index: root.view.day;
+                            accessible-label: @tr("Day");
+                            selected(value) => { root.option(3, self.current-index); }
+                        }
+                        ComboBox {
+                            model: root.view.periods;
+                            current-index: root.view.period;
+                            accessible-label: @tr("Start period");
+                            selected(value) => { root.option(4, self.current-index); }
+                        }
+                        Text { text: @tr("Room alternatives"); color: Theme.text; font-weight: 700; }
+                        if root.view.locations.length == 0: Text { text: @tr("Add rooms in Data to review placement options."); color: Theme.text-muted; wrap: word-wrap; }
+                        for room[index] in root.view.locations: Panel {
+                            VerticalLayout {
+                                padding: Theme.space-medium;
+                                spacing: Theme.space-small;
+                                HorizontalLayout {
+                                    spacing: Theme.space-small;
+                                    WorkVerdict { value: room.tone; }
+                                    Rectangle { horizontal-stretch: 1; }
+                                }
+                                if room.summary != "": Text { text: room.summary; color: Theme.text-muted; wrap: word-wrap; }
+                                Text { text: room.room-facts; color: Theme.text-muted; wrap: word-wrap; }
+                                ActionButton {
+                                    text: room.title;
+                                    accessible-label: @tr("Preview placement in {0}", room.title);
+                                    accessible-description: Labels.work-verdict(room.tone) + " · " + room.room-facts + (room.summary != "" ? " · " + room.summary : "");
+                                    enabled: root.editable;
+                                    clicked => { root.action(4, index); }
+                                }
+                            }
+                        }
+                    }
+                    if root.view.move-open: Panel {
+                        VerticalLayout {
+                            padding: Theme.space-medium;
+                            spacing: Theme.space-small;
+                            Text { text: @tr("Placement preview"); color: Theme.text; font-weight: 700; }
+                            HorizontalLayout { alignment: start; WorkVerdict { value: root.view.move-verdict; } }
+                            Text { text: @tr("Proposed location"); color: Theme.text-muted; }
+                            Text { text: root.view.move-to; color: Theme.text; wrap: word-wrap; }
+                            for reason in root.view.move-findings: Text { text: reason; color: Theme.text-muted; wrap: word-wrap; }
+                            if root.view.move-hint != "": Text { text: root.view.move-hint; color: Theme.text-muted; wrap: word-wrap; }
+                            if root.editable && !root.view.locked: ActionButton { text: @tr("Other rooms at this time"); clicked => { root.action(15, 0); } }
+                        }
+                    }
+                }
+            }
+            if root.view.move-open: HorizontalLayout {
+                alignment: end;
+                spacing: Theme.space-small;
+                ActionButton { text: @tr("Cancel"); enabled: !root.suspended; clicked => { root.action(6, 0); } }
+                ActionButton { text: @tr("Apply placement"); primary: self.enabled; enabled: root.editable && root.view.move-allowed; clicked => { root.action(5, 0); } }
+            }
+        }
+    }
+}
+
+component SolverPanel inherits FocusScope {
+    in property <WorkView> view;
+    callback action(int, int);
+    callback option(int, int);
+    accessible-role: form;
+    accessible-label: @tr("Auto schedule");
+    init => { root.focus(); }
+    key-pressed(event) => {
+        if event.text == Key.Escape { root.action(13, 0); return accept; }
+        return reject;
+    }
+    Panel {
+        drop-shadow-blur: 18px;
+        drop-shadow-color: #00000032;
+        VerticalLayout {
+            padding: Theme.space-large;
+            spacing: Theme.space-medium;
+            Text { text: root.view.solver-stage == 3 ? @tr("Schedule result") : @tr("Auto schedule"); font-size: Theme.font-title; font-weight: 700; color: Theme.text; }
+            StatusBanner {
+                message: root.view.solver-cancelling ? @tr("Cancelling local scheduling…") : root.view.solver-message;
+                tone: root.view.solver-stage == 3 ? (root.view.solver-allowed ? Tone.success : Tone.warning) : Tone.info;
+            }
+            if root.view.error != "": StatusBanner { message: root.view.error; tone: Tone.danger; }
+            if root.view.solver-stage == 1: Text { text: @tr("This runs on your PC. Review the result before applying it to the draft."); color: Theme.text-muted; wrap: word-wrap; }
+            if root.view.solver-stage == 1: ComboBox {
+                model: [@tr("All meetings"), @tr("Unassigned meetings"), @tr("Selected meeting")];
+                current-index: root.view.solver-scope;
+                accessible-label: @tr("Schedule scope");
+                selected(value) => { root.option(5, self.current-index); }
+            }
+            if root.view.solver-stage == 1 && root.view.solver-scope == 2 && !root.view.has-selection: Text { text: @tr("Select a meeting before using this scope."); color: Theme.text-muted; wrap: word-wrap; }
+            if root.view.solver-stage < 3: Rectangle { vertical-stretch: 1; }
+            if root.view.solver-stage == 3: Text { text: root.view.solver-summary; color: Theme.text; wrap: word-wrap; }
+            if root.view.solver-stage == 3: changes := ListView {
+                accessible-label: @tr("Proposed schedule changes");
+                for entry in root.view.solver-changes: VerticalLayout {
+                    width: changes.visible-width - 8px;
+                    padding: Theme.space-small;
+                    spacing: Theme.space-small;
+                    HorizontalLayout {
+                        spacing: Theme.space-small;
+                        Badge {
+                            text: entry.kind == 0 ? @tr("New placement") : entry.kind == 1 ? @tr("Moved") : @tr("Unassigned");
+                            tone: entry.kind == 0 ? Tone.success : entry.kind == 1 ? Tone.info : Tone.warning;
+                        }
+                        Text { text: entry.title; color: Theme.text; font-weight: 600; wrap: word-wrap; vertical-alignment: center; horizontal-stretch: 1; }
+                    }
+                    Text { text: entry.detail; color: Theme.text-muted; wrap: word-wrap; }
+                }
+            }
+            if root.view.solver-hint != "": StatusBanner { message: root.view.solver-hint; tone: Tone.warning; }
+            HorizontalLayout {
+                spacing: Theme.space-medium;
+                alignment: end;
+                ActionButton {
+                    text: root.view.solver-stage == 3 ? @tr("Keep current draft") : @tr("Cancel");
+                    enabled: !root.view.solver-cancelling;
+                    clicked => { root.action(13, 0); }
+                }
+                if root.view.solver-stage == 1: ActionButton { text: @tr("Run scheduling"); primary: self.enabled; enabled: root.view.solver-scope != 2 || root.view.has-selection; clicked => { root.action(12, 0); } }
+                if root.view.solver-stage == 3: ActionButton { text: @tr("Apply to draft"); primary: self.enabled; enabled: root.view.solver-allowed; clicked => { root.action(14, 0); } }
+            }
+        }
+    }
+}
+
+export component WorkbenchPage inherits FocusScope {
+    in property <WorkView> view;
+    in property <[CardData]> cards;
+    in property <[int]> days;
+    in property <[PeriodRow]> periods;
+    in property <bool> editable;
+    in property <bool> compact;
+    in property <bool> can-undo;
+    in property <bool> can-redo;
+    in property <int> locked;
+    in property <int> unassigned;
+    in property <int> conflicts;
+    in property <string> version;
+    in-out property <int> selected;
+    private property <bool> detail-open;
+    private property <bool> controls-available: root.view.loaded && root.view.solver-stage == 0;
+    callback action(int, int);
+    callback option(int, int);
+    callback search(bool, string);
+    callback pick-slot(int, int);
+    callback move-card(int, int, int) -> bool;
+    pure callback can-move(int, int, int) -> bool;
+    callback validate();
+    key-pressed(event) => {
+        if event.text != Key.Escape { return reject; }
+        if root.view.solver-stage > 0 { root.action(13, 0); return accept; }
+        if root.view.move-open { root.action(6, 0); return accept; }
+        if root.detail-open { root.close-detail(); return accept; }
+        if root.view.has-selection { root.action(2, 0); return accept; }
+        return reject;
+    }
+
+    function choose(kind: int, index: int) {
+        root.detail-open = true;
+        root.action(kind, index);
+    }
+    function close-detail() {
+        root.detail-open = false;
+        if !root.compact { root.action(2, 0); }
+    }
+
+    VerticalLayout {
+        padding: Theme.page-padding;
+        spacing: Theme.space-medium;
+        PageHeader {
+            title: @tr("Timetable");
+            subtitle: @tr("Weekly workbench") + (root.version == "" ? "" : " · " + root.version);
+            VerticalLayout { alignment: center; IconButton { icon: Icons.undo; label: @tr("Undo"); enabled: root.controls-available && root.editable && root.can-undo; clicked => { root.action(8, 0); } } }
+            VerticalLayout { alignment: center; IconButton { icon: Icons.redo; label: @tr("Redo"); enabled: root.controls-available && root.editable && root.can-redo; clicked => { root.action(9, 0); } } }
+            ActionButton { text: @tr("Reschedule"); enabled: root.controls-available && root.editable; clicked => { root.action(11, 0); } }
+            ActionButton { text: @tr("Auto schedule"); primary: self.enabled; enabled: root.controls-available && root.editable; clicked => { root.action(10, 0); } }
+            ActionButton { text: @tr("Validate & finalize"); enabled: root.controls-available; clicked => { root.validate(); } }
+        }
+        if !root.view.loaded: StatusBanner { message: @tr("Create a term to begin scheduling."); }
+        if root.view.error != "": StatusBanner { message: root.view.error; tone: Tone.danger; }
+        if root.view.loaded: FilterBar {
+            ComboBox { min-width: 110px; preferred-width: 136px; horizontal-stretch: 0; model: [@tr("All"), @tr("By year"), @tr("By instructor"), @tr("By room")]; accessible-label: @tr("View"); current-index: root.view.filter-kind; enabled: root.controls-available; selected(value) => { root.option(0, self.current-index); } }
+            if root.view.filter-kind > 0: ComboBox { min-width: 100px; preferred-width: 168px; horizontal-stretch: 0; model: root.view.filters; accessible-label: @tr("View filter"); current-index: root.view.filter; enabled: root.controls-available; selected(value) => { root.option(1, self.current-index); } }
+            SearchField { min-width: 120px; placeholder-text: @tr("Search courses"); text: root.view.query; enabled: root.controls-available; edited(value) => { root.search(false, value); } }
+            ActionButton { text: root.view.list ? @tr("Weekly grid") : @tr("List view"); enabled: root.controls-available; clicked => { root.option(2, root.view.list ? 0 : 1); } }
+            if root.compact: ActionButton { text: @tr("Details"); checkable: true; checked <=> root.detail-open; enabled: root.controls-available; }
+        }
+        if root.view.loaded: HorizontalLayout {
+            spacing: Theme.space-medium;
+            alignment: start;
+            Badge { text: @tr("Locked") + " " + root.locked; icon: Icons.lock; }
+            Badge { text: @tr("Unassigned") + " " + root.unassigned; tone: root.unassigned > 0 ? Tone.warning : Tone.neutral; }
+            Badge { text: @tr("Hard conflicts") + " " + root.conflicts; tone: root.conflicts > 0 ? Tone.danger : Tone.success; }
+        }
+        if root.controls-available && root.editable && root.view.choosing && !root.view.locked && !root.view.list: Text {
+            text: @tr("Choose a day and period in Details or select an empty grid cell.");
+            color: Theme.text-muted;
+            wrap: word-wrap;
+        }
+        content := HorizontalLayout {
+            spacing: Theme.space-medium;
+            vertical-stretch: 1;
+            if root.view.loaded: Panel {
+                width: root.compact ? 192px : 218px;
+                VerticalLayout {
+                    padding: Theme.space-medium;
+                    spacing: Theme.space-small;
+                    Text { text: @tr("Unassigned"); color: Theme.text; font-weight: 700; }
+                    SearchField { placeholder-text: @tr("Search sections"); text: root.view.pending-query; enabled: root.controls-available; edited(value) => { root.search(true, value); } }
+                    if root.view.pending.length == 0: Text { text: @tr("No unassigned meetings in this view."); color: Theme.text-muted; wrap: word-wrap; }
+                    todo := ListView {
+                        accessible-label: @tr("Unassigned");
+                        accessible-item-count: root.view.pending.length;
+                        for item[index] in root.view.pending: WorkRow { width: todo.visible-width - 12px; item: item; index: index; pending: true; enabled: root.controls-available; picked => { root.choose(1, index); } }
+                    }
+                }
+            }
+            if root.view.loaded && !root.view.list: grid-scroll := ScrollView {
+                horizontal-stretch: 1;
+                content-width: grid.width;
+                content-height: grid.height;
+                grid := TimetableGrid {
+                    width: max(grid.min-grid-width, grid-scroll.visible-width - 10px);
+                    cards: root.cards;
+                    days: root.days;
+                    periods: root.periods;
+                    range-labels: true;
+                    interactive: root.controls-available;
+                    header-offset: max(0px, -grid-scroll.content-y);
+                    picking: root.controls-available && root.editable && root.view.choosing && !root.view.locked;
+                    selected <=> root.selected;
+                    activated(index) => { root.choose(0, index); }
+                    pick-slot(day, period) => { root.pick-slot(day, period); root.detail-open = true; }
+                    move-card(i, day, period) => { if root.controls-available && root.editable { root.detail-open = true; return root.move-card(i, day, period); } return false; }
+                    can-move(i, day, period) => { return root.controls-available && root.editable && root.can-move(i, day, period); }
+                }
+            }
+            if root.view.loaded && root.view.list: Panel {
+                horizontal-stretch: 1;
+                VerticalLayout {
+                    padding: Theme.space-medium;
+                    if root.view.rows.length == 0: Text { text: @tr("No placements in this view."); color: Theme.text-muted; wrap: word-wrap; }
+                    schedule := ListView {
+                        accessible-label: @tr("Timetable");
+                        accessible-item-count: root.view.rows.length;
+                        for row[index] in root.view.rows: WorkRow { item: row; index: index; width: schedule.visible-width - 12px; enabled: root.controls-available; picked => { root.choose(0, index); } }
+                    }
+                }
+            }
+            if root.view.loaded && !root.compact: WorkDetails {
+                width: 292px;
+                view: root.view;
+                editable: root.controls-available && root.editable;
+                action(kind, index) => { root.action(kind, index); }
+                option(kind, index) => { root.option(kind, index); }
+                close => { root.close-detail(); }
+            }
+        }
+    }
+    if root.compact && root.detail-open && root.view.loaded: WorkDetails {
+        x: root.width - self.width - Theme.page-padding;
+        y: content.y;
+        width: 310px;
+        height: content.height;
+        compact: true;
+        view: root.view;
+        editable: root.controls-available && root.editable;
+        action(kind, index) => { root.action(kind, index); }
+        option(kind, index) => { root.option(kind, index); }
+        close => { root.close-detail(); }
+    }
+    if root.view.solver-stage > 0: Rectangle {
+        background: #00000040;
+        TouchArea {}
+        dialog := SolverPanel {
+            width: min(parent.width - 36px, 620px);
+            height: min(parent.height - 36px, root.view.solver-stage == 3 ? 490px : 290px);
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            view: root.view;
+            action(kind, index) => { root.action(kind, index); }
+            option(kind, index) => { root.option(kind, index); }
+        }
+    }
+}

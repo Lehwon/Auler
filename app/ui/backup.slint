@@ -1,0 +1,113 @@
+import { ScrollView } from "std-widgets.slint";
+import { ActionButton, KeyValue, StatusBanner } from "components.slint";
+import { Panel, Theme, Tone } from "theme.slint";
+
+export struct BackupCount {
+    label: string,
+    value: string,
+}
+
+export struct BackupView {
+    current-path: string,
+    pending-path: string,
+    department: string,
+    counts: [BackupCount],
+    busy: bool,
+    pending: bool,
+    error: string,
+    saved: string,
+    restored: bool,
+}
+
+export component BackupPane inherits Rectangle {
+    in property <BackupView> view;
+    callback save-backup();
+    callback restore-backup();
+
+    VerticalLayout {
+        spacing: Theme.space-medium;
+        if root.view.error != "": StatusBanner { message: root.view.error; tone: Tone.danger; }
+        if root.view.busy: StatusBanner { message: @tr("Checking workspace copy…"); tone: Tone.info; }
+        if root.view.saved != "": StatusBanner {
+            message: root.view.restored ? @tr("Verified copy saved to {0}", root.view.saved) : @tr("Verified backup saved to {0}", root.view.saved);
+            tone: Tone.success;
+        }
+        Panel {
+            VerticalLayout {
+                padding: Theme.space-large;
+                spacing: Theme.space-medium;
+                Text { text: @tr("Current workspace"); color: Theme.text; font-weight: 700; }
+                Text { text: root.view.current-path; color: Theme.text-muted; wrap: word-wrap; }
+                Text { text: @tr("A full backup includes private notes and change history. Windows restricts the backup file to this account."); color: Theme.text; wrap: word-wrap; }
+                HorizontalLayout {
+                    spacing: Theme.space-medium;
+                    ActionButton { text: @tr("Save workspace backup"); primary: true; enabled: !root.view.busy && !root.view.pending && root.view.current-path != ""; clicked => { root.save-backup(); } }
+                    Rectangle { horizontal-stretch: 1; }
+                }
+            }
+        }
+        Panel {
+            VerticalLayout {
+                padding: Theme.space-large;
+                spacing: Theme.space-medium;
+                Text { text: @tr("Restore a backup"); color: Theme.text; font-weight: 700; }
+                Text { text: @tr("Choose a backup and a new workspace file. Auler checks the copy before you open it."); color: Theme.text-muted; wrap: word-wrap; }
+                HorizontalLayout {
+                    ActionButton { text: @tr("Restore to new file"); enabled: !root.view.busy && !root.view.pending; clicked => { root.restore-backup(); } }
+                    Rectangle { horizontal-stretch: 1; }
+                }
+            }
+        }
+        Rectangle { vertical-stretch: 1; }
+    }
+}
+
+export component RestoreConfirmation inherits FocusScope {
+    in property <BackupView> view;
+    callback open();
+    callback cancel();
+
+    key-pressed(event) => {
+        if event.text == Key.Escape { root.cancel(); return accept; }
+        if event.text == Key.Tab || event.text == Key.Backtab {
+            if keep.has-focus { activate.focus(); } else { keep.focus(); }
+            return accept;
+        }
+        reject
+    }
+    Rectangle { width: parent.width; height: parent.height; background: #17263d70; }
+    TouchArea { width: parent.width; height: parent.height; }
+    Panel {
+        width: min(parent.width - 56px, 560px);
+        height: min(parent.height - 48px, details.preferred-height + actions.preferred-height + 3 * Theme.space-large);
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        accessible-role: groupbox;
+        accessible-label: @tr("Verified restored workspace");
+        VerticalLayout {
+            padding: Theme.space-large;
+            spacing: Theme.space-large;
+            scroll := ScrollView {
+                vertical-stretch: 1;
+                content-width: scroll.visible-width;
+                content-height: details.preferred-height;
+                details := VerticalLayout {
+                    width: scroll.visible-width - 12px;
+                    height: self.preferred-height;
+                    spacing: Theme.space-medium;
+                    Text { text: @tr("Verified restored workspace"); color: Theme.text; font-size: Theme.font-title; font-weight: 700; }
+                    Text { text: root.view.department; color: Theme.text; wrap: word-wrap; }
+                    StatusBanner { message: @tr("Database integrity and record counts match the backup."); tone: Tone.success; }
+                    for item in root.view.counts: KeyValue { key: item.label; value: item.value; }
+                    Text { text: root.view.pending-path; color: Theme.text-muted; wrap: char-wrap; }
+                }
+            }
+            actions := HorizontalLayout {
+                spacing: Theme.space-medium;
+                alignment: end;
+                keep := ActionButton { text: @tr("Keep working"); init => { self.focus(); } clicked => { root.cancel(); } }
+                activate := ActionButton { text: @tr("Open restored workspace"); primary: true; clicked => { root.open(); } }
+            }
+        }
+    }
+}
